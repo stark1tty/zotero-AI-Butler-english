@@ -26,7 +26,7 @@ export class UiSettingsPage {
     this.container.innerHTML = "";
 
     const title = Zotero.getMainWindow().document.createElement("h2");
-    title.textContent = "🎨 界面设置";
+    title.textContent = "🎨 UI Settings";
     Object.assign(title.style, {
       color: "#59c0bc",
       marginBottom: "20px",
@@ -38,36 +38,36 @@ export class UiSettingsPage {
 
     this.container.appendChild(
       createNotice(
-        "界面与行为设置：自动滚动、自动扫描；以及已有 AI 笔记时的处理策略。",
+        "UI and behavior settings: auto-scroll, auto-scan; and how to handle existing AI notes.",
       ),
     );
 
     const form = Zotero.getMainWindow().document.createElement("div");
     Object.assign(form.style, { maxWidth: "820px" });
 
-    // 自动滚动
+    // Auto-scroll
     const autoScroll = (getPref("autoScroll") as boolean) ?? true;
     const autoScrollBox = createCheckbox("autoScroll", !!autoScroll);
     form.appendChild(
       createFormGroup(
-        "自动滚动到最新输出",
+        "Auto-scroll to Latest Output",
         autoScrollBox,
-        "生成笔记时，自动滚动到输出窗口底部",
+        "Automatically scroll to the bottom of the output window when generating notes",
       ),
     );
 
-    // 自动扫描
+    // Auto-scan
     const autoScan = (getPref("autoScan") as boolean) ?? true;
     const autoScanBox = createCheckbox("autoScan", !!autoScan);
     form.appendChild(
       createFormGroup(
-        "自动扫描新文献",
+        "Auto-scan New Literature",
         autoScanBox,
-        "监听文献库变化，新加入的文献自动加入分析队列",
+        "Monitor library changes and automatically add new items to the analysis queue",
       ),
     );
 
-    // 保存对话历史
+    // Save chat history
     const saveChatHistory = (getPref("saveChatHistory") as boolean) ?? true;
     const saveChatHistoryBox = createCheckbox(
       "saveChatHistory",
@@ -75,84 +75,84 @@ export class UiSettingsPage {
     );
     form.appendChild(
       createFormGroup(
-        "保存追问对话记录",
+        "Save Follow-up Chat History",
         saveChatHistoryBox,
-        "开启后，追问对话的内容会自动保存到论文的 AI 管家笔记中",
+        "When enabled, follow-up conversation content will be automatically saved to the paper's AI Butler note",
       ),
     );
 
-    // 笔记管理策略
+    // Note management strategy
     const policy = (
       (getPref("noteStrategy" as any) as string) || "skip"
     ).toString();
     const policySelect = createSelect(
       "notePolicy",
       [
-        { value: "skip", label: "跳过(默认)" },
-        { value: "overwrite", label: "覆盖" },
-        { value: "append", label: "追加" },
+        { value: "skip", label: "Skip (Default)" },
+        { value: "overwrite", label: "Overwrite" },
+        { value: "append", label: "Append" },
       ],
       policy,
     );
     form.appendChild(
       createFormGroup(
-        "已有 AI 笔记时的策略",
+        "Existing AI Note Strategy",
         policySelect,
-        "当检测到条目已有 AI 总结笔记时该如何处理",
+        "How to handle items that already have AI summary notes",
       ),
     );
 
-    // 表格管理策略
+    // Table management strategy
     const tablePolicy = (
       (getPref("tableStrategy" as any) as string) || "skip"
     ).toString();
     const tablePolicySelect = createSelect(
       "tablePolicy",
       [
-        { value: "skip", label: "跳过(默认)" },
-        { value: "overwrite", label: "覆盖" },
+        { value: "skip", label: "Skip (Default)" },
+        { value: "overwrite", label: "Overwrite" },
       ],
       tablePolicy,
     );
     form.appendChild(
       createFormGroup(
-        "已有 AI 表格时的策略",
+        "Existing AI Table Strategy",
         tablePolicySelect,
-        "当检测到条目已有 AI 填表笔记时该如何处理",
+        "How to handle items that already have AI table notes",
       ),
     );
 
-    // Markdown 笔记样式主题
+    // Markdown note style theme
     const currentTheme = (
       (getPref("markdownTheme" as any) as string) || "github"
     ).toString();
     const themeSelect = createSelect(
       "markdownTheme",
       [
-        { value: "github", label: "GitHub (默认)" },
-        { value: "redstriking", label: "红印 (Redstriking)" },
-        // 更多主题可在此添加
+        { value: "github", label: "GitHub (Default)" },
+        { value: "redstriking", label: "Redstriking" },
+        // More themes can be added here
       ],
       currentTheme,
     );
     form.appendChild(
       createFormGroup(
-        "侧边栏笔记样式",
+        "Sidebar Note Style",
         themeSelect,
-        "设置侧边栏 AI 笔记的 Markdown 渲染样式",
+        "Set the Markdown rendering style for AI notes in the sidebar",
       ),
     );
 
-    // 预览区域（移除字号预览，不再提供字体大小设置）
+    // Preview area (font size preview removed, no longer providing font size setting)
 
-    // 按钮
+    // Buttons
     const actions = Zotero.getMainWindow().document.createElement("div");
     Object.assign(actions.style, {
       display: "flex",
       gap: "12px",
       marginTop: "16px",
     });
-    const btnSave = createStyledButton("💾 保存设置", "#4caf50");
+    const btnSave = createStyledButton("💾 Save Settings", "#4caf50");
     btnSave.addEventListener("click", async () => {
       const autoVal =
         (form.querySelector("#setting-autoScroll") as HTMLInputElement)
@@ -180,20 +180,20 @@ export class UiSettingsPage {
       setPref("tableStrategy" as any, tablePolicyVal);
       setPref("markdownTheme" as any, themeVal);
 
-      // 清除主题缓存以便下次加载新主题
+      // Clear theme cache to load new theme next time
       const { themeManager } = await import("../../themeManager");
       themeManager.setCurrentTheme(themeVal);
       themeManager.clearCache();
 
-      // 重新加载自动扫描管理器
+      // Reload auto-scan manager
       AutoScanManager.getInstance().reload();
 
-      new ztoolkit.ProgressWindow("界面设置")
-        .createLine({ text: "✅ 设置已保存", type: "success" })
+      new ztoolkit.ProgressWindow("UI Settings")
+        .createLine({ text: "✅ Settings Saved", type: "success" })
         .show();
     });
 
-    const btnReset = createStyledButton("🔄 重置默认", "#9e9e9e");
+    const btnReset = createStyledButton("🔄 Reset to Default", "#9e9e9e");
     btnReset.addEventListener("click", () => {
       setPref("autoScroll", true as any);
       setPref("autoScan", true as any);
@@ -202,8 +202,8 @@ export class UiSettingsPage {
       setPref("tableStrategy" as any, "skip");
       AutoScanManager.getInstance().reload();
       this.render();
-      new ztoolkit.ProgressWindow("界面设置")
-        .createLine({ text: "已重置为默认", type: "success" })
+      new ztoolkit.ProgressWindow("UI Settings")
+        .createLine({ text: "Reset to Default", type: "success" })
         .show();
     });
     actions.appendChild(btnSave);
@@ -212,7 +212,7 @@ export class UiSettingsPage {
 
     this.container.appendChild(form);
 
-    // 无字号预览
+    // No font size preview
   }
 
   private applyPreview(fontSize: number): void {

@@ -8,7 +8,7 @@
  *
  * 主要职责:
  * 1. 扫描所有收藏夹和条目
- * 2. 检测哪些条目缺少 AI 笔记
+ * 2. 检测哪些条目Missing AI 笔记
  * 3. 以树形结构展示扫描结果(支持多级目录)
  * 4. 提供父子联动的复选框选择逻辑
  * 5. 将用户选择的条目批量加入队列
@@ -20,6 +20,7 @@
 import { BaseView } from "./BaseView";
 import { TaskQueueManager } from "../taskQueue";
 import { MainWindow } from "./MainWindow";
+import { getString } from "../../utils/locale";
 
 /**
  * 树节点接口
@@ -90,7 +91,7 @@ export class LibraryScannerView extends BaseView {
             margin: "0 0 10px 0",
             fontSize: "18px",
           },
-          innerHTML: "📚 库扫描结果",
+          innerHTML: getString("scanner-title"),
         }),
         this.createElement("p", {
           id: "scanner-info",
@@ -99,7 +100,7 @@ export class LibraryScannerView extends BaseView {
             fontSize: "14px",
             opacity: "0.9",
           },
-          innerHTML: "正在扫描...",
+          innerHTML: getString("scanner-scanning"),
         }),
       ],
     });
@@ -135,7 +136,7 @@ export class LibraryScannerView extends BaseView {
         fontSize: "14px",
         color: "#666",
       },
-      innerHTML: "已选择: <strong>0</strong> 篇",
+      innerHTML: `Selected: <strong>0</strong>`,
     });
 
     // 按钮容器
@@ -146,7 +147,7 @@ export class LibraryScannerView extends BaseView {
       },
     });
 
-    // 取消按钮
+    // Cancel按钮
     const cancelButton = this.createElement("button", {
       styles: {
         padding: "8px 20px",
@@ -156,7 +157,7 @@ export class LibraryScannerView extends BaseView {
         cursor: "pointer",
         fontSize: "14px",
       },
-      textContent: "返回",
+      textContent: "Back",
     }) as HTMLButtonElement;
 
     cancelButton.addEventListener("click", () => {
@@ -176,7 +177,7 @@ export class LibraryScannerView extends BaseView {
         fontSize: "14px",
         fontWeight: "600",
       },
-      textContent: "添加到队列",
+      textContent: "Add to Queue",
     }) as HTMLButtonElement;
 
     confirmButton.addEventListener("click", () => {
@@ -249,7 +250,7 @@ export class LibraryScannerView extends BaseView {
         const unfiledNode: TreeNode = {
           id: `unfiled-${library.libraryID}`,
           type: "collection",
-          name: "未分类文献",
+          name: getString("scanner-uncategorized"),
           children: [],
           checked: false,
           expanded: false, // 默认收起
@@ -393,20 +394,20 @@ export class LibraryScannerView extends BaseView {
   }
 
   /**
-   * 更新 UI
+   * Update UI
    */
   private updateUI(): void {
-    // 更新头部信息
+    // Update头部信息
     const infoElement = this.container?.querySelector("#scanner-info");
     if (infoElement) {
       if (this.totalUnprocessed === 0) {
-        infoElement.innerHTML = "🎉 所有文献都已分析完成!";
+        infoElement.innerHTML = getString("scanner-all-complete");
       } else {
-        infoElement.innerHTML = `发现 <strong>${this.totalUnprocessed}</strong> 篇文献未进行 AI 分析`;
+        infoElement.innerHTML = `Found <strong>${this.totalUnprocessed}</strong> references not yet analyzed by AI`;
       }
     }
 
-    // 更新树形结构
+    // Update树形结构
     if (this.treeContainer) {
       this.treeContainer.innerHTML = "";
       if (this.totalUnprocessed === 0) {
@@ -417,7 +418,10 @@ export class LibraryScannerView extends BaseView {
             color: "#999",
             fontSize: "16px",
           },
-          innerHTML: "🎉<br><br>所有文献都已分析完成!",
+          innerHTML: getString("scanner-all-complete").replace(
+            "🎉 ",
+            "🎉<br><br>",
+          ),
         });
         this.treeContainer.appendChild(emptyMessage);
       } else {
@@ -430,7 +434,7 @@ export class LibraryScannerView extends BaseView {
       }
     }
 
-    // 更新选择计数
+    // Update选择计数
     this.updateSelectedCount();
   }
 
@@ -484,7 +488,7 @@ export class LibraryScannerView extends BaseView {
         fontWeight: "600",
         color: "#fff",
       },
-      innerHTML: `📚 全选/全不选 (共 ${this.totalUnprocessed} 篇未分析)`,
+      innerHTML: `📚 Select All / Deselect All (${this.totalUnprocessed} unanalyzed)`,
     });
 
     content.appendChild(checkbox);
@@ -518,19 +522,19 @@ export class LibraryScannerView extends BaseView {
    * 切换所有节点
    */
   private toggleAllNodes(checked: boolean): void {
-    // 第一阶段：更新所有节点的数据模型
+    // 第一阶段：Update所有节点的数据模型
     for (const node of this.treeRoot) {
       this.updateCheckedStateRecursive(node, checked);
     }
 
-    // 第二阶段：更新 UI（展开节点、渲染子节点、更新复选框）
+    // 第二阶段：Update UI（展开节点、渲染子节点、Update复选框）
     for (const node of this.treeRoot) {
       this.updateNodeUIRecursive(node, checked);
     }
   }
 
   /**
-   * 递归更新节点的 checked 状态（仅更新数据模型）
+   * 递归Update节点的 checked 状态（仅Update数据模型）
    */
   private updateCheckedStateRecursive(node: TreeNode, checked: boolean): void {
     node.checked = checked;
@@ -540,10 +544,10 @@ export class LibraryScannerView extends BaseView {
   }
 
   /**
-   * 递归更新节点的 UI（复选框状态、展开状态）
+   * 递归Update节点的 UI（复选框状态、展开状态）
    */
   private updateNodeUIRecursive(node: TreeNode, checked: boolean): void {
-    // 更新已渲染节点的复选框 UI
+    // Update已渲染节点的复选框 UI
     if (node.checkboxElement) {
       node.checkboxElement.checked = checked;
     }
@@ -566,7 +570,7 @@ export class LibraryScannerView extends BaseView {
   private toggleNodeRecursive(node: TreeNode, checked: boolean): void {
     node.checked = checked;
 
-    // 更新复选框 UI
+    // Update复选框 UI
     if (node.checkboxElement) {
       node.checkboxElement.checked = checked;
     }
@@ -715,7 +719,7 @@ export class LibraryScannerView extends BaseView {
     });
 
     // 图标和名称
-    // 使用 textContent 而非 innerHTML，避免论文标题中的特殊字符（如 <, >, &）导致 XML 解析错误
+    // 使用 textContent 而非 innerHTML，避免Paper title中的特殊字符（如 <, >, &）导致 XML 解析Error
     const icon = node.type === "collection" ? "📁" : "📄";
     const label = this.createElement("span", {
       styles: {
@@ -808,7 +812,7 @@ export class LibraryScannerView extends BaseView {
   }
 
   /**
-   * 更新节点子元素的可见性
+   * Update节点子元素的可见性
    */
   private updateNodeVisibility(node: TreeNode): void {
     if (node.childrenContainer) {
@@ -852,7 +856,7 @@ export class LibraryScannerView extends BaseView {
   private toggleNode(node: TreeNode, checked: boolean): void {
     node.checked = checked;
 
-    // 更新复选框 UI
+    // Update复选框 UI
     if (node.checkboxElement) {
       node.checkboxElement.checked = checked;
     }
@@ -861,7 +865,7 @@ export class LibraryScannerView extends BaseView {
     if (checked && node.type === "collection" && node.children.length > 0) {
       node.expanded = true;
       this.updateNodeVisibility(node);
-      // 更新展开图标
+      // Update展开图标
       const expandIcon = node.element?.querySelector("span") as HTMLElement;
       if (expandIcon && expandIcon.textContent) {
         expandIcon.textContent = "▼";
@@ -875,14 +879,14 @@ export class LibraryScannerView extends BaseView {
       this.toggleNode(child, checked);
     }
 
-    // 更新父节点状态
+    // Update父节点状态
     if (node.parentNode) {
       this.updateParentCheckState(node.parentNode);
     }
   }
 
   /**
-   * 更新父节点的选中状态
+   * Update父节点的选中状态
    */
   private updateParentCheckState(node: TreeNode): void {
     const allChecked = node.children.every((child) => child.checked);
@@ -892,7 +896,7 @@ export class LibraryScannerView extends BaseView {
 
     node.checked = allChecked || someChecked;
 
-    // 更新复选框 UI
+    // Update复选框 UI
     if (node.checkboxElement) {
       node.checkboxElement.checked = node.checked;
     }
@@ -911,15 +915,15 @@ export class LibraryScannerView extends BaseView {
   }
 
   /**
-   * 更新选择计数
+   * Update选择计数
    */
   private updateSelectedCount(): void {
     this.selectedCount = this.countSelectedItems(this.treeRoot);
     if (this.selectedCountElement) {
-      this.selectedCountElement.innerHTML = `已选择: <strong>${this.selectedCount}</strong> 篇`;
+      this.selectedCountElement.innerHTML = `Selected: <strong>${this.selectedCount}</strong>`;
     }
 
-    // 更新按钮状态
+    // Update按钮状态
     const confirmButton = this.container?.querySelector(
       "#scanner-confirm-btn",
     ) as HTMLButtonElement;
@@ -952,8 +956,11 @@ export class LibraryScannerView extends BaseView {
     const selectedItems = this.collectSelectedItems(this.treeRoot);
 
     if (selectedItems.length === 0) {
-      new ztoolkit.ProgressWindow("AI 管家")
-        .createLine({ text: "请先选择要分析的文献", type: "default" })
+      new ztoolkit.ProgressWindow("AI Butler")
+        .createLine({
+          text: getString("scanner-please-select"),
+          type: "default",
+        })
         .show();
       return;
     }
@@ -963,9 +970,9 @@ export class LibraryScannerView extends BaseView {
       this.taskQueueManager.addTask(item, false);
     }
 
-    new ztoolkit.ProgressWindow("AI 管家")
+    new ztoolkit.ProgressWindow("AI Butler")
       .createLine({
-        text: `✅ 已将 ${selectedItems.length} 篇文献添加到队列`,
+        text: `✅ Added ${selectedItems.length} references to queue`,
         type: "success",
       })
       .show();

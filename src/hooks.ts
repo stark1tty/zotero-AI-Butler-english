@@ -261,13 +261,19 @@ function initializeDefaultPrefsOnStartup() {
       }
     } catch (error) {
       // 配置读取失败时记录错误
-      ztoolkit.log(`[AI-Butler] 启动时初始化配置失败: ${key}`, error);
+      ztoolkit.log(
+        `[AI-Butler] Failed to initialize configuration on startup: ${key}`,
+        error,
+      );
 
       // 尝试强制设置默认值
       try {
         setPref(key as any, defaultValue);
       } catch (e) {
-        ztoolkit.log(`[AI-Butler] 启动时强制设置配置失败: ${key}`, e);
+        ztoolkit.log(
+          `[AI-Butler] Failed to force set configuration on startup: ${key}`,
+          e,
+        );
       }
     }
   }
@@ -357,7 +363,7 @@ function registerContextMenuItem() {
   // 注册"AI 管家仪表盘"菜单项
   menu.register("item", {
     tag: "menuitem",
-    label: "AI 管家仪表盘",
+    label: "AI Butler Dashboard",
     icon: menuIcon,
 
     commandListener: async (_ev: Event) => {
@@ -471,13 +477,18 @@ function registerContextMenuItem() {
 /**
  * 注册文献库工具栏按钮
  *
- * 在 Zotero 主窗口的文献库工具栏中添加"AI 管家"按钮
- * 用户点击后可以打开 AI 管家主界面
+ * 在 Zotero 文献列表的右键菜单中添加插件功能入口
+ * 用户可以通过右键选中的文献条目快速生成 AI 总结
+ *
+ * 菜单配置:
+ * - 显示条件:仅当选中的是常规条目(非附件、笔记等)时显示
+ * - 点击行为:调用 AI 总结生成流程
+ * - 视觉样式:显示插件图标和国际化文本
  *
  * 技术实现:
- * - 在 onMainWindowLoad 时创建按钮并添加到工具栏
- * - 使用唯一 ID 防止重复创建
- * - 点击后打开 AI 管家仪表盘
+ * - 使用 ztoolkit.Menu API 注册菜单项
+ * - getVisibility 动态控制菜单项的显示状态
+ * - commandListener 处理用户点击事件
  */
 function registerLibraryToolbarButton(win: Window) {
   try {
@@ -494,7 +505,7 @@ function registerLibraryToolbarButton(win: Window) {
     // zotero-items-toolbar 是文献列表上方的工具栏
     const toolbar = doc.getElementById("zotero-items-toolbar");
     if (!toolbar) {
-      ztoolkit.log("[AI-Butler] 找不到文献库工具栏");
+      ztoolkit.log("[AI-Butler] Literature library toolbar not found");
       return;
     }
 
@@ -525,13 +536,13 @@ function registerLibraryToolbarButton(win: Window) {
       try {
         await openAIButlerDashboardFromUnifiedEntry();
       } catch (error: any) {
-        ztoolkit.log("[AI-Butler] 打开 AI 管家失败:", error);
+        ztoolkit.log("[AI-Butler] Failed to open AI Butler:", error);
         new ztoolkit.ProgressWindow("AI Butler", {
           closeOnClick: true,
           closeTime: 3000,
         })
           .createLine({
-            text: `打开失败: ${error.message || error}`,
+            text: `Open failed: ${error.message || error}`,
             type: "error",
           })
           .show();
@@ -541,9 +552,12 @@ function registerLibraryToolbarButton(win: Window) {
     buttonContainer.appendChild(button);
     toolbar.appendChild(buttonContainer);
 
-    ztoolkit.log("[AI-Butler] 文献库工具栏按钮已添加");
+    ztoolkit.log("[AI-Butler] Literature library toolbar button added");
   } catch (error) {
-    ztoolkit.log("[AI-Butler] 注册文献库工具栏按钮失败:", error);
+    ztoolkit.log(
+      "[AI-Butler] Failed to register literature library toolbar button:",
+      error,
+    );
   }
 }
 
@@ -580,7 +594,7 @@ function registerReaderToolbarButton() {
     const button = doc.createElement("button");
     button.className = "toolbar-button ai-butler-reader-chat-btn";
     button.innerHTML = `🤖`;
-    button.title = "AI 管家 - 与 AI 对话讨论当前论文";
+    button.title = "AI Butler - Chat with AI about this paper";
     button.style.cssText = `
       padding: 4px 8px;
       border: none;
@@ -610,7 +624,7 @@ function registerReaderToolbarButton() {
             closeTime: 3000,
           })
             .createLine({
-              text: "无法获取当前文献信息",
+              text: "Unable to get current item information",
               type: "error",
             })
             .show();
@@ -629,7 +643,7 @@ function registerReaderToolbarButton() {
               closeTime: 3000,
             })
               .createLine({
-                text: "该 PDF 没有关联的父条目",
+                text: "This PDF has no associated parent item",
                 type: "error",
               })
               .show();
@@ -643,13 +657,13 @@ function registerReaderToolbarButton() {
 
         await handleOpenAIChat(targetItemId);
       } catch (error: any) {
-        ztoolkit.log("[AI-Butler] Reader 工具栏按钮点击失败:", error);
+        ztoolkit.log("[AI-Butler] Reader toolbar button click failed:", error);
         new ztoolkit.ProgressWindow("AI Butler", {
           closeOnClick: true,
           closeTime: 3000,
         })
           .createLine({
-            text: `打开失败: ${error.message || error}`,
+            text: `Open failed: ${error.message || error}`,
             type: "error",
           })
           .show();
@@ -691,16 +705,19 @@ function registerReaderToolbarButton() {
           toolbar.appendChild(buttonContainer);
         }
         ztoolkit.log(
-          `[AI-Butler] 已为 ${readers.length} 个已打开的 Reader 添加工具栏按钮`,
+          `[AI-Butler] Added toolbar buttons for ${readers.length} opened Readers`,
         );
       } catch (err) {
-        ztoolkit.log("[AI-Butler] 处理已打开的 Reader 失败:", err);
+        ztoolkit.log("[AI-Butler] Failed to process opened Readers:", err);
       }
     }, 1000);
 
-    ztoolkit.log("[AI-Butler] Reader 工具栏按钮已注册");
+    ztoolkit.log("[AI-Butler] Reader toolbar button registered");
   } catch (error) {
-    ztoolkit.log("[AI-Butler] 注册 Reader 工具栏按钮失败:", error);
+    ztoolkit.log(
+      "[AI-Butler] Failed to register Reader toolbar button:",
+      error,
+    );
   }
 }
 
@@ -723,7 +740,7 @@ async function registerItemPaneSection() {
       await import("./modules/ItemPaneSection");
     registerSection(handleOpenAIChat);
   } catch (error) {
-    ztoolkit.log("[AI-Butler] 注册条目面板区块失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to register item pane section:", error);
   }
 }
 
@@ -747,13 +764,13 @@ async function handleOpenAIChat(itemId: number): Promise<void> {
       await (summaryView as any).loadItemForChat(itemId);
     }
   } catch (error: any) {
-    ztoolkit.log("[AI-Butler] 打开 AI 追问失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to open AI chat:", error);
     new ztoolkit.ProgressWindow("AI Butler", {
       closeOnClick: true,
       closeTime: 3000,
     })
       .createLine({
-        text: `打开 AI 追问失败: ${error.message || error}`,
+        text: `Failed to open AI chat: ${error.message || error}`,
         type: "error",
       })
       .show();
@@ -784,7 +801,7 @@ async function handleChatWithAI() {
         closeTime: 3000,
       })
         .createLine({
-          text: "请选择一个 AI 笔记",
+          text: "Please select an AI note",
           type: "error",
         })
         .show();
@@ -800,7 +817,7 @@ async function handleChatWithAI() {
         closeTime: 3000,
       })
         .createLine({
-          text: "找不到笔记对应的文献条目",
+          text: "Literature item corresponding to the note not found",
           type: "error",
         })
         .show();
@@ -814,7 +831,7 @@ async function handleChatWithAI() {
         closeTime: 3000,
       })
         .createLine({
-          text: "无法加载文献条目",
+          text: "Unable to load literature item",
           type: "error",
         })
         .show();
@@ -832,13 +849,13 @@ async function handleChatWithAI() {
       await (summaryView as any).showSavedNoteForItem(parentItemID);
     }
   } catch (error: any) {
-    ztoolkit.log("[AI-Butler] 打开聊天失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to open chat:", error);
     new ztoolkit.ProgressWindow("AI Butler", {
       closeOnClick: true,
       closeTime: 3000,
     })
       .createLine({
-        text: `打开聊天失败: ${error.message || error}`,
+        text: `Failed to open chat: ${error.message || error}`,
         type: "error",
       })
       .show();
@@ -898,7 +915,7 @@ async function handleGenerateSummary() {
         true,
       ) as string) ||
       (Zotero.Prefs.get(`${config.prefsPrefix}.openaiApiKey`, true) as string);
-    providerName = "OpenAI 兼容"; // 提示更明确
+    providerName = "OpenAI Compatible"; // 提示更明确
   } else if (pLower === "openrouter") {
     selectedApiKey = Zotero.Prefs.get(
       `${config.prefsPrefix}.openRouterApiKey`,
@@ -910,7 +927,7 @@ async function handleGenerateSummary() {
       `${config.prefsPrefix}.volcanoArkApiKey`,
       true,
     ) as string;
-    providerName = "火山方舟";
+    providerName = "Volcano Engine";
   } else {
     selectedApiKey = Zotero.Prefs.get(
       `${config.prefsPrefix}.openaiApiKey`,
@@ -926,7 +943,7 @@ async function handleGenerateSummary() {
       closeTime: 5000, // 5秒后自动关闭
     })
       .createLine({
-        text: `请先在设置中配置 ${providerName} API Key`,
+        text: `Please configure ${providerName} API Key in settings first`,
         type: "error",
       })
       .show();
@@ -943,7 +960,7 @@ async function handleGenerateSummary() {
       closeTime: 3000,
     })
       .createLine({
-        text: "请先选择要处理的条目",
+        text: "Please select the items to process first",
         type: "error",
       })
       .show();
@@ -968,20 +985,20 @@ async function handleGenerateSummary() {
       mainWin.getTaskQueueView().refresh();
     } catch (e) {
       // 安全兜底，不影响后续流程
-      ztoolkit.log("[AI-Butler] 刷新任务队列视图失败:", e);
+      ztoolkit.log("[AI-Butler] Failed to refresh task queue view:", e);
     }
 
     progressWin
       .createLine({
-        text: `已加入队列: ${items.length} 篇文献，开始处理...`,
+        text: `Added to queue: ${items.length} literature items, starting process...`,
         type: "success",
       })
       .show();
   } catch (error: any) {
-    ztoolkit.log("[AI-Butler] 入队失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to enqueue:", error);
     progressWin
       .createLine({
-        text: `入队失败: ${error.message || error}`,
+        text: `Failed to enqueue: ${error.message || error}`,
         type: "error",
       })
       .show();
@@ -992,7 +1009,7 @@ async function handleGenerateSummary() {
  * 主窗口卸载钩子函数
  *
  * 当 Zotero 主窗口关闭时执行清理操作
- * 确保插件不会留下内存泄漏或无效的资源引用
+ * 确保插件不会留下内存泄漏 or 无效的资源引用
  *
  * 清理内容:
  * - 注销所有注册的UI组件(菜单项、工具栏按钮等)
@@ -1134,7 +1151,10 @@ async function handleImageSummary() {
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "请先选择要处理的文献", type: "error" })
+      .createLine({
+        text: "Please select the literature to process first",
+        type: "error",
+      })
       .show();
     return;
   }
@@ -1146,7 +1166,7 @@ async function handleImageSummary() {
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "请选择一个文献条目", type: "error" })
+      .createLine({ text: "Please select a literature item", type: "error" })
       .show();
     return;
   }
@@ -1162,16 +1182,19 @@ async function handleImageSummary() {
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "🖼️ 一图总结任务已加入队列", type: "success" })
+      .createLine({
+        text: "🖼️ Image summary task added to queue",
+        type: "success",
+      })
       .show();
   } catch (error: any) {
-    ztoolkit.log("[AI-Butler] 添加一图总结任务失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to add image summary task:", error);
     new ztoolkit.ProgressWindow("AI Butler", {
       closeOnClick: true,
       closeTime: 5000,
     })
       .createLine({
-        text: `❌ 添加任务失败: ${error.message || error}`,
+        text: `❌ Failed to add task: ${error.message || error}`,
         type: "error",
       })
       .show();
@@ -1191,7 +1214,10 @@ async function handleMindmapGeneration() {
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "请先选择要处理的文献", type: "error" })
+      .createLine({
+        text: "Please select the literature to process first",
+        type: "error",
+      })
       .show();
     return;
   }
@@ -1203,7 +1229,7 @@ async function handleMindmapGeneration() {
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "请选择一个文献条目", type: "error" })
+      .createLine({ text: "Please select a literature item", type: "error" })
       .show();
     return;
   }
@@ -1219,16 +1245,16 @@ async function handleMindmapGeneration() {
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "🧠 思维导图任务已加入队列", type: "success" })
+      .createLine({ text: "🧠 Mindmap task added to queue", type: "success" })
       .show();
   } catch (error: any) {
-    ztoolkit.log("[AI-Butler] 添加思维导图任务失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to add mindmap task:", error);
     new ztoolkit.ProgressWindow("AI Butler", {
       closeOnClick: true,
       closeTime: 5000,
     })
       .createLine({
-        text: `❌ 添加任务失败: ${error.message || error}`,
+        text: `❌ Failed to add task: ${error.message || error}`,
         type: "error",
       })
       .show();
@@ -1254,7 +1280,7 @@ async function handleLiteratureReview() {
         closeTime: 3000,
       })
         .createLine({
-          text: "请先选择一个分类",
+          text: "Please select a collection first",
           type: "error",
         })
         .show();
@@ -1271,13 +1297,13 @@ async function handleLiteratureReview() {
       await reviewView.setCollection(collection);
     }
   } catch (error: any) {
-    ztoolkit.log("[AI-Butler] 打开文献综述失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to open literature review:", error);
     new ztoolkit.ProgressWindow("AI Butler", {
       closeOnClick: true,
       closeTime: 5000,
     })
       .createLine({
-        text: `打开文献综述失败: ${error.message || error}`,
+        text: `Failed to open literature review: ${error.message || error}`,
         type: "error",
       })
       .show();
@@ -1297,7 +1323,10 @@ async function handleFillTable() {
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "请先选择要填表的文献", type: "error" })
+      .createLine({
+        text: "Please select the literature for table filling first",
+        type: "error",
+      })
       .show();
     return;
   }
@@ -1317,7 +1346,7 @@ async function handleFillTable() {
     try {
       mainWin.getTaskQueueView().refresh();
     } catch (e) {
-      ztoolkit.log("[AI-Butler] 刷新任务队列视图失败:", e);
+      ztoolkit.log("[AI-Butler] Failed to refresh task queue view:", e);
     }
 
     new ztoolkit.ProgressWindow("AI Butler", {
@@ -1325,18 +1354,18 @@ async function handleFillTable() {
       closeTime: 4000,
     })
       .createLine({
-        text: `📋 已加入队列: ${items.length} 篇文献填表任务`,
+        text: `📋 Added to queue: ${items.length} literature table filling tasks`,
         type: "success",
       })
       .show();
   } catch (error: any) {
-    ztoolkit.log("[AI-Butler] 填表失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to fill table:", error);
     new ztoolkit.ProgressWindow("AI Butler", {
       closeOnClick: true,
       closeTime: 5000,
     })
       .createLine({
-        text: `❌ 填表失败: ${error.message || error}`,
+        text: `❌ Failed to fill table: ${error.message || error}`,
         type: "error",
       })
       .show();
@@ -1363,7 +1392,10 @@ async function handleMultiRoundSummary(
       closeOnClick: true,
       closeTime: 3000,
     })
-      .createLine({ text: "请先选择要处理的文献", type: "error" })
+      .createLine({
+        text: "Please select the literature to process first",
+        type: "error",
+      })
       .show();
     return;
   }
@@ -1386,17 +1418,20 @@ async function handleMultiRoundSummary(
       closeTime: 3000,
     })
       .createLine({
-        text: `已将 ${items.length} 个重分析任务加入高优队列`,
+        text: `Added ${items.length} re-analysis tasks to high-priority queue`,
         type: "success",
       })
       .show();
   } catch (error: any) {
-    ztoolkit.log("[AI Butler] 加入重分析队列失败:", error);
+    ztoolkit.log("[AI Butler] Failed to join re-analysis queue:", error);
     new ztoolkit.ProgressWindow("AI Butler", {
       closeOnClick: true,
       closeTime: 5000,
     })
-      .createLine({ text: "加入队列失败: " + error.message, type: "error" })
+      .createLine({
+        text: "Failed to join queue: " + error.message,
+        type: "error",
+      })
       .show();
   }
 }

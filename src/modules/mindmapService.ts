@@ -1,9 +1,9 @@
 /**
  * ================================================================
- * 思维导图生成服务模块
+ * Mind map generation服务模块
  * ================================================================
  *
- * 整合完整的思维导图生成工作流：
+ * 整合完整的Mind map generation工作流：
  * 1. 提取论文 PDF 内容
  * 2. 调用 LLM 生成 Markdown 结构化列表
  * 3. 将结果保存到 Zotero 笔记（使用 markmap 代码块包裹）
@@ -37,7 +37,7 @@ export type MindmapProgressCallback = (
 ) => void;
 
 /**
- * 思维导图生成服务类
+ * Mind map generation服务类
  */
 export class MindmapService {
   /**
@@ -54,8 +54,8 @@ export class MindmapService {
     const itemTitle = item.getField("title") as string;
 
     try {
-      // ========== 阶段 1: 获取论文内容 ==========
-      progressCallback?.("extracting", "正在提取论文内容...", 10);
+      // ========== 阶段 1: 获取Paper content ==========
+      progressCallback?.("extracting", "ExtractingPaper content...", 10);
 
       // 检查 PDF 文件大小限制
       const enableSizeLimit =
@@ -75,7 +75,7 @@ export class MindmapService {
       const { pdfContent, isBase64 } = await this.extractPdfContent(item);
 
       // ========== 阶段 2: 生成思维导图 Markdown ==========
-      progressCallback?.("generating", "正在生成思维导图...", 40);
+      progressCallback?.("generating", "Generating mind map...", 40);
 
       const mindmapMarkdown = await this.generateMindmapMarkdown(
         pdfContent,
@@ -84,21 +84,21 @@ export class MindmapService {
       );
 
       ztoolkit.log(
-        `[AI-Butler] 思维导图生成完成，长度: ${mindmapMarkdown.length}`,
+        `[AI-Butler] 思维导图Generation complete，长度: ${mindmapMarkdown.length}`,
       );
 
       // ========== 阶段 3: 保存笔记 ==========
-      progressCallback?.("saving", "正在保存思维导图笔记...", 80);
+      progressCallback?.("saving", "Saving mind map note...", 80);
 
       const note = await this.createMindmapNote(item, mindmapMarkdown);
 
-      progressCallback?.("completed", "思维导图生成完成！", 100);
+      progressCallback?.("completed", "Mind map generation complete!", 100);
 
       return note;
     } catch (error: any) {
-      progressCallback?.("failed", `生成失败: ${error.message}`, 0);
+      progressCallback?.("failed", `Generation failed: ${error.message}`, 0);
 
-      ztoolkit.log("[AI-Butler] 思维导图生成失败:", error);
+      ztoolkit.log("[AI-Butler] Mind map generation失败:", error);
 
       throw error;
     }
@@ -245,7 +245,7 @@ ${truncatedRequest}`;
       itemTitle.length > maxTitleLength
         ? itemTitle.substring(0, maxTitleLength) + "..."
         : itemTitle;
-    const noteTitle = `AI 管家思维导图 - ${truncatedTitle}`;
+    const noteTitle = `AI Butler Mind Map - ${truncatedTitle}`;
 
     // 将 Markdown 包裹在 markmap 代码块中
     // 注意：不要对 markmap 代码块进行 HTML 转义，否则侧边栏正则无法匹配
@@ -294,7 +294,7 @@ ${truncatedRequest}`;
 
       // 也检查笔记标题
       const noteHtml: string = (note as any).getNote?.() || "";
-      if (noteHtml.includes("AI管家思维导图 -")) {
+      if (noteHtml.includes("AI Butler Mind Map -")) {
         return note;
       }
     }

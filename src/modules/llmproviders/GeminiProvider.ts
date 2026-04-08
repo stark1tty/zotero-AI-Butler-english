@@ -87,13 +87,13 @@ export class GeminiProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 const errorMessage = `${code}: ${msg}`;
                 xmlhttp.abort();
                 throw new Error(errorMessage);
               } catch {
                 xmlhttp.abort();
-                throw new Error(`HTTP ${status}: 请求失败`);
+                throw new Error(`HTTP ${status}: 请求Failed`);
               }
             }
 
@@ -143,7 +143,7 @@ export class GeminiProvider implements ILlmProvider {
         },
       });
     } catch (error: any) {
-      let errorMessage = error?.message || "Gemini 请求失败";
+      let errorMessage = error?.message || "Gemini 请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -255,7 +255,7 @@ export class GeminiProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 const errorMessage = `${code}: ${msg}`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] Gemini HTTP error:", {
@@ -266,7 +266,7 @@ export class GeminiProvider implements ILlmProvider {
                 });
                 xmlhttp.abort();
               } catch (parseErr) {
-                const errorMessage = `HTTP ${status}: 请求失败`;
+                const errorMessage = `HTTP ${status}: 请求Failed`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] Gemini HTTP error:", {
                   status,
@@ -337,7 +337,7 @@ export class GeminiProvider implements ILlmProvider {
         }
         throw abortError;
       }
-      let errorMessage = error?.message || "Gemini 请求失败";
+      let errorMessage = error?.message || "Gemini 请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -434,7 +434,7 @@ export class GeminiProvider implements ILlmProvider {
       const status = error?.xmlhttp?.status;
       const responseBody =
         error?.xmlhttp?.response || error?.xmlhttp?.responseText || "";
-      let errorMessage = error?.message || "Gemini 请求失败";
+      let errorMessage = error?.message || "Gemini 请求Failed";
       let errorName = "NetworkError";
       try {
         if (responseBody) {
@@ -483,7 +483,7 @@ export class GeminiProvider implements ILlmProvider {
     const { APITestError } = await import("./types");
     throw new APITestError(`HTTP ${status}`, {
       errorName: `HTTP_${status}`,
-      errorMessage: `HTTP ${status}: ${response.statusText || "请求失败"}`,
+      errorMessage: `HTTP ${status}: ${response.statusText || "请求Failed"}`,
       statusCode: status,
       requestUrl: url,
       requestBody: payloadStr,
@@ -567,12 +567,12 @@ export class GeminiProvider implements ILlmProvider {
       const headers = startResponse.getAllResponseHeaders?.() || "";
       const urlMatch = headers.match(/x-goog-upload-url:\s*(.+?)(?:\r?\n|$)/i);
       if (!urlMatch) {
-        throw new Error("无法获取 Gemini 文件上传 URL");
+        throw new Error("Cannot get Gemini 文件上传 URL");
       }
       uploadUrl = urlMatch[1].trim();
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] Gemini 文件上传初始化失败:", error);
-      throw new Error(`Gemini 文件上传初始化失败: ${error.message}`);
+      ztoolkit.log("[AI-Butler] Gemini 文件上传初始化Failed:", error);
+      throw new Error(`Gemini 文件上传初始化Failed: ${error.message}`);
     }
 
     // 步骤 2: 上传文件内容
@@ -591,14 +591,14 @@ export class GeminiProvider implements ILlmProvider {
       const fileInfo = uploadResponse.response;
       const fileUri = fileInfo?.file?.uri;
       if (!fileUri) {
-        throw new Error("无法获取上传文件的 URI");
+        throw new Error("Cannot get上传文件的 URI");
       }
 
       ztoolkit.log(`[AI-Butler] 文件上传成功: ${displayName} -> ${fileUri}`);
       return fileUri;
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] Gemini 文件上传失败:", error);
-      throw new Error(`Gemini 文件上传失败: ${error.message}`);
+      ztoolkit.log("[AI-Butler] Gemini 文件上传Failed:", error);
+      throw new Error(`Gemini 文件上传Failed: ${error.message}`);
     }
   }
 
@@ -708,12 +708,12 @@ export class GeminiProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 xmlhttp.abort();
                 throw new Error(`${code}: ${msg}`);
               } catch {
                 xmlhttp.abort();
-                throw new Error(`HTTP ${status}: 请求失败`);
+                throw new Error(`HTTP ${status}: 请求Failed`);
               }
             }
 
@@ -763,7 +763,7 @@ export class GeminiProvider implements ILlmProvider {
         },
       });
     } catch (error: any) {
-      let errorMessage = error?.message || "Gemini 请求失败";
+      let errorMessage = error?.message || "Gemini 请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;

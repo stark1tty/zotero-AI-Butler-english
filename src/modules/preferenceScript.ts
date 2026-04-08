@@ -61,14 +61,14 @@ export async function registerPrefsScripts(_window: Window) {
   }
 
   try {
-    bindOpenMainWindowButton(_window); // 绑定打开主窗口按钮
+    bindOpenMainWindowButton(_window); // 绑定Open主窗口按钮
   } catch (e) {
     logError("bindOpenMainWindowButton", e);
   }
 }
 
 /**
- * 更新首选项UI的值
+ * Update首选项UI的值
  * @param win - 窗口对象
  */
 function updatePrefsUI(win: Window) {
@@ -233,23 +233,25 @@ function initializeDefaultPrefs() {
     try {
       const currentValue = getPref(key as any);
 
-      // 特殊处理提示词更新
+      // 特殊处理提示词Update
       if (key === "summaryPrompt") {
         const currentPromptVersion = getPref("promptVersion" as any) as
           | number
           | undefined;
         const currentPrompt = currentValue as string | undefined;
 
-        // 检查是否需要更新提示词
+        // 检查是否需要Update提示词
         if (shouldUpdatePrompt(currentPromptVersion, currentPrompt)) {
-          ztoolkit.log(`[AI-Butler][Prefs] 更新提示词到版本 ${PROMPT_VERSION}`);
+          ztoolkit.log(
+            `[AI-Butler][Prefs] Update提示词到版本 ${PROMPT_VERSION}`,
+          );
           setPref("summaryPrompt" as any, defaultValue);
           setPref("promptVersion" as any, PROMPT_VERSION);
           continue;
         }
       }
 
-      // 如果配置不存在或为空，则设置默认值
+      // 如果配置Does not exist或为空，则设置默认值
       if (currentValue === undefined || currentValue === null) {
         // const preview = typeof defaultValue === 'string' && defaultValue.length > 50
         //   ? defaultValue.substring(0, 50) + '...'
@@ -279,7 +281,7 @@ function initializeDefaultPrefs() {
 
 /**
  * 诊断配置问题 - 在控制台输出详细信息(仅在调试时使用)
- * 取消注释 registerPrefsScripts 中的调用来启用
+ * Cancel注释 registerPrefsScripts 中的调用来启用
  */
 function diagnosePrefs() {
   ztoolkit.log("[AI-Butler][Prefs] ========== 配置诊断开始 ==========");
@@ -308,7 +310,7 @@ function diagnosePrefs() {
       ztoolkit.log(`  - 类型: ${valueType}`);
       ztoolkit.log(`  - 长度: ${valueLength}`);
       ztoolkit.log(
-        `  - 是否为空: ${value === undefined || value === null || (typeof value === "string" && !value.trim())}`,
+        `  - Is empty: ${value === undefined || value === null || (typeof value === "string" && !value.trim())}`,
       );
     } catch (error) {
       ztoolkit.log(`[AI-Butler][Prefs] 读取配置失败: ${key}`, error);
@@ -362,7 +364,7 @@ function migrateToGlobalOnce() {
 }
 
 /**
- * 绑定"打开 AI 管家控制面板"按钮的点击事件
+ * 绑定"Open AI 管家控制面板"按钮的点击事件
  *
  * 这是"反转控制权"模式的核心实现:
  * 由主脚本主动找到偏好设置页面中的按钮,并为其绑定事件监听器
@@ -419,7 +421,7 @@ function bindOpenMainWindowButton(win: Window) {
             closeTime: 5000,
           })
             .createLine({
-              text: `打开主窗口失败: ${message}`,
+              text: `Failed to open main window: ${message}`,
               type: "error",
             })
             .show();
@@ -433,7 +435,7 @@ function bindOpenMainWindowButton(win: Window) {
           closeTime: 5000,
         })
           .createLine({
-            text: `打开主窗口失败: ${message}`,
+            text: `Failed to open main window: ${message}`,
             type: "error",
           })
           .show();

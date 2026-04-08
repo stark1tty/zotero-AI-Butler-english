@@ -79,11 +79,11 @@ export class OpenAIProvider implements ILlmProvider {
                       : null;
                     const err = parsed?.error || parsed || {};
                     const code = err?.code || `HTTP ${status}`;
-                    const msg = err?.message || "请求失败";
+                    const msg = err?.message || "请求Failed";
                     abortError = new Error(`${code}: ${msg}`);
                     xmlhttp.abort();
                   } catch {
-                    abortError = new Error(`HTTP ${status}: 请求失败`);
+                    abortError = new Error(`HTTP ${status}: 请求Failed`);
                     xmlhttp.abort();
                   }
                   return;
@@ -155,7 +155,7 @@ export class OpenAIProvider implements ILlmProvider {
             if (gotAnyDelta && chunks.length > 0) return chunks.join("");
             throw abortError;
           }
-          let errorMessage = error?.message || "OpenAI Responses 请求失败";
+          let errorMessage = error?.message || "OpenAI Responses 请求Failed";
           try {
             const responseText =
               error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -195,7 +195,7 @@ export class OpenAIProvider implements ILlmProvider {
         if (onProgress && text) await onProgress(text);
         return text;
       } catch (e: any) {
-        let errorMessage = e?.message || "OpenAI Responses 请求失败";
+        let errorMessage = e?.message || "OpenAI Responses 请求Failed";
         try {
           const responseText = e?.xmlhttp?.response || e?.xmlhttp?.responseText;
           if (responseText) {
@@ -258,14 +258,14 @@ export class OpenAIProvider implements ILlmProvider {
                     const parsed = JSON.parse(errorResponse);
                     const err = parsed?.error || parsed;
                     const code = err?.code || `HTTP ${status}`;
-                    const msg = err?.message || "请求失败";
+                    const msg = err?.message || "请求Failed";
                     const errorMessage = `${code}: ${msg}`;
                     abortedDueToError = true;
                     errorFromProgress = new Error(errorMessage);
                     xmlhttp.abort();
                   }
                 } catch {
-                  const errorMessage = `HTTP ${status}: 请求失败`;
+                  const errorMessage = `HTTP ${status}: 请求Failed`;
                   abortedDueToError = true;
                   errorFromProgress = new Error(errorMessage);
                   xmlhttp.abort();
@@ -345,7 +345,7 @@ export class OpenAIProvider implements ILlmProvider {
         if (abortedDueToError && errorFromProgress) throw errorFromProgress;
         if (streamComplete && gotAnyDelta) return chunks.join("");
         if (gotAnyDelta && chunks.length > 0) return chunks.join("");
-        let errorMessage = "未知错误";
+        let errorMessage = "未知Error";
         try {
           const responseText =
             error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -467,11 +467,11 @@ export class OpenAIProvider implements ILlmProvider {
                     : null;
                   const err = parsed?.error || parsed || {};
                   const code = err?.code || `HTTP ${status}`;
-                  const msg = err?.message || "请求失败";
+                  const msg = err?.message || "请求Failed";
                   abortError = new Error(`${code}: ${msg}`);
                   xmlhttp.abort();
                 } catch {
-                  abortError = new Error(`HTTP ${status}: 请求失败`);
+                  abortError = new Error(`HTTP ${status}: 请求Failed`);
                   xmlhttp.abort();
                 }
                 return;
@@ -543,7 +543,7 @@ export class OpenAIProvider implements ILlmProvider {
           if (gotAnyDelta && chunks.length > 0) return chunks.join("");
           throw abortError;
         }
-        let errorMessage = error?.message || "OpenAI Responses 请求失败";
+        let errorMessage = error?.message || "OpenAI Responses 请求Failed";
         try {
           const responseText =
             error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -627,7 +627,7 @@ export class OpenAIProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 const errorMessage = `${code}: ${msg}`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] OpenAI HTTP error:", {
@@ -638,7 +638,7 @@ export class OpenAIProvider implements ILlmProvider {
                 });
                 xmlhttp.abort();
               } catch (parseErr) {
-                const errorMessage = `HTTP ${status}: 请求失败`;
+                const errorMessage = `HTTP ${status}: 请求Failed`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] OpenAI HTTP error:", {
                   status,
@@ -709,7 +709,7 @@ export class OpenAIProvider implements ILlmProvider {
         }
         throw abortError;
       }
-      let errorMessage = error?.message || "OpenAI 请求失败";
+      let errorMessage = error?.message || "OpenAI 请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -812,7 +812,7 @@ export class OpenAIProvider implements ILlmProvider {
       const status = error?.xmlhttp?.status;
       const responseBody =
         error?.xmlhttp?.response || error?.xmlhttp?.responseText || "";
-      let errorMessage = error?.message || "OpenAI 请求失败";
+      let errorMessage = error?.message || "OpenAI 请求Failed";
       let errorName = "NetworkError";
       try {
         if (responseBody) {
@@ -856,7 +856,7 @@ export class OpenAIProvider implements ILlmProvider {
     const { APITestError } = await import("./types");
     throw new APITestError(`HTTP ${status}`, {
       errorName: `HTTP_${status}`,
-      errorMessage: `HTTP ${status}: ${response.statusText || "请求失败"}`,
+      errorMessage: `HTTP ${status}: ${response.statusText || "请求Failed"}`,
       statusCode: status,
       requestUrl: responsesUrl,
       requestBody: payloadStr,
@@ -960,11 +960,11 @@ export class OpenAIProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 abortError = new Error(`${code}: ${msg}`);
                 xmlhttp.abort();
               } catch {
-                abortError = new Error(`HTTP ${status}: 请求失败`);
+                abortError = new Error(`HTTP ${status}: 请求Failed`);
                 xmlhttp.abort();
               }
               return;
@@ -1036,7 +1036,7 @@ export class OpenAIProvider implements ILlmProvider {
         if (gotAnyDelta && chunks.length > 0) return chunks.join("");
         throw abortError;
       }
-      let errorMessage = error?.message || "OpenAI 多文件请求失败";
+      let errorMessage = error?.message || "OpenAI 多文件请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;

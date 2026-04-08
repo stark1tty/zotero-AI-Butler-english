@@ -7,7 +7,7 @@
  *
  * 主要职责:
  * 1. 任务入队/出队管理
- * 2. 任务状态跟踪 (待处理/处理中/已完成/失败)
+ * 2. 任务状态跟踪 (待处理/处理中/Completed/失败)
  * 3. 优先级调度
  * 4. 并发控制
  * 5. 失败重试机制
@@ -18,7 +18,7 @@
  * 1. 用户添加任务到队列
  * 2. 任务按优先级和创建时间排序
  * 3. 后台执行器按并发数限制处理任务
- * 4. 任务完成/失败后更新状态
+ * 4. 任务完成/失败后Update状态
  * 5. 失败任务可重试或移除
  *
  * @module taskQueue
@@ -31,7 +31,7 @@ import { PDFExtractor } from "./pdfExtractor";
 
 /** 无 PDF 附件错误标识 */
 const NO_PDF_ERROR_MSG =
-  "该条目没有 PDF 附件，无法进行 AI 分析。请先为该文献添加 PDF 文件。";
+  "This item has no PDF attachment and cannot be analyzed by AI. Please add a PDF file to this literature first.";
 
 /**
  * 任务状态枚举
@@ -39,7 +39,7 @@ const NO_PDF_ERROR_MSG =
 export enum TaskStatus {
   PENDING = "pending", // 待处理
   PROCESSING = "processing", // 处理中
-  COMPLETED = "completed", // 已完成
+  COMPLETED = "completed", // Completed
   FAILED = "failed", // 失败
   PRIORITY = "priority", // 优先处理
 }
@@ -99,7 +99,7 @@ export interface QueueStats {
   pending: number; // 待处理数
   priority: number; // 优先处理数
   processing: number; // 处理中数
-  completed: number; // 已完成数
+  completed: number; // Completed数
   failed: number; // 失败数
   successRate: number; // 成功率(%)
 }
@@ -144,7 +144,7 @@ export class TaskQueueManager {
   /** 任务队列 */
   private tasks: Map<string, TaskItem> = new Map();
 
-  /** 当前正在处理的任务ID集合 */
+  /** 当前Processing的任务ID集合 */
   private processingTasks: Set<string> = new Set();
 
   /** 任务进度回调函数集合 */
@@ -211,12 +211,12 @@ export class TaskQueueManager {
   ): Promise<string> {
     const taskId = `task-${item.id}`;
 
-    // 检查是否已存在
+    // 检查是否Already exists
     if (this.tasks.has(taskId)) {
       const existingTask = this.tasks.get(taskId)!;
-      // 如果强制覆盖，或者任务已存在且需要强制更新
+      // 如果强制覆盖，或者任务Already exists且需要强制Update
       if (options?.forceOverwrite) {
-        ztoolkit.log(`强制更新已存在的任务: ${taskId}`);
+        ztoolkit.log(`Force updating existing task: ${taskId}`);
         existingTask.status = priority
           ? TaskStatus.PRIORITY
           : TaskStatus.PENDING;
@@ -224,7 +224,7 @@ export class TaskQueueManager {
         existingTask.progress = 0;
         existingTask.error = undefined;
         existingTask.retryCount = 0;
-        existingTask.createdAt = new Date(); // 更新创建时间以调整顺序
+        existingTask.createdAt = new Date(); // Update创建时间以调整顺序
         await this.saveToStorage();
 
         if (!this.isRunning) {
@@ -232,13 +232,13 @@ export class TaskQueueManager {
         }
         if (priority) {
           this.executeTask(taskId).catch((e) => {
-            ztoolkit.log(`优先任务立即执行失败: ${e}`);
+            ztoolkit.log(`Priority task immediate execution failed: ${e}`);
           });
         }
         return taskId;
       }
 
-      ztoolkit.log(`任务已存在: ${taskId}`);
+      ztoolkit.log(`Task already exists: ${taskId}`);
       return taskId;
     }
 
@@ -258,7 +258,7 @@ export class TaskQueueManager {
     this.tasks.set(taskId, task);
     await this.saveToStorage();
 
-    ztoolkit.log(`添加任务: ${task.title} (${taskId})`);
+    ztoolkit.log(`Adding task: ${task.title} (${taskId})`);
 
     // 如果执行器未运行,启动它
     if (!this.isRunning) {
@@ -268,7 +268,7 @@ export class TaskQueueManager {
     // 如果是优先任务，立即执行（不等待批处理周期）
     if (priority) {
       this.executeTask(taskId).catch((e) => {
-        ztoolkit.log(`优先任务立即执行失败: ${e}`);
+        ztoolkit.log(`Priority task immediate execution failed: ${e}`);
       });
     }
 
@@ -305,9 +305,9 @@ export class TaskQueueManager {
   public async addImageSummaryTask(item: Zotero.Item): Promise<string> {
     const taskId = `img-task-${item.id}`;
 
-    // 检查是否已存在
+    // 检查是否Already exists
     if (this.tasks.has(taskId)) {
-      ztoolkit.log(`一图总结任务已存在: ${taskId}`);
+      ztoolkit.log(`Image summary task already exists: ${taskId}`);
       return taskId;
     }
 
@@ -322,17 +322,17 @@ export class TaskQueueManager {
       retryCount: 0,
       maxRetries: 1, // 一图总结只重试1次
       taskType: "imageSummary",
-      workflowStage: "等待开始",
+      workflowStage: "Waiting to start",
     };
 
     this.tasks.set(taskId, task);
     await this.saveToStorage();
 
-    ztoolkit.log(`添加一图总结任务: ${task.title} (${taskId})`);
+    ztoolkit.log(`Adding image summary task: ${task.title} (${taskId})`);
 
     // 立即执行一图总结任务
     this.executeImageSummaryTask(taskId).catch((e) => {
-      ztoolkit.log(`一图总结任务执行失败: ${e}`);
+      ztoolkit.log(`Image summary task execution failed: ${e}`);
     });
 
     return taskId;
@@ -357,21 +357,21 @@ export class TaskQueueManager {
       return;
     }
 
-    // 更新任务状态
+    // Update任务状态
     task.status = TaskStatus.PROCESSING;
     task.startedAt = new Date();
     task.progress = 0;
-    task.workflowStage = "正在初始化";
+    task.workflowStage = "Initializing";
     this.processingTasks.add(taskId);
     await this.saveToStorage();
 
-    ztoolkit.log(`开始执行一图总结任务: ${task.title}`);
+    ztoolkit.log(`Starting image summary task: ${task.title}`);
 
     try {
       // 获取 Zotero Item
       const item = await Zotero.Items.getAsync(task.itemId);
       if (!item) {
-        throw new Error("文献条目不存在");
+        throw new Error("Literature item does not exist");
       }
 
       // 动态导入 ImageSummaryService
@@ -381,7 +381,7 @@ export class TaskQueueManager {
       await ImageSummaryService.generateForItem(
         item,
         (stage, message, progress) => {
-          // 更新任务进度
+          // Update任务进度
           task.progress = progress;
           task.workflowStage = message;
           this.notifyProgress(taskId, progress, message);
@@ -395,30 +395,35 @@ export class TaskQueueManager {
       // 任务成功完成
       task.status = TaskStatus.COMPLETED;
       task.progress = 100;
-      task.workflowStage = "完成";
+      task.workflowStage = "Completed";
       task.completedAt = new Date();
       task.duration = Math.floor(
         (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000,
       );
 
-      ztoolkit.log(`一图总结任务完成: ${task.title} (耗时${task.duration}秒)`);
+      ztoolkit.log(
+        `Image summary task completed: ${task.title} (took ${task.duration} seconds)`,
+      );
       this.notifyComplete(taskId, true);
     } catch (error: any) {
       // 任务失败
-      task.error = error?.details?.errorMessage || error?.message || "未知错误";
-      task.workflowStage = "失败";
+      task.error =
+        error?.details?.errorMessage || error?.message || "Unknown error";
+      task.workflowStage = "Failed";
 
       task.retryCount++;
       if (task.retryCount < task.maxRetries) {
         task.status = TaskStatus.PENDING;
         task.progress = 0;
         ztoolkit.log(
-          `一图总结任务失败,将重试 (${task.retryCount}/${task.maxRetries}): ${task.title}`,
+          `Image summary task failed, will retry (${task.retryCount}/${task.maxRetries}): ${task.title}`,
         );
       } else {
         task.status = TaskStatus.FAILED;
         task.completedAt = new Date();
-        ztoolkit.log(`一图总结任务最终失败: ${task.title} - ${task.error}`);
+        ztoolkit.log(
+          `Image summary task ultimately failed: ${task.title} - ${task.error}`,
+        );
       }
 
       this.notifyComplete(taskId, false, task.error);
@@ -444,9 +449,9 @@ export class TaskQueueManager {
   public async addMindmapTask(item: Zotero.Item): Promise<string> {
     const taskId = `mindmap-task-${item.id}`;
 
-    // 检查是否已存在
+    // 检查是否Already exists
     if (this.tasks.has(taskId)) {
-      ztoolkit.log(`思维导图任务已存在: ${taskId}`);
+      ztoolkit.log(`Mindmap task already exists: ${taskId}`);
       return taskId;
     }
 
@@ -461,17 +466,17 @@ export class TaskQueueManager {
       retryCount: 0,
       maxRetries: 2,
       taskType: "mindmap",
-      workflowStage: "等待开始",
+      workflowStage: "Waiting to start",
     };
 
     this.tasks.set(taskId, task);
     await this.saveToStorage();
 
-    ztoolkit.log(`添加思维导图任务: ${task.title} (${taskId})`);
+    ztoolkit.log(`Adding mindmap task: ${task.title} (${taskId})`);
 
     // 立即执行思维导图任务
     this.executeMindmapTask(taskId).catch((e) => {
-      ztoolkit.log(`思维导图任务执行失败: ${e}`);
+      ztoolkit.log(`Mindmap task execution failed: ${e}`);
     });
 
     return taskId;
@@ -496,29 +501,29 @@ export class TaskQueueManager {
       return;
     }
 
-    // 更新任务状态
+    // Update任务状态
     task.status = TaskStatus.PROCESSING;
     task.startedAt = new Date();
     task.progress = 0;
-    task.workflowStage = "正在初始化";
+    task.workflowStage = "Initializing";
     this.processingTasks.add(taskId);
     await this.saveToStorage();
 
-    ztoolkit.log(`开始执行思维导图任务: ${task.title}`);
+    ztoolkit.log(`Starting mindmap task: ${task.title}`);
 
     try {
       // 获取 Zotero Item
       const item = await Zotero.Items.getAsync(task.itemId);
       if (!item) {
-        throw new Error("文献条目不存在");
+        throw new Error("Literature item does not exist");
       }
 
       // 动态导入 MindmapService
       const { MindmapService } = await import("./mindmapService");
 
-      // 执行思维导图生成
+      // 执行Mind map generation
       await MindmapService.generateForItem(item, (stage, message, progress) => {
-        // 更新任务进度
+        // Update任务进度
         task.progress = progress;
         task.workflowStage = message;
         this.notifyProgress(taskId, progress, message);
@@ -531,30 +536,35 @@ export class TaskQueueManager {
       // 任务成功完成
       task.status = TaskStatus.COMPLETED;
       task.progress = 100;
-      task.workflowStage = "完成";
+      task.workflowStage = "Completed";
       task.completedAt = new Date();
       task.duration = Math.floor(
         (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000,
       );
 
-      ztoolkit.log(`思维导图任务完成: ${task.title} (耗时${task.duration}秒)`);
+      ztoolkit.log(
+        `Mindmap task completed: ${task.title} (took ${task.duration} seconds)`,
+      );
       this.notifyComplete(taskId, true);
     } catch (error: any) {
       // 任务失败
-      task.error = error?.details?.errorMessage || error?.message || "未知错误";
-      task.workflowStage = "失败";
+      task.error =
+        error?.details?.errorMessage || error?.message || "Unknown error";
+      task.workflowStage = "Failed";
 
       task.retryCount++;
       if (task.retryCount < task.maxRetries) {
         task.status = TaskStatus.PENDING;
         task.progress = 0;
         ztoolkit.log(
-          `思维导图任务失败,将重试 (${task.retryCount}/${task.maxRetries}): ${task.title}`,
+          `Mindmap task failed, will retry (${task.retryCount}/${task.maxRetries}): ${task.title}`,
         );
       } else {
         task.status = TaskStatus.FAILED;
         task.completedAt = new Date();
-        ztoolkit.log(`思维导图任务最终失败: ${task.title} - ${task.error}`);
+        ztoolkit.log(
+          `Mindmap task ultimately failed: ${task.title} - ${task.error}`,
+        );
       }
 
       this.notifyComplete(taskId, false, task.error);
@@ -578,7 +588,7 @@ export class TaskQueueManager {
     const taskId = `table-task-${item.id}`;
 
     if (this.tasks.has(taskId)) {
-      ztoolkit.log(`填表任务已存在: ${taskId}`);
+      ztoolkit.log(`Table filling task already exists: ${taskId}`);
       return taskId;
     }
 
@@ -592,17 +602,17 @@ export class TaskQueueManager {
       retryCount: 0,
       maxRetries: 2,
       taskType: "tableFill",
-      workflowStage: "等待开始",
+      workflowStage: "Waiting to start",
     };
 
     this.tasks.set(taskId, task);
     await this.saveToStorage();
 
-    ztoolkit.log(`添加填表任务: ${task.title} (${taskId})`);
+    ztoolkit.log(`Adding table filling task: ${task.title} (${taskId})`);
 
     // 立即执行
     this.executeTableFillTask(taskId).catch((e) => {
-      ztoolkit.log(`填表任务执行失败: ${e}`);
+      ztoolkit.log(`Table filling task execution failed: ${e}`);
     });
 
     return taskId;
@@ -624,13 +634,13 @@ export class TaskQueueManager {
     task.status = TaskStatus.PROCESSING;
     task.startedAt = new Date();
     task.progress = 0;
-    task.workflowStage = "正在初始化";
+    task.workflowStage = "Initializing";
     this.processingTasks.add(taskId);
     await this.saveToStorage();
 
     try {
       const item = await Zotero.Items.getAsync(task.itemId);
-      if (!item) throw new Error("文献条目不存在");
+      if (!item) throw new Error("Literature item does not exist");
 
       const { LiteratureReviewService } =
         await import("./literatureReviewService");
@@ -644,9 +654,9 @@ export class TaskQueueManager {
         (getPref("tableFillPrompt" as any) as string) ||
         DEFAULT_TABLE_FILL_PROMPT;
 
-      task.workflowStage = "正在提取 PDF";
+      task.workflowStage = "Extracting PDF";
       task.progress = 20;
-      this.notifyProgress(taskId, 20, "正在提取 PDF");
+      this.notifyProgress(taskId, 20, "Extracting PDF");
 
       // 找到 PDF 附件
       const attachmentIDs = (item as any).getAttachments?.() || [];
@@ -659,11 +669,11 @@ export class TaskQueueManager {
         }
       }
 
-      if (!pdfAtt) throw new Error("该条目没有 PDF 附件");
+      if (!pdfAtt) throw new Error("This item has no PDF attachment");
 
-      task.workflowStage = "正在 AI 填表";
+      task.workflowStage = "AI Table Filling";
       task.progress = 40;
-      this.notifyProgress(taskId, 40, "正在 AI 填表");
+      this.notifyProgress(taskId, 40, "AI Table Filling");
 
       const tableContent = await LiteratureReviewService.fillTableForSinglePDF(
         item,
@@ -672,25 +682,27 @@ export class TaskQueueManager {
         fillPrompt,
       );
 
-      task.workflowStage = "正在保存";
+      task.workflowStage = "Saving";
       task.progress = 80;
-      this.notifyProgress(taskId, 80, "正在保存");
+      this.notifyProgress(taskId, 80, "Saving");
 
       await LiteratureReviewService.saveTableNote(item, tableContent);
 
       task.status = TaskStatus.COMPLETED;
       task.progress = 100;
-      task.workflowStage = "完成";
+      task.workflowStage = "Completed";
       task.completedAt = new Date();
       task.duration = Math.floor(
         (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000,
       );
 
-      ztoolkit.log(`填表任务完成: ${task.title} (耗时${task.duration}秒)`);
+      ztoolkit.log(
+        `Table filling task completed: ${task.title} (took ${task.duration} seconds)`,
+      );
       this.notifyComplete(taskId, true);
     } catch (error: any) {
-      task.error = error?.message || "未知错误";
-      task.workflowStage = "失败";
+      task.error = error?.message || "Unknown error";
+      task.workflowStage = "Failed";
       task.retryCount++;
       if (task.retryCount < task.maxRetries) {
         task.status = TaskStatus.PENDING;
@@ -718,11 +730,11 @@ export class TaskQueueManager {
   ): Promise<string> {
     const taskId = `review-task-${collection.id}`;
 
-    // 若已存在则更新
+    // 若Already exists则Update
     if (this.tasks.has(taskId)) {
       const existing = this.tasks.get(taskId)!;
       if (existing.status === TaskStatus.PROCESSING) {
-        ztoolkit.log(`综述任务正在执行: ${taskId}`);
+        ztoolkit.log(`Literature review task is executing: ${taskId}`);
         return taskId;
       }
       this.tasks.delete(taskId);
@@ -738,7 +750,7 @@ export class TaskQueueManager {
       retryCount: 0,
       maxRetries: 1,
       taskType: "review",
-      workflowStage: "等待开始",
+      workflowStage: "Waiting to start",
       collectionId: collection.id,
       pdfAttachmentIds: pdfAttachments.map((p) => p.id),
       reviewName,
@@ -748,11 +760,11 @@ export class TaskQueueManager {
     this.tasks.set(taskId, task);
     await this.saveToStorage();
 
-    ztoolkit.log(`添加综述任务: ${task.title} (${taskId})`);
+    ztoolkit.log(`Adding literature review task: ${task.title} (${taskId})`);
 
     // 立即执行
     this.executeReviewTask(taskId, prompt).catch((e) => {
-      ztoolkit.log(`综述任务执行失败: ${e}`);
+      ztoolkit.log(`Literature review task execution failed: ${e}`);
     });
 
     return taskId;
@@ -777,19 +789,19 @@ export class TaskQueueManager {
     task.status = TaskStatus.PROCESSING;
     task.startedAt = new Date();
     task.progress = 0;
-    task.workflowStage = "正在初始化";
+    task.workflowStage = "Initializing";
     this.processingTasks.add(taskId);
     await this.saveToStorage();
 
     try {
       if (!task.collectionId || !task.pdfAttachmentIds?.length) {
-        throw new Error("综述任务参数不完整");
+        throw new Error("Literature review task parameters are incomplete");
       }
 
       const collection = Zotero.Collections.get(
         task.collectionId,
       ) as Zotero.Collection;
-      if (!collection) throw new Error("分类不存在");
+      if (!collection) throw new Error("Collection does not exist");
 
       // 加载 PDF 附件
       const pdfAttachments: Zotero.Item[] = [];
@@ -798,13 +810,14 @@ export class TaskQueueManager {
         if (att) pdfAttachments.push(att);
       }
 
-      if (pdfAttachments.length === 0) throw new Error("没有可用的 PDF 附件");
+      if (pdfAttachments.length === 0)
+        throw new Error("No available PDF attachments");
 
       const { LiteratureReviewService } =
         await import("./literatureReviewService");
 
       const reviewName =
-        task.reviewName || `综述 ${new Date().toISOString().slice(2, 10)}`;
+        task.reviewName || `Review ${new Date().toISOString().slice(2, 10)}`;
 
       await LiteratureReviewService.generateReview(
         collection,
@@ -824,17 +837,19 @@ export class TaskQueueManager {
 
       task.status = TaskStatus.COMPLETED;
       task.progress = 100;
-      task.workflowStage = "完成";
+      task.workflowStage = "Completed";
       task.completedAt = new Date();
       task.duration = Math.floor(
         (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000,
       );
 
-      ztoolkit.log(`综述任务完成: ${task.title} (耗时${task.duration}秒)`);
+      ztoolkit.log(
+        `Literature review task completed: ${task.title} (took ${task.duration} seconds)`,
+      );
       this.notifyComplete(taskId, true);
     } catch (error: any) {
-      task.error = error?.message || "未知错误";
-      task.workflowStage = "失败";
+      task.error = error?.message || "Unknown error";
+      task.workflowStage = "Failed";
       task.status = TaskStatus.FAILED;
       task.completedAt = new Date();
       this.notifyComplete(taskId, false, task.error);
@@ -886,7 +901,7 @@ export class TaskQueueManager {
       retryCount: 0,
       maxRetries: 1,
       taskType: "targetedQuestion",
-      workflowStage: "等待开始",
+      workflowStage: "Waiting to start",
       collectionId: collection.id,
       pdfAttachmentIds: pdfAttachments.map((p) => p.id),
       tableTemplate,
@@ -899,11 +914,11 @@ export class TaskQueueManager {
     this.tasks.set(taskId, task);
     await this.saveToStorage();
 
-    ztoolkit.log(`添加针对性提问任务: ${task.title} (${taskId})`);
+    ztoolkit.log(`Adding targeted question task: ${task.title} (${taskId})`);
 
     // 立即执行
     this.executeTargetedQuestionTask(taskId).catch((e) => {
-      ztoolkit.log(`针对性提问任务执行失败: ${e}`);
+      ztoolkit.log(`Targeted question task execution failed: ${e}`);
     });
 
     return taskId;
@@ -925,7 +940,7 @@ export class TaskQueueManager {
     task.status = TaskStatus.PROCESSING;
     task.startedAt = new Date();
     task.progress = 0;
-    task.workflowStage = "正在初始化";
+    task.workflowStage = "Initializing";
     this.processingTasks.add(taskId);
     await this.saveToStorage();
 
@@ -935,26 +950,27 @@ export class TaskQueueManager {
         !task.pdfAttachmentIds?.length ||
         !task.targetedPrompt
       ) {
-        throw new Error("针对性提问任务参数不完整");
+        throw new Error("Targeted question task parameters are incomplete");
       }
 
       const collection = Zotero.Collections.get(
         task.collectionId,
       ) as Zotero.Collection;
-      if (!collection) throw new Error("分类不存在");
+      if (!collection) throw new Error("Collection does not exist");
 
       const pdfAttachments: Zotero.Item[] = [];
       for (const attId of task.pdfAttachmentIds) {
         const att = await Zotero.Items.getAsync(attId);
         if (att) pdfAttachments.push(att);
       }
-      if (pdfAttachments.length === 0) throw new Error("没有可用的 PDF 附件");
+      if (pdfAttachments.length === 0)
+        throw new Error("No available PDF attachments");
 
       const { LiteratureReviewService } =
         await import("./literatureReviewService");
       const noteTitle =
         task.targetedNoteTitle ||
-        `针对性提问 ${new Date().toISOString().slice(2, 10)}`;
+        `Targeted Question ${new Date().toISOString().slice(2, 10)}`;
 
       await LiteratureReviewService.generateTargetedAnswer(
         collection,
@@ -978,19 +994,19 @@ export class TaskQueueManager {
 
       task.status = TaskStatus.COMPLETED;
       task.progress = 100;
-      task.workflowStage = "完成";
+      task.workflowStage = "Completed";
       task.completedAt = new Date();
       task.duration = Math.floor(
         (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000,
       );
 
       ztoolkit.log(
-        `针对性提问任务完成: ${task.title} (耗时${task.duration}秒)`,
+        `Targeted question task completed: ${task.title} (took ${task.duration} seconds)`,
       );
       this.notifyComplete(taskId, true);
     } catch (error: any) {
-      task.error = error?.message || "未知错误";
-      task.workflowStage = "失败";
+      task.error = error?.message || "Unknown error";
+      task.workflowStage = "Failed";
       task.status = TaskStatus.FAILED;
       task.completedAt = new Date();
       this.notifyComplete(taskId, false, task.error);
@@ -1020,17 +1036,17 @@ export class TaskQueueManager {
 
     // 不能删除处理中的任务
     if (task.status === TaskStatus.PROCESSING) {
-      throw new Error("无法删除处理中的任务");
+      throw new Error("Cannot delete a processing task");
     }
 
     this.tasks.delete(taskId);
     await this.saveToStorage();
 
-    ztoolkit.log(`删除任务: ${taskId}`);
+    ztoolkit.log(`Deleting task: ${taskId}`);
   }
 
   /**
-   * 清空已完成的任务
+   * 清空Completed的任务
    */
   public async clearCompleted(): Promise<void> {
     const completedTasks = Array.from(this.tasks.values()).filter(
@@ -1042,7 +1058,7 @@ export class TaskQueueManager {
     }
 
     await this.saveToStorage();
-    ztoolkit.log(`清空已完成任务: ${completedTasks.length} 个`);
+    ztoolkit.log(`Cleared completed tasks: ${completedTasks.length}`);
   }
 
   /**
@@ -1057,7 +1073,7 @@ export class TaskQueueManager {
     this.processingTasks.clear();
 
     await this.saveToStorage();
-    ztoolkit.log("清空所有任务");
+    ztoolkit.log("Cleared all tasks");
   }
 
   /**
@@ -1082,7 +1098,7 @@ export class TaskQueueManager {
     ) {
       task.status = priority ? TaskStatus.PRIORITY : TaskStatus.PENDING;
       await this.saveToStorage();
-      ztoolkit.log(`任务 ${taskId} 优先级已更新: ${priority}`);
+      ztoolkit.log(`Task ${taskId} priority updated: ${priority}`);
     }
   }
 
@@ -1104,7 +1120,7 @@ export class TaskQueueManager {
     task.retryCount = 0;
 
     await this.saveToStorage();
-    ztoolkit.log(`重试任务: ${taskId}`);
+    ztoolkit.log(`Retrying task: ${taskId}`);
 
     // 确保执行器正在运行
     if (!this.isRunning) {
@@ -1138,7 +1154,7 @@ export class TaskQueueManager {
    * 2. 处理中
    * 3. 待处理
    * 4. 失败
-   * 5. 已完成
+   * 5. Completed
    *
    * 同状态内按创建时间升序
    */
@@ -1213,12 +1229,12 @@ export class TaskQueueManager {
    */
   public start(): void {
     if (this.isRunning) {
-      ztoolkit.log("队列执行器已在运行");
+      ztoolkit.log("Queue executor is already running");
       return;
     }
 
     this.isRunning = true;
-    ztoolkit.log("启动队列执行器");
+    ztoolkit.log("Starting queue executor");
 
     // 立即执行一次
     this.executeNextBatch();
@@ -1245,11 +1261,11 @@ export class TaskQueueManager {
       this.executorTimerId = null;
     }
 
-    ztoolkit.log("停止队列执行器");
+    ztoolkit.log("Stopping queue executor");
   }
 
   /**
-   * 更新执行器设置
+   * Update执行器设置
    *
    * @param maxConcurrency 最大并发数
    * @param intervalSeconds 执行间隔(秒)
@@ -1266,7 +1282,7 @@ export class TaskQueueManager {
     }
 
     ztoolkit.log(
-      `更新执行器设置: 批次大小=${this.batchSize}, 间隔=${intervalSeconds}秒`,
+      `Updating executor settings: batchSize=${this.batchSize}, interval=${intervalSeconds} seconds`,
     );
   }
 
@@ -1309,7 +1325,7 @@ export class TaskQueueManager {
         });
 
       if (pendingTasks.length === 0) {
-        ztoolkit.log("没有待处理的任务");
+        ztoolkit.log("No pending tasks");
         return;
       }
 
@@ -1317,12 +1333,12 @@ export class TaskQueueManager {
       const tasksToExecute = pendingTasks.slice(0, this.batchSize);
 
       ztoolkit.log(
-        `开始并行执行批次任务: ${tasksToExecute.length} 个 (批次大小=${this.batchSize})`,
+        `Starting parallel batch execution: ${tasksToExecute.length} tasks (batchSize=${this.batchSize})`,
       );
 
       // 并行执行所有任务
       const taskPromises = tasksToExecute.map(async (task) => {
-        ztoolkit.log(`启动任务: ${task.title}`);
+        ztoolkit.log(`Starting task: ${task.title}`);
         const wasQuickFail = await this.executeTask(task.id);
         return { taskId: task.id, title: task.title, wasQuickFail };
       });
@@ -1335,7 +1351,7 @@ export class TaskQueueManager {
       const quickFailCount = results.filter((r) => r.wasQuickFail).length;
 
       ztoolkit.log(
-        `批次执行完成，实际处理 ${llmTasksProcessed} 个任务，快速失败 ${quickFailCount} 个`,
+        `Batch execution completed, processed ${llmTasksProcessed} tasks, quick failed ${quickFailCount} tasks`,
       );
     } finally {
       this.isBatchRunning = false;
@@ -1389,29 +1405,31 @@ export class TaskQueueManager {
     }
 
     // 防止任务被重复执行（竞态条件保护）
-    // 如果任务已在处理中或已完成，跳过执行
+    // 如果任务已在处理中或Completed，跳过执行
     if (
       task.status === TaskStatus.PROCESSING ||
       task.status === TaskStatus.COMPLETED
     ) {
-      ztoolkit.log(`任务已在处理中或已完成，跳过重复执行: ${taskId}`);
+      ztoolkit.log(
+        `Task already processing or completed, skipping duplicate execution: ${taskId}`,
+      );
       return false;
     }
 
-    // 更新任务状态为处理中
+    // Update任务状态为处理中
     task.status = TaskStatus.PROCESSING;
     task.startedAt = new Date();
     task.progress = 0;
     this.processingTasks.add(taskId);
     await this.saveToStorage();
 
-    ztoolkit.log(`开始执行任务: ${task.title} (${taskId})`);
+    ztoolkit.log(`Starting task execution: ${task.title} (${taskId})`);
 
     try {
       // 获取 Zotero Item
       const item = await Zotero.Items.getAsync(task.itemId);
       if (!item) {
-        throw new Error("文献条目不存在");
+        throw new Error("Literature item does not exist");
       }
 
       // 检查是否有 PDF 附件
@@ -1425,7 +1443,7 @@ export class TaskQueueManager {
         item,
         undefined, // 不使用输出窗口,通过流式回调转发
         (message: string, progress: number) => {
-          // 更新任务进度
+          // Update任务进度
           task.progress = progress;
           this.notifyProgress(taskId, progress, message);
         },
@@ -1438,7 +1456,7 @@ export class TaskQueueManager {
             }
             this.notifyStream(taskId, { type: "chunk", chunk });
           } catch (e) {
-            ztoolkit.log(`流式内容广播失败: ${e}`);
+            ztoolkit.log(`Stream callback execution failed: ${e}`);
           }
         },
         task.options,
@@ -1452,7 +1470,9 @@ export class TaskQueueManager {
         (task.completedAt.getTime() - task.startedAt!.getTime()) / 1000,
       );
 
-      ztoolkit.log(`任务完成: ${task.title} (耗时${task.duration}秒)`);
+      ztoolkit.log(
+        `Task completed: ${task.title} (took ${task.duration} seconds)`,
+      );
       this.notifyComplete(taskId, true);
       // 发送结束事件
       this.notifyStream(taskId, { type: "finish" });
@@ -1463,14 +1483,14 @@ export class TaskQueueManager {
       return false; // 非快速失败，计入批次
     } catch (error: any) {
       // 任务失败
-      task.error = error.message || "未知错误";
+      task.error = error.message || "Unknown error";
 
       // 无 PDF 附件错误直接标记失败，不重试（用户需要手动添加 PDF）
       const isNoPdfError = task.error === NO_PDF_ERROR_MSG;
       if (isNoPdfError) {
         task.status = TaskStatus.FAILED;
         task.completedAt = new Date();
-        ztoolkit.log(`任务失败（无 PDF 附件）: ${task.title}`);
+        ztoolkit.log(`Task failed (no PDF attachment): ${task.title}`);
       } else {
         task.retryCount++;
         // 检查是否需要重试
@@ -1479,13 +1499,13 @@ export class TaskQueueManager {
           task.status = TaskStatus.PENDING;
           task.progress = 0;
           ztoolkit.log(
-            `任务失败,将重试 (${task.retryCount}/${task.maxRetries}): ${task.title}`,
+            `Task failed, will retry (${task.retryCount}/${task.maxRetries}): ${task.title}`,
           );
         } else {
           // 超过最大重试次数,标记为失败
           task.status = TaskStatus.FAILED;
           task.completedAt = new Date();
-          ztoolkit.log(`任务最终失败: ${task.title} - ${task.error}`);
+          ztoolkit.log(`Task ultimately failed: ${task.title} - ${task.error}`);
         }
       }
 
@@ -1509,7 +1529,7 @@ export class TaskQueueManager {
   public onProgress(callback: TaskProgressCallback): () => void {
     this.progressCallbacks.add(callback);
 
-    // 返回取消注册的函数
+    // 返回Cancel注册的函数
     return () => {
       this.progressCallbacks.delete(callback);
     };
@@ -1523,7 +1543,7 @@ export class TaskQueueManager {
   public onComplete(callback: TaskCompleteCallback): () => void {
     this.completeCallbacks.add(callback);
 
-    // 返回取消注册的函数
+    // 返回Cancel注册的函数
     return () => {
       this.completeCallbacks.delete(callback);
     };
@@ -1549,7 +1569,7 @@ export class TaskQueueManager {
       try {
         callback(taskId, progress, message);
       } catch (error) {
-        ztoolkit.log(`进度回调执行失败: ${error}`);
+        ztoolkit.log(`Progress callback execution failed: ${error}`);
       }
     });
   }
@@ -1566,7 +1586,7 @@ export class TaskQueueManager {
       try {
         callback(taskId, success, error);
       } catch (error) {
-        ztoolkit.log(`完成回调执行失败: ${error}`);
+        ztoolkit.log(`Complete callback execution failed: ${error}`);
       }
     });
   }
@@ -1584,7 +1604,7 @@ export class TaskQueueManager {
       try {
         cb(taskId, event);
       } catch (e) {
-        ztoolkit.log(`流式回调执行失败: ${e}`);
+        ztoolkit.log(`Stream callback execution failed: ${e}`);
       }
     });
   }
@@ -1609,17 +1629,21 @@ export class TaskQueueManager {
         return;
       }
 
-      // 检查是否已有一图总结任务正在队列中
+      // 检查是否已有一图总结任务正在In queue
       const existingTask = this.tasks.get(`img-task-${itemId}`);
       if (existingTask) {
-        ztoolkit.log(`[AI-Butler] 一图总结任务已存在，跳过自动触发: ${itemId}`);
+        ztoolkit.log(
+          `[AI-Butler] Image summary task already exists, skipping auto trigger: ${itemId}`,
+        );
         return;
       }
 
-      ztoolkit.log(`[AI-Butler] 自动触发一图总结: ${item.getField("title")}`);
+      ztoolkit.log(
+        `[AI-Butler] Auto triggering image summary: ${item.getField("title")}`,
+      );
       await this.addImageSummaryTask(item);
     } catch (error) {
-      ztoolkit.log(`[AI-Butler] 自动触发一图总结失败:`, error);
+      ztoolkit.log(`[AI-Butler] Auto trigger image summary failed:`, error);
     }
   }
 
@@ -1678,14 +1702,14 @@ export class TaskQueueManager {
 
       this.lastLoadedSnapshotAt = snapshotAt || null;
 
-      ztoolkit.log(`从存储加载 ${this.tasks.size} 个任务`);
+      ztoolkit.log(`Loaded ${this.tasks.size} tasks from storage`);
     } catch (error) {
-      ztoolkit.log(`加载任务队列失败: ${error}`);
+      ztoolkit.log(`Failed to load task queue: ${error}`);
     }
   }
 
   /**
-   * 主动从持久化存储刷新任务数据
+   * 主动从持久化存储Refresh任务数据
    *
    * 用于跨窗口上下文读取最新快照；若本上下文正在执行任务，则以内存状态为准。
    */
@@ -1714,7 +1738,7 @@ export class TaskQueueManager {
       );
       this.lastLoadedSnapshotAt = savedAt;
     } catch (error) {
-      ztoolkit.log(`保存任务队列失败: ${error}`);
+      ztoolkit.log(`Failed to save task queue: ${error}`);
     }
   }
 

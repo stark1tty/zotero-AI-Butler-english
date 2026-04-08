@@ -59,9 +59,9 @@ export class MainWindow {
   /** 对话框实例 */
   private dialog: any;
 
-  /** 窗口是否打开 */
+  /** 窗口是否Open */
   private isOpen: boolean = false;
-  /** 是否正在打开窗口（防抖并发 open）*/
+  /** 是否正在Open窗口（防抖并发 open）*/
   private isOpening: boolean = false;
 
   /** UI 初始化重试次数（用于等待异步渲染完成）*/
@@ -140,23 +140,23 @@ export class MainWindow {
   }
 
   /**
-   * 打开主窗口
+   * Open主窗口
    *
    * @param initialTab 初始显示的标签页,默认为 dashboard
    */
   public async open(initialTab: TabType = "dashboard"): Promise<void> {
     if (this.isOpen) {
-      // 如果窗口已打开,只切换标签页
+      // 如果窗口已Open,只切换标签页
       this.switchTab(initialTab);
       try {
         this.dialog?.window?.focus?.();
       } catch (e) {
-        ztoolkit.log("[AI Butler] 聚焦已打开窗口失败:", e);
+        ztoolkit.log("[AI Butler] Failed to focus open window:", e);
       }
       return;
     }
 
-    // 防止并发重复打开
+    // 防止并发重复Open
     if (this.isOpening) {
       this.activeTab = initialTab;
       return;
@@ -212,10 +212,10 @@ export class MainWindow {
               else root.classList.remove("ai-butler-dark");
             }
           } catch (e2) {
-            ztoolkit.log("[AI Butler] 初始化主题类失败", e2);
+            ztoolkit.log("[AI Butler] Failed to initialize theme class", e2);
           }
         } catch (e) {
-          ztoolkit.log("[AI Butler] 初始化 UI 异常:", e);
+          ztoolkit.log("[AI Butler] UI initialization exception:", e);
         }
       },
       unloadCallback: () => {
@@ -267,7 +267,7 @@ export class MainWindow {
         ],
       })
       .setDialogData(dialogData)
-      .open("AI Butler - 智能文献管家", {
+      .open("AI Butler - Intelligent Literature Manager", {
         width: defaultW,
         height: defaultH,
         centerscreen: true,
@@ -342,14 +342,16 @@ export class MainWindow {
             root.appendChild(container);
             this.viewContainer = container;
           }
-          ztoolkit.log("[AI Butler] 容器未按时渲染，已兜底创建");
+          ztoolkit.log(
+            "[AI Butler] Containers were not rendered on time, fallback created",
+          );
         } else {
-          ztoolkit.log("[AI Butler] 无法找到容器元素");
+          ztoolkit.log("[AI Butler] Unable to find container elements");
         }
       }
 
       if (!this.tabBar || !this.viewContainer) {
-        // 兜底后仍失败，结束本次初始化尝试
+        // 兜底后仍Failed，结束本次初始化尝试
         this.uiInitializing = false;
         return;
       }
@@ -406,10 +408,10 @@ export class MainWindow {
     if (!this.tabBar) return;
 
     const tabs: Array<{ id: TabType; label: string; icon: string }> = [
-      { id: "dashboard", label: "仪表盘", icon: "📊" },
-      { id: "summary", label: "AI 总结", icon: "📝" },
-      { id: "tasks", label: "任务队列", icon: "📋" },
-      { id: "settings", label: "快捷设置", icon: "⚙️" },
+      { id: "dashboard", label: "Dashboard", icon: "📊" },
+      { id: "summary", label: "AI Summary", icon: "📝" },
+      { id: "tasks", label: "Task Queue", icon: "📋" },
+      { id: "settings", label: "Quick Settings", icon: "⚙️" },
     ];
 
     tabs.forEach((tab) => {
@@ -490,7 +492,7 @@ export class MainWindow {
       currentView.hide();
     }
 
-    // 更新激活状态
+    // Update激活状态
     this.activeTab = tabId;
 
     // 如果是 scanner 或 literature-review 视图,隐藏标签栏
@@ -499,7 +501,7 @@ export class MainWindow {
         tabId === "scanner" || tabId === "literature-review" ? "none" : "flex";
     }
 
-    // 更新标签按钮样式
+    // Update标签按钮样式
     this.updateTabButtons();
 
     // 显示新视图
@@ -513,7 +515,7 @@ export class MainWindow {
   }
 
   /**
-   * 更新标签按钮样式
+   * Update标签按钮样式
    *
    * @private
    */
@@ -571,15 +573,15 @@ export class MainWindow {
 
     placeholderDiv.innerHTML = `
       <div style="font-size: 64px; margin-bottom: 20px;">🚧</div>
-      <div>该功能正在开发中...</div>
-      <div style="font-size: 12px; margin-top: 10px; opacity: 0.7;">敬请期待</div>
+      <div>This feature is under development...</div>
+      <div style="font-size: 12px; margin-top: 10px; opacity: 0.7;">Stay tuned</div>
     `;
 
     this.viewContainer.appendChild(placeholderDiv);
   }
 
   /**
-   * 关闭窗口
+   * Close窗口
    */
   public close(): void {
     if (this.dialog) {
@@ -593,7 +595,7 @@ export class MainWindow {
    * @private
    */
   private onLoad(): void {
-    ztoolkit.log("[AI Butler] 主窗口已加载");
+    ztoolkit.log("[AI Butler] Main window loaded");
   }
 
   /**
@@ -605,7 +607,7 @@ export class MainWindow {
     this.isOpen = false;
     this.isOpening = false;
 
-    // 重置初始化相关状态，防止下次打开复用旧引用
+    // 重置初始化相关状态，防止下次Open复用旧引用
     this.uiInitialized = false;
     this.uiInitializing = false;
     this.initAttempts = 0;
@@ -617,7 +619,7 @@ export class MainWindow {
       view.destroy();
     });
 
-    ztoolkit.log("[AI Butler] 主窗口已关闭");
+    ztoolkit.log("[AI Butler] Main window closed");
   }
 
   /**
@@ -648,9 +650,9 @@ export class MainWindow {
   }
 
   /**
-   * 检查窗口是否打开
+   * 检查窗口是否Open
    *
-   * @returns 是否打开
+   * @returns 是否Open
    */
   public isWindowOpen(): boolean {
     return this.isOpen;

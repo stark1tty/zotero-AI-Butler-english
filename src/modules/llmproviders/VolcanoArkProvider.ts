@@ -108,13 +108,13 @@ export class VolcanoArkProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 const errorMessage = `${code}: ${msg}`;
                 xmlhttp.abort();
                 throw new Error(errorMessage);
               } catch {
                 xmlhttp.abort();
-                throw new Error(`HTTP ${status}: 请求失败`);
+                throw new Error(`HTTP ${status}: 请求Failed`);
               }
             }
 
@@ -164,7 +164,7 @@ export class VolcanoArkProvider implements ILlmProvider {
         },
       });
     } catch (error: any) {
-      let errorMessage = error?.message || "火山引擎请求失败";
+      let errorMessage = error?.message || "火山引擎请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -294,7 +294,7 @@ export class VolcanoArkProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 const errorMessage = `${code}: ${msg}`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] VolcanoArk HTTP error:", {
@@ -305,7 +305,7 @@ export class VolcanoArkProvider implements ILlmProvider {
                 });
                 xmlhttp.abort();
               } catch (parseErr) {
-                const errorMessage = `HTTP ${status}: 请求失败`;
+                const errorMessage = `HTTP ${status}: 请求Failed`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] VolcanoArk HTTP error:", {
                   status,
@@ -376,7 +376,7 @@ export class VolcanoArkProvider implements ILlmProvider {
         }
         throw abortError;
       }
-      let errorMessage = error?.message || "火山引擎请求失败";
+      let errorMessage = error?.message || "火山引擎请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -475,7 +475,7 @@ export class VolcanoArkProvider implements ILlmProvider {
       const status = error?.xmlhttp?.status;
       const responseBody =
         error?.xmlhttp?.response || error?.xmlhttp?.responseText || "";
-      let errorMessage = error?.message || "火山引擎请求失败";
+      let errorMessage = error?.message || "火山引擎请求Failed";
       let errorName = "NetworkError";
       try {
         if (responseBody) {
@@ -522,7 +522,7 @@ export class VolcanoArkProvider implements ILlmProvider {
     const { APITestError } = await import("./types");
     throw new APITestError(`HTTP ${status}`, {
       errorName: `HTTP_${status}`,
-      errorMessage: `HTTP ${status}: ${response.statusText || "请求失败"}`,
+      errorMessage: `HTTP ${status}: ${response.statusText || "请求Failed"}`,
       statusCode: status,
       requestUrl: url,
       requestBody: payloadStr,
@@ -735,12 +735,12 @@ export class VolcanoArkProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 xmlhttp.abort();
                 throw new Error(`${code}: ${msg}`);
               } catch {
                 xmlhttp.abort();
-                throw new Error(`HTTP ${status}: 请求失败`);
+                throw new Error(`HTTP ${status}: 请求Failed`);
               }
             }
 
@@ -790,7 +790,7 @@ export class VolcanoArkProvider implements ILlmProvider {
         },
       });
     } catch (error: any) {
-      let errorMessage = error?.message || "火山引擎请求失败";
+      let errorMessage = error?.message || "火山引擎请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;

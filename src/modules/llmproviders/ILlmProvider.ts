@@ -8,7 +8,7 @@ export interface PdfFileInfo {
   filePath: string;
   /** 显示名称 */
   displayName: string;
-  /** Base64 编码内容（可选，用于不支持 File API 的场景） */
+  /** Base64 编码内容（Optional，用于不支持 File API 的场景） */
   base64Content?: string;
 }
 
@@ -34,7 +34,7 @@ export interface ILlmProvider {
   testConnection(options: LLMOptions): Promise<string>;
 
   /**
-   * 多文件摘要生成（可选方法）
+   * 多文件摘要生成（Optional方法）
    * 支持同时处理多个 PDF 文件
    *
    * @param pdfFiles PDF 文件列表

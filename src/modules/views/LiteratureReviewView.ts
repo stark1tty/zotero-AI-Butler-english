@@ -150,7 +150,7 @@ export class LiteratureReviewView extends BaseView {
   }
 
   /**
-   * 渲染视图内容
+   * 渲染视图Content
    */
   protected renderContent(): HTMLElement {
     const container = this.createElement("div", {
@@ -182,7 +182,7 @@ export class LiteratureReviewView extends BaseView {
             fontSize: "18px",
             fontWeight: "600",
           },
-          innerHTML: "📚 AI管家文献综述",
+          innerHTML: "📚 AI Butler Literature Review",
         }),
         this.createElement("p", {
           id: "review-collection-name",
@@ -191,7 +191,7 @@ export class LiteratureReviewView extends BaseView {
             fontSize: "14px",
             opacity: "0.9",
           },
-          innerHTML: "请选择一个分类...",
+          innerHTML: "Please select a collection...",
         }),
       ],
     });
@@ -223,15 +223,15 @@ export class LiteratureReviewView extends BaseView {
         fontWeight: "500",
         color: "var(--ai-text)",
       },
-      textContent: "综述名称",
+      textContent: "Review Name",
     });
 
-    const defaultName = `综述 ${new Date().toISOString().slice(2, 10)}`;
+    const defaultName = `Review ${new Date().toISOString().slice(2, 10)}`;
     this.nameInput = createInput(
       "review-name-input",
       "text",
       defaultName,
-      "请输入综述名称...",
+      "Please enter review name...",
     );
     this.nameInput.style.width = "100%";
 
@@ -250,7 +250,7 @@ export class LiteratureReviewView extends BaseView {
         fontWeight: "500",
         color: "var(--ai-text)",
       },
-      textContent: "综述提示词",
+      textContent: "Review Prompt",
     });
     const reviewPresetControls = this.createElement("div", {
       styles: {
@@ -272,14 +272,14 @@ export class LiteratureReviewView extends BaseView {
       "review-preset-name",
       "text",
       this.getCurrentReviewPreset().name,
-      "预设名称",
+      "Preset Name",
     );
     this.reviewPresetNameInput.style.width = "180px";
     this.reviewPresetNameInput.addEventListener("change", () => {
       this.handleReviewPresetRename();
     });
     const saveReviewPresetBtn = createStyledButton(
-      "保存预设",
+      "Save Preset",
       "#4caf50",
       "small",
     );
@@ -293,7 +293,7 @@ export class LiteratureReviewView extends BaseView {
       "review-prompt-input",
       this.getCurrentReviewPreset().prompt,
       5,
-      "请输入综述提示词...",
+      "Please enter review prompt...",
     );
     reviewPromptGroup.appendChild(reviewPromptLabel);
     reviewPromptGroup.appendChild(reviewPresetControls);
@@ -311,7 +311,7 @@ export class LiteratureReviewView extends BaseView {
         fontWeight: "500",
         color: "var(--ai-text)",
       },
-      textContent: "表格模板提示词",
+      textContent: "Table Template Prompt",
     });
     const tablePresetControls = this.createElement("div", {
       styles: {
@@ -333,14 +333,14 @@ export class LiteratureReviewView extends BaseView {
       "table-preset-name",
       "text",
       this.getCurrentTablePreset().name,
-      "预设名称",
+      "Preset Name",
     );
     this.tablePresetNameInput.style.width = "180px";
     this.tablePresetNameInput.addEventListener("change", () => {
       this.handleTablePresetRename();
     });
     const saveTablePresetBtn = createStyledButton(
-      "保存预设",
+      "Save Preset",
       "#4caf50",
       "small",
     );
@@ -354,7 +354,7 @@ export class LiteratureReviewView extends BaseView {
       "table-prompt-input",
       this.getCurrentTablePreset().prompt,
       5,
-      "请输入表格模板提示词...",
+      "Please enter table template prompt...",
     );
     this.tablePromptTextarea.addEventListener("input", () =>
       this.refreshTargetedTableEntryOptions(),
@@ -363,7 +363,7 @@ export class LiteratureReviewView extends BaseView {
     tablePromptGroup.appendChild(tablePresetControls);
     tablePromptGroup.appendChild(this.tablePromptTextarea);
 
-    // 针对性提问输入框（独立于综述）
+    // Targeted Questions输入框（独立于综述）
     const targetedPromptGroup = this.createElement("div", {
       styles: { marginBottom: "0" },
     });
@@ -375,7 +375,7 @@ export class LiteratureReviewView extends BaseView {
         fontWeight: "500",
         color: "var(--ai-text)",
       },
-      textContent: "针对性提问提示词",
+      textContent: "Targeted Question Prompt",
     });
     this.targetedPromptTextarea = createTextarea(
       "targeted-prompt-input",
@@ -383,7 +383,7 @@ export class LiteratureReviewView extends BaseView {
         (Zotero.Prefs.get(TARGETED_PROMPT_PREF_KEY, true) as string) || ""
       ).trim() || DEFAULT_TARGETED_QUESTION_PROMPT,
       4,
-      "例如：仅比较“研究方法”这一维度，给出差异点与适用场景",
+      "e.g., Only compare the 'Research Method' dimension, providing differences and applicable scenarios.",
     );
     targetedPromptGroup.appendChild(targetedLabel);
     targetedPromptGroup.appendChild(this.targetedPromptTextarea);
@@ -423,7 +423,7 @@ export class LiteratureReviewView extends BaseView {
         color: "var(--ai-text)",
         cursor: "pointer",
       },
-      textContent: "追加新条目",
+      textContent: "Append New Entries",
     });
     appendOptionsRow.appendChild(this.targetedAppendTableEntriesCheckbox);
     appendOptionsRow.appendChild(appendOptionsLabel);
@@ -434,7 +434,7 @@ export class LiteratureReviewView extends BaseView {
       (Zotero.Prefs.get(TARGETED_NEW_TABLE_ENTRIES_PREF_KEY, true) as string) ||
         "",
       2,
-      "输入要追加的条目，多个请用逗号或换行分隔",
+      "Enter entries to append, separated by commas or newlines",
     );
     this.targetedNewEntriesTextarea.style.marginTop = "8px";
     this.targetedNewEntriesTextarea.style.fontSize = "13px";
@@ -474,7 +474,7 @@ export class LiteratureReviewView extends BaseView {
         fontWeight: "600",
         color: "var(--ai-text)",
       },
-      textContent: "针对性提问使用的表格条目",
+      textContent: "Table Entries for Targeted Questions",
     });
     const tableEntriesActions = this.createElement("div", {
       styles: {
@@ -482,11 +482,15 @@ export class LiteratureReviewView extends BaseView {
         gap: "6px",
       },
     });
-    const selectAllEntriesBtn = createStyledButton("全选", "#64748b", "small");
+    const selectAllEntriesBtn = createStyledButton(
+      "Select All",
+      "#64748b",
+      "small",
+    );
     selectAllEntriesBtn.addEventListener("click", () =>
       this.setAllTargetedTableEntriesChecked(true),
     );
-    const clearEntriesBtn = createStyledButton("清空", "#94a3b8", "small");
+    const clearEntriesBtn = createStyledButton("Clear", "#94a3b8", "small");
     clearEntriesBtn.addEventListener("click", () =>
       this.setAllTargetedTableEntriesChecked(false),
     );
@@ -537,14 +541,18 @@ export class LiteratureReviewView extends BaseView {
         fontWeight: "600",
         color: "var(--ai-text)",
       },
-      textContent: "选择要纳入综述的 PDF",
+      textContent: "Select PDFs to include in the review",
     });
 
-    // 全选/取消按钮
-    const selectAllBtn = createStyledButton("全选", "#6366f1", "small");
+    // 全选/Cancel按钮
+    const selectAllBtn = createStyledButton("Select All", "#6366f1", "small");
     selectAllBtn.addEventListener("click", () => this.toggleAllNodes(true));
 
-    const deselectAllBtn = createStyledButton("取消全选", "#94a3b8", "small");
+    const deselectAllBtn = createStyledButton(
+      "Deselect All",
+      "#94a3b8",
+      "small",
+    );
     deselectAllBtn.style.marginLeft = "8px";
     deselectAllBtn.addEventListener("click", () => this.toggleAllNodes(false));
 
@@ -605,7 +613,7 @@ export class LiteratureReviewView extends BaseView {
         fontSize: "14px",
         color: "var(--ai-text-muted)",
       },
-      innerHTML: "已选择: <strong>0</strong> 个 PDF",
+      innerHTML: "Selected: <strong>0</strong> PDFs",
     });
 
     // 按钮容器
@@ -617,20 +625,24 @@ export class LiteratureReviewView extends BaseView {
     });
 
     // 返回按钮
-    const cancelButton = createStyledButton("返回", "#94a3b8", "medium");
+    const cancelButton = createStyledButton("Back", "#94a3b8", "medium");
     cancelButton.addEventListener("click", () => {
       MainWindow.getInstance().switchTab("dashboard");
     });
 
     // 填表按钮
-    this.fillTableButton = createStyledButton("📋 填表", "#4caf50", "medium");
+    this.fillTableButton = createStyledButton(
+      "📋 Fill Table",
+      "#4caf50",
+      "medium",
+    );
     this.fillTableButton.addEventListener("click", () =>
       this.handleFillTables(),
     );
 
-    // 针对性提问按钮（与综述独立）
+    // Targeted Questions按钮（与综述独立）
     this.askQuestionButton = createStyledButton(
-      "🎯 针对性提问",
+      "🎯 Targeted Question",
       "#0ea5e9",
       "medium",
     );
@@ -640,7 +652,7 @@ export class LiteratureReviewView extends BaseView {
 
     // 生成按钮
     this.generateButton = createStyledButton(
-      "🚀 生成综述",
+      "🚀 Generate Review",
       "#6366f1",
       "medium",
     );
@@ -767,19 +779,19 @@ export class LiteratureReviewView extends BaseView {
   }
 
   /**
-   * 更新 UI
+   * Update UI
    */
   private updateUI(): void {
     if (!this.collection) {
       return;
     }
 
-    // 更新分类名称
+    // Update分类名称
     const nameElement = this.container?.querySelector(
       "#review-collection-name",
     );
     if (nameElement) {
-      nameElement.innerHTML = `分类: <strong>${this.collection.name}</strong> (${this.treeNodes.length} 篇文献, ${this.totalPdfCount} 个 PDF)`;
+      nameElement.innerHTML = `Collection: <strong>${this.collection.name}</strong> (${this.treeNodes.length} items, ${this.totalPdfCount} PDFs)`;
     }
 
     // 渲染文献列表
@@ -794,7 +806,8 @@ export class LiteratureReviewView extends BaseView {
             color: "var(--ai-text-muted)",
             fontSize: "14px",
           },
-          innerHTML: "📭<br><br>该分类下没有带 PDF 附件的文献",
+          innerHTML:
+            "📭<br><br>No literature with PDF attachments found in this collection",
         });
         this.treeContainer.appendChild(emptyMessage);
       } else {
@@ -882,7 +895,7 @@ export class LiteratureReviewView extends BaseView {
     });
 
     // 图标和名称 - 截取显示，避免溢出
-    const pdfInfo = hasMultiplePdfs ? ` (${node.pdfNodes.length} 个 PDF)` : "";
+    const pdfInfo = hasMultiplePdfs ? ` (${node.pdfNodes.length} PDFs)` : "";
     const maxTitleLength = 60;
     const displayName =
       node.name.length > maxTitleLength
@@ -932,7 +945,7 @@ export class LiteratureReviewView extends BaseView {
                   fontSize: "10px",
                   flexShrink: "0",
                 },
-                textContent: "📊 已填表",
+                textContent: "📊 Table Filled",
               });
               nodeElement.insertBefore(tableBadge, label.nextSibling);
               break;
@@ -954,7 +967,7 @@ export class LiteratureReviewView extends BaseView {
           fontSize: "10px",
           flexShrink: "0",
         },
-        textContent: "✅ 已综述",
+        textContent: "✅ Reviewed",
       });
       nodeElement.appendChild(reviewedBadge);
     }
@@ -1118,7 +1131,7 @@ export class LiteratureReviewView extends BaseView {
   }
 
   /**
-   * 更新父节点选中状态
+   * Update父节点选中状态
    */
   private updateParentCheckState(node: TreeNode): void {
     const allChecked = node.pdfNodes.every((p) => p.checked);
@@ -1154,7 +1167,7 @@ export class LiteratureReviewView extends BaseView {
   }
 
   /**
-   * 更新选择计数
+   * Update选择计数
    */
   private updateSelectedCount(): void {
     this.selectedPdfCount = 0;
@@ -1167,10 +1180,10 @@ export class LiteratureReviewView extends BaseView {
     }
 
     if (this.selectedCountElement) {
-      this.selectedCountElement.innerHTML = `已选择: <strong>${this.selectedPdfCount}</strong> 个 PDF`;
+      this.selectedCountElement.innerHTML = `Selected: <strong>${this.selectedPdfCount}</strong> PDFs`;
     }
 
-    // 更新生成按钮状态
+    // Update生成按钮状态
     if (this.generateButton) {
       this.generateButton.disabled = this.selectedPdfCount === 0;
       this.generateButton.style.opacity =
@@ -1229,7 +1242,7 @@ export class LiteratureReviewView extends BaseView {
       const normalizedFirst = this.normalizeTableEntryName(first);
       if (!normalizedFirst) continue;
       if (
-        normalizedFirst === "维度" ||
+        normalizedFirst === "Dimension" ||
         normalizedFirst === "dimension" ||
         normalizedFirst === "field"
       ) {
@@ -1249,7 +1262,7 @@ export class LiteratureReviewView extends BaseView {
       return DEFAULT_TABLE_TEMPLATE;
     }
     const rows = entries.map((entry) => `| ${entry} | |`);
-    return ["| 维度 | 内容 |", "|------|------|", ...rows].join("\n");
+    return ["| Dimension | Content |", "|------|------|", ...rows].join("\n");
   }
 
   private mergeUniqueEntries(groups: string[][]): string[] {
@@ -1347,7 +1360,8 @@ export class LiteratureReviewView extends BaseView {
             fontSize: "12px",
             color: "var(--ai-text-muted)",
           },
-          textContent: "当前表格模板未解析到可选条目",
+          textContent:
+            "No selectable entries parsed from the current table template",
         }),
       );
       return;
@@ -1521,7 +1535,7 @@ export class LiteratureReviewView extends BaseView {
         closeTime: 3000,
       })
         .createLine({
-          text: "请至少选择一个 PDF",
+          text: "Please select at least one PDF",
           type: "error",
         })
         .show();
@@ -1530,7 +1544,7 @@ export class LiteratureReviewView extends BaseView {
 
     const reviewName =
       this.nameInput.value.trim() ||
-      `综述 ${new Date().toISOString().slice(2, 10)}`;
+      `Review ${new Date().toISOString().slice(2, 10)}`;
     const reviewPrompt =
       this.reviewPromptTextarea.value.trim() ||
       (getPref("tableReviewPrompt" as any) as string) ||
@@ -1560,7 +1574,7 @@ export class LiteratureReviewView extends BaseView {
         closeTime: 3000,
       })
         .createLine({
-          text: `✅ 综述任务已加入队列: ${reviewName}`,
+          text: `✅ Review task added to queue: ${reviewName}`,
           type: "success",
         })
         .show();
@@ -1568,13 +1582,13 @@ export class LiteratureReviewView extends BaseView {
       // 跳转到任务队列界面
       MainWindow.getInstance().switchTab("tasks");
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] 添加综述任务失败:", error);
+      ztoolkit.log("[AI-Butler] 添加综述任务Failed:", error);
       new ztoolkit.ProgressWindow("AI Butler", {
         closeOnClick: true,
         closeTime: 5000,
       })
         .createLine({
-          text: `❌ 添加失败: ${error.message || error}`,
+          text: `❌ 添加Failed: ${error.message || error}`,
           type: "error",
         })
         .show();
@@ -1582,7 +1596,7 @@ export class LiteratureReviewView extends BaseView {
   }
 
   /**
-   * 基于表格进行针对性提问（独立于综述）
+   * 基于表格进行Targeted Questions（独立于综述）
    */
   private async handleAskFromTables(): Promise<void> {
     if (
@@ -1599,7 +1613,7 @@ export class LiteratureReviewView extends BaseView {
         closeOnClick: true,
         closeTime: 3000,
       })
-        .createLine({ text: "请至少选择一个 PDF", type: "error" })
+        .createLine({ text: "Please select at least one PDF", type: "error" })
         .show();
       return;
     }
@@ -1624,7 +1638,10 @@ export class LiteratureReviewView extends BaseView {
         closeOnClick: true,
         closeTime: 3000,
       })
-        .createLine({ text: "请至少勾选一个表格条目", type: "error" })
+        .createLine({
+          text: "Please check at least one table item",
+          type: "error",
+        })
         .show();
       return;
     }
@@ -1640,7 +1657,7 @@ export class LiteratureReviewView extends BaseView {
         closeTime: 3000,
       })
         .createLine({
-          text: "已勾选追加新条目，请填写至少一个新表格条目",
+          text: "Append new items is checked, please fill in at least one new table item",
           type: "error",
         })
         .show();
@@ -1657,7 +1674,7 @@ export class LiteratureReviewView extends BaseView {
       DEFAULT_TARGETED_QUESTION_PROMPT;
     const targetedPrompt = targetedPromptRaw.replace(
       /\$\{question\}/g,
-      "请围绕我在提示词中的问题作答",
+      "Please answer the questions in my prompt",
     );
 
     try {
@@ -1679,7 +1696,7 @@ export class LiteratureReviewView extends BaseView {
         true,
       );
 
-      const noteTitle = `针对性提问 ${new Date().toISOString().slice(2, 10)}`;
+      const noteTitle = `Targeted Questions ${new Date().toISOString().slice(2, 10)}`;
       const { TaskQueueManager } = await import("../taskQueue");
       const manager = TaskQueueManager.getInstance();
       await manager.addTargetedQuestionTask(
@@ -1699,20 +1716,20 @@ export class LiteratureReviewView extends BaseView {
         closeTime: 3500,
       })
         .createLine({
-          text: `✅ 针对性提问任务已加入队列: ${noteTitle}`,
+          text: `✅ Targeted Questions任务已加入队列: ${noteTitle}`,
           type: "success",
         })
         .show();
 
       MainWindow.getInstance().switchTab("tasks");
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] 添加针对性提问任务失败:", error);
+      ztoolkit.log("[AI-Butler] 添加Targeted Questions任务Failed:", error);
       new ztoolkit.ProgressWindow("AI Butler", {
         closeOnClick: true,
         closeTime: 5000,
       })
         .createLine({
-          text: `❌ 添加失败: ${error.message || error}`,
+          text: `❌ 添加Failed: ${error.message || error}`,
           type: "error",
         })
         .show();
@@ -1732,7 +1749,7 @@ export class LiteratureReviewView extends BaseView {
         closeTime: 3000,
       })
         .createLine({
-          text: "请至少选择一个 PDF",
+          text: "Please select at least one PDF",
           type: "error",
         })
         .show();
@@ -1763,7 +1780,7 @@ export class LiteratureReviewView extends BaseView {
         closeTime: 3000,
       })
         .createLine({
-          text: `✅ 已添加 ${count} 个填表任务到队列`,
+          text: `✅ Added ${count} table filling tasks to queue`,
           type: "success",
         })
         .show();
@@ -1771,13 +1788,13 @@ export class LiteratureReviewView extends BaseView {
       // 跳转到任务队列界面
       MainWindow.getInstance().switchTab("tasks");
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] 添加填表任务失败:", error);
+      ztoolkit.log("[AI-Butler] 添加填表任务Failed:", error);
       new ztoolkit.ProgressWindow("AI Butler", {
         closeOnClick: true,
         closeTime: 5000,
       })
         .createLine({
-          text: `❌ 添加失败: ${error.message || error}`,
+          text: `❌ 添加Failed: ${error.message || error}`,
           type: "error",
         })
         .show();
@@ -1836,8 +1853,8 @@ export class LiteratureReviewView extends BaseView {
       // 兼容旧版本：如果预设里仍是“填表提示词”，自动纠正为模板文本
       if (
         prompt.includes("${tableTemplate}") ||
-        prompt.includes("只输出填好的表格") ||
-        prompt.includes("填写每个维度")
+        prompt.includes("Only output the filled table") ||
+        prompt.includes("填写每个Dimension")
       ) {
         return sharedTablePrompt;
       }
@@ -1850,12 +1867,12 @@ export class LiteratureReviewView extends BaseView {
         | undefined;
       this.reviewPresets = this.normalizePresets(
         savedReview ? JSON.parse(savedReview) : null,
-        "综述预设",
+        "Review Preset",
         sharedReviewPrompt,
       );
     } catch {
       this.reviewPresets = this.makeDefaultPresets(
-        "综述预设",
+        "Review Preset",
         sharedReviewPrompt,
       );
     }
@@ -1866,13 +1883,13 @@ export class LiteratureReviewView extends BaseView {
         | undefined;
       this.tablePresets = this.normalizePresets(
         savedTable ? JSON.parse(savedTable) : null,
-        "表格预设",
+        "Table Preset",
         sharedTablePrompt,
         normalizeTableTemplatePrompt,
       );
     } catch {
       this.tablePresets = this.makeDefaultPresets(
-        "表格预设",
+        "Table Preset",
         sharedTablePrompt,
       );
     }
@@ -1920,7 +1937,7 @@ export class LiteratureReviewView extends BaseView {
         true,
       );
     } catch (e) {
-      ztoolkit.log("[AI-Butler] 保存预设失败:", e);
+      ztoolkit.log("[AI-Butler] 保存预设Failed:", e);
     }
   }
 
@@ -1983,7 +2000,7 @@ export class LiteratureReviewView extends BaseView {
       closeOnClick: true,
       closeTime: 2000,
     })
-      .createLine({ text: `✅ 已保存 ${current.name}`, type: "success" })
+      .createLine({ text: `✅ Saved ${current.name}`, type: "success" })
       .show();
   }
 
@@ -2001,7 +2018,7 @@ export class LiteratureReviewView extends BaseView {
       closeOnClick: true,
       closeTime: 2000,
     })
-      .createLine({ text: `✅ 已保存 ${current.name}`, type: "success" })
+      .createLine({ text: `✅ Saved ${current.name}`, type: "success" })
       .show();
   }
 

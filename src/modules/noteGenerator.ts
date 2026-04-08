@@ -8,7 +8,7 @@
  * 主要职责:
  * 1. 统筹论文总结生成的完整工作流
  * 2. 协调 PDF 文本提取和 AI 模型调用
- * 3. 管理流式输出和用户界面更新
+ * 3. 管理流式输出和用户界面Update
  * 4. 处理批量文献的队列执行
  * 5. 创建和管理 Zotero 笔记条目
  *
@@ -70,8 +70,8 @@ export class NoteGenerator {
    * - 不创建包含错误信息的笔记,直接抛出异常由上层处理
    *
    * @param item Zotero 文献条目对象
-   * @param outputWindow 可选的输出窗口,用于显示流式生成过程
-   * @param progressCallback 可选的进度回调函数,接收处理状态消息和进度百分比
+   * @param outputWindow Optional的输出窗口,用于显示流式生成过程
+   * @param progressCallback Optional的进度回调函数,接收处理状态消息和进度百分比
    * @returns 包含创建的笔记对象和完整内容的对象
    * @throws 当任何步骤失败时抛出错误
    */
@@ -93,10 +93,10 @@ export class NoteGenerator {
         (getPref("noteStrategy" as any) as string) || "skip"
       ).toLowerCase();
       const existing = await this.findExistingNote(item);
-      // 如果不是强制覆盖，且已存在笔记，则检查策略
+      // 如果不是强制覆盖，且Already exists笔记，则检查策略
       if (existing && !options?.forceOverwrite) {
         if (policy === "skip") {
-          progressCallback?.("已存在AI笔记，跳过", 100);
+          progressCallback?.("AI note already exists, skipping", 100);
           return {
             note: existing as Zotero.Item,
             content: ((existing as any).getNote?.() as string) || "",
@@ -105,7 +105,7 @@ export class NoteGenerator {
       }
 
       // 步骤 1: PDF 处理
-      progressCallback?.("正在处理PDF...", 10);
+      progressCallback?.("ProcessingPDF...", 10);
 
       // 检查 PDF 文件大小限制
       const enableSizeLimit =
@@ -117,7 +117,7 @@ export class NoteGenerator {
         const fileSizeMB = await PDFExtractor.getPdfFileSize(item);
         if (fileSizeMB > maxPdfSizeMB) {
           throw new Error(
-            `PDF 文件过大 (${fileSizeMB.toFixed(1)} MB)，超过设置的阈值 ${maxPdfSizeMB} MB`,
+            `PDF file too large (${fileSizeMB.toFixed(1)} MB)，exceeds the set threshold ${maxPdfSizeMB} MB`,
           );
         }
       }
@@ -131,7 +131,7 @@ export class NoteGenerator {
       let isBase64 = false;
       let useMultiPdfMode = false;
 
-      // 检查是否应该使用多 PDF 模式
+      // 检查是否应该Using multi-PDF mode
       if (pdfAttachmentMode === "all" && prefMode === "base64") {
         const allPdfs = await PDFExtractor.getAllPdfAttachments(item);
 
@@ -144,7 +144,7 @@ export class NoteGenerator {
           if (supportsMultiFile) {
             useMultiPdfMode = true;
             progressCallback?.(
-              `使用多 PDF 模式 (${allPdfs.length} 个文件)...`,
+              `Using multi-PDF mode (${allPdfs.length} files)...`,
               15,
             );
           } else {
@@ -155,7 +155,7 @@ export class NoteGenerator {
                 closeTime: 3000,
               })
                 .createLine({
-                  text: "当前 API 不支持多 PDF 上传，已使用默认 PDF",
+                  text: "Current API does not support multi-PDF upload, using default PDF",
                   type: "warning",
                 })
                 .show();
@@ -194,15 +194,15 @@ export class NoteGenerator {
       // 通知进度回调开始 AI 分析 (40% 完成)
       progressCallback?.(
         summaryMode === "single"
-          ? "正在生成AI总结..."
-          : `正在进行多轮对话分析 (模式: ${summaryMode === "multi_concat" ? "拼接" : "总结"})...`,
+          ? "GeneratingAI summary..."
+          : `Conducting multi-round analysis (mode: ${summaryMode === "multi_concat" ? "concatenation" : "summary"})...`,
         40,
       );
 
       // 如果有输出窗口,开始显示当前处理的条目
       if (outputWindow) {
         // 先显示加载状态
-        outputWindow.showLoadingState(`正在分析「${itemTitle}」`);
+        outputWindow.showLoadingState(`Analyzing「${itemTitle}」`);
       }
 
       // 根据总结模式选择不同的生成策略
@@ -232,7 +232,7 @@ export class NoteGenerator {
             allPdfs.map(async (pdf) => {
               const path = await pdf.getFilePathAsync();
               if (!path || typeof path !== "string") {
-                throw new Error(`无法获取 PDF 文件路径: ${pdf.id}`);
+                throw new Error(`Cannot get PDF file path: ${pdf.id}`);
               }
               // 获取 Base64 内容
               const pdfData = await Zotero.File.getBinaryContentsAsync(path);
@@ -284,20 +284,20 @@ export class NoteGenerator {
         );
       }
 
-      // 步骤 3: 创建/更新笔记
+      // 步骤 3: 创建/Update笔记
       // 通知进度回调开始创建笔记 (80% 完成)
-      progressCallback?.("正在创建笔记...", 80);
+      progressCallback?.("Creating note...", 80);
 
       // 检查内容是否为空，防止创建空笔记
       if (!fullContent || !fullContent.trim()) {
-        throw new Error("AI 返回内容为空，笔记未创建");
+        throw new Error("AI returned empty content, note not created");
       }
 
-      // 格式化笔记内容,添加标题和样式
+      // 格式化Note content,添加标题和样式
       const noteContent = this.formatNoteContent(
         itemTitle,
         fullContent,
-        "AI 总结",
+        "AI Summary",
       );
 
       if (existing) {
@@ -322,7 +322,7 @@ export class NoteGenerator {
       }
 
       // 通知进度回调完成 (100%)
-      progressCallback?.("完成！", 100);
+      progressCallback?.("Done!", 100);
 
       // 异步并行填表（不阻塞笔记返回）
       const enableTable =
@@ -364,13 +364,16 @@ export class NoteGenerator {
                     break; // 只用第一个 PDF
                   }
                 } catch (e) {
-                  ztoolkit.log("[AI-Butler] 额外填表失败:", e);
+                  ztoolkit.log(
+                    "[AI-Butler] Additional table filling failed:",
+                    e,
+                  );
                 }
               }
             })();
           })
           .catch((e) => {
-            ztoolkit.log("[AI-Butler] 加载填表服务失败:", e);
+            ztoolkit.log("[AI-Butler] Failed to load table service:", e);
           });
       }
 
@@ -421,7 +424,7 @@ export class NoteGenerator {
   }
 
   /**
-   * 格式化笔记内容
+   * 格式化Note content
    *
    * 为 AI 生成的总结添加标题头部,并转换为 Zotero 笔记兼容的 HTML 格式
    *
@@ -431,16 +434,16 @@ export class NoteGenerator {
    * 3. 包装成完整的笔记结构
    *
    * @param itemTitle 文献条目标题
-   * @param summary AI 生成的总结内容 (Markdown 格式)
+   * @param summary AI 生成的Summary content (Markdown 格式)
    * @returns 格式化后的 HTML 内容,可直接保存到 Zotero 笔记
    *
    * @example
    * ```typescript
    * const formatted = formatNoteContent(
-   *   "深度学习综述",
-   *   "## 摘要\n这是一篇综述文章..."
+   *   "Deep Learning Review",
+   *   "## 摘要\nThis is a review article..."
    * );
-   * // 返回: <h2>AI 管家 - 深度学习综述</h2><div>...</div>
+   * // 返回: <h2>AI 管家 - Deep Learning Review</h2><div>...</div>
    * ```
    */
   public static formatNoteContent(
@@ -494,7 +497,7 @@ export class NoteGenerator {
    * @example
    * ```typescript
    * const html = convertMarkdownToNoteHTML(
-   *   "## 公式\n质能方程: $E=mc^2$\n\n$$\\frac{a}{b}$$"
+   *   "## 公式\nMass-energy equation: $E=mc^2$\n\n$$\\frac{a}{b}$$"
    * );
    * // 返回格式化的 HTML,公式被正确标记
    * ```
@@ -547,7 +550,7 @@ export class NoteGenerator {
     // 移除所有内联样式,Zotero 笔记不支持 style 属性
     html = html.replace(/\s+style="[^"]*"/g, "");
 
-    // ===== 步骤 4: 恢复公式（使用 Zotero 原生笔记编辑器识别的格式）=====
+    // ===== 步骤 4: 恢复公式（使用 Zotero 原生笔记Edit器识别的格式）=====
     html = html.replace(
       /FORMULA_(BLOCK|INLINE)_(\d+)_END/g,
       (_match, type, index) => {
@@ -578,7 +581,7 @@ export class NoteGenerator {
   /**
    * HTML 转义工具函数
    *
-   * 将特殊字符转换为 HTML 实体,防止 XSS 攻击和格式错误
+   * 将特殊字符转换为 HTML 实体,防止 XSS 攻击和Format error
    *
    * 转义规则:
    * - & → &amp;
@@ -613,7 +616,7 @@ export class NoteGenerator {
    * 操作步骤:
    * 1. 实例化一个新的笔记对象
    * 2. 设置父条目 ID (关联到文献)
-   * 3. 设置笔记内容 (HTML 格式)
+   * 3. 设置Note content (HTML 格式)
    * 4. 添加标签 "AI-Generated"
    * 5. 保存到数据库
    *
@@ -623,14 +626,14 @@ export class NoteGenerator {
    * - 内容为 HTML 格式,支持富文本显示
    *
    * @param item 父文献条目对象
-   * @param initialContent 初始笔记内容 (HTML 格式),默认为空字符串
+   * @param initialContent 初始Note content (HTML 格式),默认为空字符串
    * @returns 创建并保存的笔记对象
    *
    * @example
    * ```typescript
    * const note = await createNote(
    *   parentItem,
-   *   "<h2>总结</h2><p>这是AI生成的内容</p>"
+   *   "<h2>总结</h2><p>This is AI-generated content</p>"
    * );
    * console.log(note.id); // 新创建的笔记 ID
    * ```
@@ -647,7 +650,7 @@ export class NoteGenerator {
     note.libraryID = item.libraryID;
     note.parentID = item.id;
 
-    // 设置笔记内容
+    // 设置Note content
     note.setNote(initialContent);
 
     // 添加 AI 生成标签,便于用户筛选和识别
@@ -663,7 +666,7 @@ export class NoteGenerator {
    * 执行多轮对话并生成内容
    *
    * 根据配置的多轮提示词依次进行对话，支持两种模式：
-   * - multi_concat: 将所有对话内容拼接（最详细）
+   * - multi_concat: 将所有对话内容concatenation（最详细）
    * - multi_summarize: 基于对话生成最终总结（均衡）
    *
    * @param pdfContent PDF内容（Base64或文本）
@@ -706,7 +709,7 @@ export class NoteGenerator {
     if (outputWindow) {
       outputWindow.startItem(itemTitle);
       outputWindow.appendContent(
-        `**[多轮对话模式: ${mode === "multi_concat" ? "拼接" : "总结"}]**\n\n`,
+        `**[Multi-round mode: ${mode === "multi_concat" ? "concatenation" : "summary"}]**\n\n`,
       );
     }
 
@@ -717,17 +720,17 @@ export class NoteGenerator {
       const progressPercent = 40 + Math.floor((i / totalRounds) * 40); // 40% - 80%
 
       progressCallback?.(
-        `正在进行第 ${roundNum}/${totalRounds} 轮对话: ${currentPrompt.title}`,
+        `Conducting round ${roundNum}/${totalRounds} of dialogue: ${currentPrompt.title}`,
         progressPercent,
       );
 
       // 在输出窗口显示当前轮次标题
       if (outputWindow) {
         outputWindow.appendContent(
-          `\n## 第 ${roundNum} 轮: ${currentPrompt.title}\n\n`,
+          `\n##  Round ${roundNum} : ${currentPrompt.title}\n\n`,
         );
-        outputWindow.appendContent(`**提问:** ${currentPrompt.prompt}\n\n`);
-        outputWindow.appendContent(`**回答:**\n`);
+        outputWindow.appendContent(`**Question:** ${currentPrompt.prompt}\n\n`);
+        outputWindow.appendContent(`**Answer:**\n`);
       }
 
       // 构建当前对话消息
@@ -773,17 +776,17 @@ export class NoteGenerator {
           outputWindow.appendContent("\n\n---\n");
         }
       } catch (error: any) {
-        ztoolkit.log(`[AI Butler] 第 ${roundNum} 轮对话失败:`, error);
+        ztoolkit.log(`[AI Butler]  Round ${roundNum} 轮对话失败:`, error);
         // 如果某轮对话失败，记录错误但继续
         roundResults.push({
           title: currentPrompt.title,
           question: currentPrompt.prompt,
-          answer: `[错误: ${error.message}]`,
+          answer: `[Error: ${error.message}]`,
         });
 
         if (outputWindow) {
           outputWindow.appendContent(
-            `\n\n❌ **对话失败:** ${error.message}\n\n---\n`,
+            `\n\n❌ **Conversation failed:** ${error.message}\n\n---\n`,
           );
         }
       }
@@ -791,14 +794,14 @@ export class NoteGenerator {
 
     // 根据模式生成最终内容
     if (mode === "multi_concat") {
-      // 拼接模式：直接拼接所有问答
+      // concatenation模式：直接concatenation所有问答
       return this.formatMultiRoundConcat(roundResults);
     } else {
       // 总结模式：基于所有对话进行最终总结
-      progressCallback?.("正在生成最终总结...", 85);
+      progressCallback?.("Generating final summary...", 85);
 
       if (outputWindow) {
-        outputWindow.appendContent("\n## 📝 最终总结\n\n");
+        outputWindow.appendContent("\n## 📝 Final Summary\n\n");
       }
 
       // 读取最终总结提示词
@@ -836,22 +839,22 @@ export class NoteGenerator {
         const saveIntermediate =
           (getPref("multiSummarySaveIntermediate" as any) as boolean) ?? false;
         if (saveIntermediate) {
-          // 拼接中间内容和最终总结
+          // concatenation中间内容和最终总结
           const intermediateContent = this.formatMultiRoundConcat(roundResults);
-          return `${intermediateContent}\n---\n\n# 📝 最终总结\n\n${summary}`;
+          return `${intermediateContent}\n---\n\n# 📝 Final Summary\n\n${summary}`;
         }
 
         return summary;
       } catch (error: any) {
         ztoolkit.log("[AI Butler] 最终总结生成失败:", error);
-        // 如果最终总结失败，回退到拼接模式
+        // 如果最终总结失败，回退到concatenation模式
         return this.formatMultiRoundConcat(roundResults);
       }
     }
   }
 
   /**
-   * 格式化多轮对话拼接内容
+   * 格式化多轮对话concatenation内容
    *
    * @param roundResults 各轮对话结果
    * @returns 格式化后的 Markdown 内容
@@ -859,13 +862,13 @@ export class NoteGenerator {
   private static formatMultiRoundConcat(
     roundResults: Array<{ title: string; question: string; answer: string }>,
   ): string {
-    let content = "# 多轮对话分析\n\n";
+    let content = "# Multi-Round Conversation Analysis\n\n";
 
     for (let i = 0; i < roundResults.length; i++) {
       const result = roundResults[i];
-      content += `## 第 ${i + 1} 轮: ${result.title}\n\n`;
-      content += `**提问:** ${result.question}\n\n`;
-      content += `**回答:**\n${result.answer}\n\n`;
+      content += `##  Round ${i + 1} : ${result.title}\n\n`;
+      content += `**Question:** ${result.question}\n\n`;
+      content += `**Answer:**\n${result.answer}\n\n`;
       content += "---\n\n";
     }
 
@@ -884,17 +887,17 @@ export class NoteGenerator {
    * 4. 每个条目独立处理,单个失败不影响后续条目
    *
    * 处理流程:
-   * 1. 创建并打开主窗口
+   * 1. 创建并Open主窗口
    * 2. 切换到 AI 总结视图
    * 3. 设置用户停止回调
    * 4. 依次处理每个条目
-   * 5. 实时更新进度和统计
+   * 5. 实时Update进度和统计
    * 6. 显示最终处理结果
    *
    * 错误处理策略:
    * - 单个条目失败:记录日志,继续处理下一个
-   * - 用户停止:立即中断,显示已完成和未处理统计
-   * - 系统错误:抛出异常,停止所有处理
+   * - 用户停止:立即中断,显示Completed和未处理统计
+   * - System error:抛出异常,停止所有处理
    *
    * 进度回调参数说明:
    * - current: 当前处理到第几个条目 (1-based)
@@ -903,7 +906,7 @@ export class NoteGenerator {
    * - message: 进度描述消息
    *
    * @param items Zotero 文献条目数组
-   * @param progressCallback 可选的进度回调函数
+   * @param progressCallback Optional的进度回调函数
    *
    * @example
    * ```typescript
@@ -930,7 +933,7 @@ export class NoteGenerator {
     let stopped = false; // 用户停止标记
     let processingCompleted = false;
 
-    // 创建并打开主窗口
+    // 创建并Open主窗口
     const mainWindow = MainWindow.getInstance();
     await mainWindow.open("summary");
 
@@ -994,7 +997,7 @@ export class NoteGenerator {
           total,
           total,
           100,
-          `已停止 (已完成 ${successCount} 个，失败 ${failedCount} 个，未处理 ${notProcessed} 个)`,
+          `Stopped (completed ${successCount}, failed ${failedCount}, unprocessed ${notProcessed})`,
         );
       } else {
         // 正常完成的情况
@@ -1004,15 +1007,20 @@ export class NoteGenerator {
 
         // 根据成功/失败情况生成不同的完成消息
         if (failedCount === 0) {
-          progressCallback?.(total, total, 100, "所有条目处理完成");
+          progressCallback?.(
+            total,
+            total,
+            100,
+            "All items processing complete",
+          );
         } else if (successCount === 0) {
-          progressCallback?.(total, total, 100, "所有条目处理失败");
+          progressCallback?.(total, total, 100, "All items processing failed");
         } else {
           progressCallback?.(
             total,
             total,
             100,
-            `${successCount} 个成功，${failedCount} 个失败`,
+            `${successCount} succeeded, ${failedCount} failed`,
           );
         }
       }

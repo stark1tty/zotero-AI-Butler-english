@@ -142,7 +142,7 @@ export class LLMClient {
       ProviderRegistry.get(providerId) || ProviderRegistry.get("openai");
     if (!impl) {
       const list = ProviderRegistry.list().join(", ");
-      const msg = `未知的供应商: ${providerId}。可用: ${list}`;
+      const msg = `Unknown provider: ${providerId}. Available: ${list}`;
       LLMClient.notifyError(msg);
       throw new Error(msg);
     }
@@ -207,7 +207,9 @@ export class LLMClient {
       prompt || (saved.trim() ? saved : getDefaultSummaryPrompt());
 
     if (typeof impl.generateMultiFileSummary !== "function") {
-      throw new Error(`Provider ${id} 不支持多文件摘要生成`);
+      throw new Error(
+        `Provider ${id} does not support multi-file summary generation`,
+      );
     }
 
     return impl.generateMultiFileSummary(
@@ -290,19 +292,19 @@ export class LLMClient {
       } catch (error: any) {
         lastError = error;
         ztoolkit.log(
-          `[LLMClient] API 调用失败 (尝试 ${attempt + 1}/${maxRetries}): ${error?.message || error}`,
+          `[LLMClient] API call failed (attempt ${attempt + 1}/${maxRetries}): ${error?.message || error}`,
         );
 
         // 尝试轮换到下一个密钥
         const rotated = ApiKeyManager.rotateToNextKey(keyManagerId);
         if (!rotated) {
-          ztoolkit.log(`[LLMClient] 无更多可用密钥，停止重试`);
+          ztoolkit.log(`[LLMClient] No more available keys, stopping retries`);
           break;
         }
       }
     }
 
-    throw lastError || new Error("所有 API 密钥均已耗尽");
+    throw lastError || new Error("All API keys are exhausted");
   }
 
   /**
@@ -334,19 +336,19 @@ export class LLMClient {
       } catch (error: any) {
         lastError = error;
         ztoolkit.log(
-          `[LLMClient] Chat API 调用失败 (尝试 ${attempt + 1}/${maxRetries}): ${error?.message || error}`,
+          `[LLMClient] Chat API call failed (attempt ${attempt + 1}/${maxRetries}): ${error?.message || error}`,
         );
 
         // 尝试轮换到下一个密钥
         const rotated = ApiKeyManager.rotateToNextKey(keyManagerId);
         if (!rotated) {
-          ztoolkit.log(`[LLMClient] 无更多可用密钥，停止重试`);
+          ztoolkit.log(`[LLMClient] No more available keys, stopping retries`);
           break;
         }
       }
     }
 
-    throw lastError || new Error("所有 API 密钥均已耗尽");
+    throw lastError || new Error("All API keys are exhausted");
   }
 
   private static notifyError(message: string) {

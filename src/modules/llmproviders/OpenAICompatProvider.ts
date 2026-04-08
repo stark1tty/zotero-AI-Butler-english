@@ -109,11 +109,11 @@ export class OpenAICompatProvider implements ILlmProvider {
                     : null;
                   const err = parsed?.error || parsed || {};
                   const code = err?.code || `HTTP ${status}`;
-                  const msg = err?.message || "请求失败";
+                  const msg = err?.message || "请求Failed";
                   abortError = new Error(`${code}: ${msg}`);
                   xmlhttp.abort();
                 } catch {
-                  abortError = new Error(`HTTP ${status}: 请求失败`);
+                  abortError = new Error(`HTTP ${status}: 请求Failed`);
                   xmlhttp.abort();
                 }
                 return;
@@ -179,7 +179,7 @@ export class OpenAICompatProvider implements ILlmProvider {
           if (gotAnyDelta && chunks.length > 0) return chunks.join("");
           throw abortError;
         }
-        let errorMessage = error?.message || "OpenAI 兼容请求失败";
+        let errorMessage = error?.message || "OpenAI 兼容请求Failed";
         try {
           const responseText =
             error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -217,7 +217,7 @@ export class OpenAICompatProvider implements ILlmProvider {
       if (onProgress && result) await onProgress(result);
       return result;
     } catch (e: any) {
-      let errorMessage = e?.message || "OpenAI 兼容请求失败";
+      let errorMessage = e?.message || "OpenAI 兼容请求Failed";
       try {
         const responseText = e?.xmlhttp?.response || e?.xmlhttp?.responseText;
         if (responseText) {
@@ -260,7 +260,7 @@ export class OpenAICompatProvider implements ILlmProvider {
         }
         const isFirstUserMessage = role === "user" && msg === conversation[0];
         if (isFirstUserMessage) {
-          // 第一条用户消息需要附带论文内容
+          // 第一条用户消息需要附带Paper content
           if (isBase64) {
             // Base64 模式：使用多模态格式
             messages.push({
@@ -276,7 +276,7 @@ export class OpenAICompatProvider implements ILlmProvider {
               ],
             });
           } else {
-            // 文本模式：将论文内容附加到消息中
+            // 文本模式：将Paper content附加到消息中
             messages.push({
               role: "user",
               content: buildUserMessage(msg.content, pdfContent),
@@ -317,11 +317,11 @@ export class OpenAICompatProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 abortError = new Error(`${code}: ${msg}`);
                 xmlhttp.abort();
               } catch {
-                abortError = new Error(`HTTP ${status}: 请求失败`);
+                abortError = new Error(`HTTP ${status}: 请求Failed`);
                 xmlhttp.abort();
               }
               return;
@@ -390,7 +390,7 @@ export class OpenAICompatProvider implements ILlmProvider {
         if (gotAnyDelta && chunks.length > 0) return chunks.join("");
         throw abortError;
       }
-      let errorMessage = error?.message || "OpenAI 兼容请求失败";
+      let errorMessage = error?.message || "OpenAI 兼容请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -473,7 +473,7 @@ export class OpenAICompatProvider implements ILlmProvider {
       const status = error?.xmlhttp?.status;
       const responseBody =
         error?.xmlhttp?.response || error?.xmlhttp?.responseText || "";
-      let errorMessage = error?.message || "OpenAI 兼容请求失败";
+      let errorMessage = error?.message || "OpenAI 兼容请求Failed";
       let errorName = "NetworkError";
       try {
         if (responseBody) {
@@ -517,7 +517,7 @@ export class OpenAICompatProvider implements ILlmProvider {
     const { APITestError } = await import("./types");
     throw new APITestError(`HTTP ${status}`, {
       errorName: `HTTP_${status}`,
-      errorMessage: `HTTP ${status}: ${response.statusText || "请求失败"}`,
+      errorMessage: `HTTP ${status}: ${response.statusText || "请求Failed"}`,
       statusCode: status,
       requestUrl: apiUrl,
       requestBody: payloadStr,
@@ -613,11 +613,11 @@ export class OpenAICompatProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.code || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 abortError = new Error(`${code}: ${msg}`);
                 xmlhttp.abort();
               } catch {
-                abortError = new Error(`HTTP ${status}: 请求失败`);
+                abortError = new Error(`HTTP ${status}: 请求Failed`);
                 xmlhttp.abort();
               }
               return;
@@ -686,7 +686,7 @@ export class OpenAICompatProvider implements ILlmProvider {
         if (gotAnyDelta && chunks.length > 0) return chunks.join("");
         throw abortError;
       }
-      let errorMessage = error?.message || "OpenAI 兼容多文件请求失败";
+      let errorMessage = error?.message || "OpenAI 兼容多文件请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;

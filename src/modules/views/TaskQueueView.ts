@@ -6,25 +6,25 @@
  * 本模块提供任务队列管理的可视化界面
  *
  * 主要职责:
- * 1. 显示所有待处理/处理中/已完成/失败的文献任务
+ * 1. 显示所有待处理/处理中/Completed/Failed的文献任务
  * 2. 提供任务状态筛选和排序功能
  * 3. 支持手动操作任务(重试/删除/优先级调整)
- * 4. 实时更新任务进度和状态
- * 5. 显示任务详细信息和错误日志
+ * 4. 实时Update任务进度和状态
+ * 5. 显示任务详细信息和Error日志
  *
  * 任务状态:
  * - pending: 待处理 (灰色)
  * - processing: 处理中 (蓝色)
- * - completed: 已完成 (绿色)
- * - failed: 失败 (红色)
+ * - completed: Completed (绿色)
+ * - failed: Failed (红色)
  * - priority: 优先处理 (橙色)
  *
  * 显示顺序:
  * 1. 优先处理
  * 2. 处理中
  * 3. 待处理
- * 4. 失败
- * 5. 已完成
+ * 4. Failed
+ * 5. Completed
  *
  * @module TaskQueueView
  * @author AI-Butler Team
@@ -34,6 +34,7 @@ import { BaseView } from "./BaseView";
 import { MainWindow } from "./MainWindow";
 import { TaskQueueManager, TaskItem, TaskStatus, TaskType } from "../taskQueue";
 import { createCard } from "./ui/components";
+import { getString } from "../../utils/locale";
 
 // 使用任务队列模块中定义的类型,避免重复定义导致的偏差
 
@@ -59,17 +60,17 @@ export class TaskQueueView extends BaseView {
   /** 队列管理器实例 */
   private manager: TaskQueueManager | null = null;
 
-  /** 取消注册回调的函数 */
+  /** Cancel注册回调的函数 */
   private unsubscribeProgress?: () => void;
   private unsubscribeComplete?: () => void;
 
-  /** 定时刷新(兜底) */
+  /** 定时Refresh(兜底) */
   private refreshTimerId: number | null = null;
 
   /** 统计信息容器 */
   private statsContainer: HTMLElement | null = null;
 
-  /** 详情按钮的流式订阅取消函数 - 防止重复订阅 */
+  /** 详情按钮的流式订阅Cancel函数 - 防止重复订阅 */
   private detailStreamUnsubscribe?: () => void;
 
   /**
@@ -161,7 +162,7 @@ export class TaskQueueView extends BaseView {
             borderBottom: "2px solid #59c0bc",
             paddingBottom: "10px",
           },
-          innerHTML: "📋 任务队列管理",
+          innerHTML: "📋 Task Queue Management",
         }),
       ],
     });
@@ -182,12 +183,12 @@ export class TaskQueueView extends BaseView {
         gap: "15px",
       },
       children: [
-        this.createStatCard("total", "总任务", "0", "#607d8b"),
-        this.createStatCard("priority", "优先处理", "0", "#ff9800"),
-        this.createStatCard("processing", "处理中", "0", "#2196f3"),
-        this.createStatCard("pending", "待处理", "0", "#9e9e9e"),
-        this.createStatCard("completed", "已完成", "0", "#4caf50"),
-        this.createStatCard("failed", "失败", "0", "#f44336"),
+        this.createStatCard("total", "Total Tasks", "0", "#607d8b"),
+        this.createStatCard("priority", "Priority", "0", "#ff9800"),
+        this.createStatCard("processing", "Processing", "0", "#2196f3"),
+        this.createStatCard("pending", "Pending", "0", "#9e9e9e"),
+        this.createStatCard("completed", "Completed", "0", "#4caf50"),
+        this.createStatCard("failed", "Failed", "0", "#f44336"),
       ],
     });
   }
@@ -231,12 +232,12 @@ export class TaskQueueView extends BaseView {
 
     // 筛选按钮
     const filterButtons = [
-      { label: "全部", value: "all" },
-      { label: "优先处理", value: TaskStatus.PRIORITY },
-      { label: "处理中", value: TaskStatus.PROCESSING },
-      { label: "待处理", value: TaskStatus.PENDING },
-      { label: "失败", value: TaskStatus.FAILED },
-      { label: "已完成", value: TaskStatus.COMPLETED },
+      { label: "All", value: "all" },
+      { label: "Priority", value: TaskStatus.PRIORITY },
+      { label: "Processing", value: TaskStatus.PROCESSING },
+      { label: "Pending", value: TaskStatus.PENDING },
+      { label: "Failed", value: TaskStatus.FAILED },
+      { label: "Completed", value: TaskStatus.COMPLETED },
     ];
 
     filterButtons.forEach((btn) => {
@@ -290,12 +291,15 @@ export class TaskQueueView extends BaseView {
 
     // 任务类型筛选按钮
     const typeButtons = [
-      { label: "📝 论文总结", value: "summary" as TaskType | "all" },
-      { label: "🖼️ 一图总结", value: "imageSummary" as TaskType | "all" },
-      { label: "🧠 思维导图", value: "mindmap" as TaskType | "all" },
-      { label: "📊 填表", value: "tableFill" as TaskType | "all" },
-      { label: "📝 综述", value: "review" as TaskType | "all" },
-      { label: "🎯 针对性提问", value: "targetedQuestion" as TaskType | "all" },
+      { label: "📝 Summary", value: "summary" as TaskType | "all" },
+      { label: "🖼️ Visual Summary", value: "imageSummary" as TaskType | "all" },
+      { label: "🧠 Mindmap", value: "mindmap" as TaskType | "all" },
+      { label: "📊 Table Fill", value: "tableFill" as TaskType | "all" },
+      { label: "📝 Review", value: "review" as TaskType | "all" },
+      {
+        label: "🎯 Targeted Q&A",
+        value: "targetedQuestion" as TaskType | "all",
+      },
     ];
 
     typeButtons.forEach((btn) => {
@@ -322,7 +326,7 @@ export class TaskQueueView extends BaseView {
 
       button.addEventListener("click", () => {
         this.filterTaskType = btn.value;
-        // 更新按钮样式
+        // Update按钮样式
         filterBar.querySelectorAll(".type-filter-btn").forEach((b: Element) => {
           const el = b as HTMLElement;
           const val = el.getAttribute("data-type");
@@ -351,7 +355,7 @@ export class TaskQueueView extends BaseView {
         color: "var(--ai-input-text)",
       },
       attributes: {
-        placeholder: "搜索标题...",
+        placeholder: "Search titles...",
       },
     }) as HTMLInputElement;
     searchInput.value = this.searchQuery;
@@ -376,7 +380,7 @@ export class TaskQueueView extends BaseView {
         alignItems: "center",
         justifyContent: "center",
       },
-      textContent: "🗑️ 清除已完成",
+      textContent: "🗑️ Clear Completed",
     });
 
     clearCompletedBtn.addEventListener("click", async () => {
@@ -451,7 +455,7 @@ export class TaskQueueView extends BaseView {
           color: "#9e9e9e",
           fontSize: "14px",
         },
-        textContent: "暂无任务",
+        textContent: "No tasks",
       });
       this.taskListContainer!.appendChild(emptyMsg);
     } else {
@@ -477,11 +481,11 @@ export class TaskQueueView extends BaseView {
     };
 
     const statusLabels = {
-      [TaskStatus.PENDING]: "⏳ 待处理",
-      [TaskStatus.PROCESSING]: "⚙️ 处理中",
-      [TaskStatus.COMPLETED]: "✅ 已完成",
-      [TaskStatus.FAILED]: "❌ 失败",
-      [TaskStatus.PRIORITY]: "🔥 优先处理",
+      [TaskStatus.PENDING]: "⏳ Pending",
+      [TaskStatus.PROCESSING]: "⚙️ Processing",
+      [TaskStatus.COMPLETED]: "✅ Completed",
+      [TaskStatus.FAILED]: "❌ Failed",
+      [TaskStatus.PRIORITY]: "🔥 Priority",
     };
 
     // 使用 card 标题作为唯一标题，移除重复显示；内容区域留空（后续信息在下方独立元素）
@@ -491,7 +495,7 @@ export class TaskQueueView extends BaseView {
     });
     taskItem.style.marginBottom = "10px";
     taskItem.style.cursor = "pointer";
-    taskItem.title = "双击可定位到对应文献"; // Tooltip hint
+    taskItem.title = "Double-click to locate the literature"; // Tooltip hint
 
     // 双击定位到 Zotero 文献列表中的对应条目
     taskItem.addEventListener("dblclick", async () => {
@@ -502,7 +506,7 @@ export class TaskQueueView extends BaseView {
           `[AI-Butler] 定位到文献: ${task.title} (ID: ${task.itemId})`,
         );
       } catch (error) {
-        ztoolkit.log(`[AI-Butler] 定位文献失败:`, error);
+        ztoolkit.log(`[AI-Butler] 定位文献Failed:`, error);
       }
     });
 
@@ -550,7 +554,7 @@ export class TaskQueueView extends BaseView {
           color: "white",
           marginLeft: "8px",
         },
-        textContent: "🖼️ 一图总结",
+        textContent: "🖼️ Visual Summary",
       });
       taskHeader.appendChild(typeBadge);
     }
@@ -564,7 +568,7 @@ export class TaskQueueView extends BaseView {
           color: "white",
           marginLeft: "8px",
         },
-        textContent: "🧠 思维导图",
+        textContent: "🧠 Mindmap",
       });
       taskHeader.appendChild(typeBadge);
     }
@@ -578,7 +582,7 @@ export class TaskQueueView extends BaseView {
           color: "white",
           marginLeft: "8px",
         },
-        textContent: "📊 填表",
+        textContent: "📊 Table Fill",
       });
       taskHeader.appendChild(typeBadge);
     }
@@ -592,7 +596,7 @@ export class TaskQueueView extends BaseView {
           color: "white",
           marginLeft: "8px",
         },
-        textContent: "📝 综述",
+        textContent: "📝 Review",
       });
       taskHeader.appendChild(typeBadge);
     }
@@ -606,7 +610,7 @@ export class TaskQueueView extends BaseView {
           color: "white",
           marginLeft: "8px",
         },
-        textContent: "🎯 针对性提问",
+        textContent: "🎯 Targeted Q&A",
       });
       taskHeader.appendChild(typeBadge);
     }
@@ -619,15 +623,15 @@ export class TaskQueueView extends BaseView {
         marginBottom: "10px",
       },
       innerHTML: `
-        创建时间: ${task.createdAt.toLocaleString("zh-CN")}
-        ${task.completedAt ? `<br/>完成时间: ${task.completedAt.toLocaleString("zh-CN")}` : ""}
-        ${task.error ? `<br/><span style="color: #f44336;">错误: ${task.error}</span>` : ""}
-        ${task.retryCount > 0 ? `<br/>重试次数: ${task.retryCount}` : ""}
-        ${isImageSummary && task.workflowStage ? `<br/><strong style="color: #9c27b0;">阶段: ${task.workflowStage}</strong>` : ""}
-        ${isMindmap && task.workflowStage ? `<br/><strong style="color: #4caf50;">阶段: ${task.workflowStage}</strong>` : ""}
-        ${task.taskType === "tableFill" && task.workflowStage ? `<br/><strong style="color: #ff9800;">阶段: ${task.workflowStage}</strong>` : ""}
-        ${task.taskType === "review" && task.workflowStage ? `<br/><strong style="color: #2196f3;">阶段: ${task.workflowStage}</strong>` : ""}
-        ${isTargetedQuestion && task.workflowStage ? `<br/><strong style="color: #0ea5e9;">阶段: ${task.workflowStage}</strong>` : ""}
+        ${getString("task-created-time")}: ${task.createdAt.toLocaleString()}
+        ${task.completedAt ? `<br/>${getString("task-completed-time")}: ${task.completedAt.toLocaleString()}` : ""}
+        ${task.error ? `<br/><span style="color: #f44336;">${getString("task-error-label")}: ${task.error}</span>` : ""}
+        ${task.retryCount > 0 ? `<br/>${getString("task-retry-count")}: ${task.retryCount}` : ""}
+        ${isImageSummary && task.workflowStage ? `<br/><strong style="color: #9c27b0;">${getString("task-stage-label")}: ${task.workflowStage}</strong>` : ""}
+        ${isMindmap && task.workflowStage ? `<br/><strong style="color: #4caf50;">${getString("task-stage-label")}: ${task.workflowStage}</strong>` : ""}
+        ${task.taskType === "tableFill" && task.workflowStage ? `<br/><strong style="color: #ff9800;">${getString("task-stage-label")}: ${task.workflowStage}</strong>` : ""}
+        ${task.taskType === "review" && task.workflowStage ? `<br/><strong style="color: #2196f3;">${getString("task-stage-label")}: ${task.workflowStage}</strong>` : ""}
+        ${isTargetedQuestion && task.workflowStage ? `<br/><strong style="color: #0ea5e9;">${getString("task-stage-label")}: ${task.workflowStage}</strong>` : ""}
       `,
     });
 
@@ -663,7 +667,7 @@ export class TaskQueueView extends BaseView {
       },
     });
 
-    // 详情按钮：打开 AI 总结面板并展示本次调用的流式结果
+    // 详情按钮：Open AI 总结面板并展示本次调用的流式结果
     const detailBtn = this.createElement("button", {
       styles: {
         padding: "6px 12px",
@@ -674,10 +678,10 @@ export class TaskQueueView extends BaseView {
         cursor: "pointer",
         fontSize: "12px",
       },
-      textContent: "🔍 详情",
+      textContent: "🔍 Details",
     });
     detailBtn.addEventListener("click", async () => {
-      // 先取消之前的流式订阅，避免重复
+      // 先Cancel之前的流式订阅，避免重复
       if (this.detailStreamUnsubscribe) {
         this.detailStreamUnsubscribe();
         this.detailStreamUnsubscribe = undefined;
@@ -689,9 +693,9 @@ export class TaskQueueView extends BaseView {
       view.clear();
       // 使用任务的 startedAt 作为计时起点，避免每次进入都从 0 开始
       const startedAt = task.startedAt || undefined;
-      view.showLoadingState(`正在分析「${task.title}」`, startedAt);
+      view.showLoadingState(`Analyzing "${task.title}"`, startedAt);
 
-      // 若任务已完成,无法再接收流，回退展示已保存笔记
+      // 若任务Completed,无法再接收流，回退展示Saved笔记
       if (task.status === TaskStatus.COMPLETED) {
         await view.showSavedNoteForItem(task.itemId);
         return;
@@ -703,7 +707,7 @@ export class TaskQueueView extends BaseView {
       try {
         this.manager.start();
       } catch (e) {
-        ztoolkit.log("[AI Butler] 启动任务执行器失败:", e);
+        ztoolkit.log("[AI Butler] 启动任务执行器Failed:", e);
       }
       let started = false;
       this.detailStreamUnsubscribe = this.manager.onStream((taskId, event) => {
@@ -747,7 +751,7 @@ export class TaskQueueView extends BaseView {
           cursor: "pointer",
           fontSize: "12px",
         },
-        textContent: "🔄 重试",
+        textContent: "🔄 Retry",
       });
 
       retryBtn.addEventListener("click", () => {
@@ -771,7 +775,7 @@ export class TaskQueueView extends BaseView {
           cursor: "pointer",
           fontSize: "12px",
         },
-        textContent: "⚡ 优先处理",
+        textContent: "⚡ Priority",
       });
 
       priorityBtn.addEventListener("click", () => {
@@ -791,7 +795,7 @@ export class TaskQueueView extends BaseView {
         cursor: "pointer",
         fontSize: "12px",
       },
-      textContent: "🗑️ 删除",
+      textContent: "🗑️ Delete",
     });
 
     deleteBtn.addEventListener("click", () => {
@@ -814,7 +818,7 @@ export class TaskQueueView extends BaseView {
   }
 
   /**
-   * 更新统计信息
+   * Update统计信息
    *
    * @private
    */
@@ -852,7 +856,7 @@ export class TaskQueueView extends BaseView {
   public filterTasks(status: TaskStatus | "all"): void {
     this.filterStatus = status;
 
-    // 更新按钮样式
+    // Update按钮样式
     const filterButtons = this.container?.querySelectorAll(".filter-btn");
     if (filterButtons) {
       filterButtons.forEach((btn: Element) => {
@@ -888,10 +892,10 @@ export class TaskQueueView extends BaseView {
   }
 
   /**
-   * 更新任务
+   * Update任务
    *
    * @param taskId 任务 ID
-   * @param updates 更新数据
+   * @param updates Update数据
    */
   public updateTask(
     taskId: string,
@@ -961,7 +965,7 @@ export class TaskQueueView extends BaseView {
   }
 
   /**
-   * 清除已完成任务
+   * 清除Completed任务
    */
   public async clearCompletedTasks(): Promise<void> {
     if (this.manager) {
@@ -1012,7 +1016,7 @@ export class TaskQueueView extends BaseView {
     this.applyTheme();
   }
 
-  /** 手动刷新任务列表（供外部在入队后立即触发） */
+  /** 手动Refresh任务列表（供外部在入队后立即触发） */
   public refresh(): void {
     if (!this.manager) {
       this.manager = TaskQueueManager.getInstance();
@@ -1031,7 +1035,7 @@ export class TaskQueueView extends BaseView {
     // 初始同步
     this.syncFromManager();
 
-    // 取消旧回调
+    // Cancel旧回调
     this.unsubscribeProgress?.();
     this.unsubscribeComplete?.();
 
@@ -1067,7 +1071,7 @@ export class TaskQueueView extends BaseView {
       },
     );
 
-    // 兜底定时刷新(5s)
+    // 兜底定时Refresh(5s)
     if (this.refreshTimerId) {
       clearInterval(this.refreshTimerId);
     }

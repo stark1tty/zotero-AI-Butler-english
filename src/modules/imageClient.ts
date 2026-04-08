@@ -1,6 +1,6 @@
 /**
  * ================================================================
- * 一图总结图片生成客户端
+ * Image SummaryImage generation客户端
  * ================================================================
  *
  * 使用 Gemini API (Nano Banana Pro) 生成学术概念海报图片
@@ -23,7 +23,7 @@ import { getPref } from "../utils/prefs";
 export type ImageSummaryRequestMode = "gemini" | "openai";
 
 /**
- * 图片生成结果接口
+ * Image generation结果接口
  */
 export interface ImageGenerationResult {
   /** Base64 编码的图片数据 */
@@ -33,7 +33,7 @@ export interface ImageGenerationResult {
 }
 
 /**
- * 图片生成错误类
+ * Image generation错误类
  */
 export class ImageGenerationError extends Error {
   /** 详细错误信息 */
@@ -53,7 +53,7 @@ export class ImageGenerationError extends Error {
 }
 
 /**
- * 图片生成客户端类
+ * Image generation客户端类
  */
 export class ImageClient {
   private static resolveRequestMode(value: unknown): ImageSummaryRequestMode {
@@ -158,7 +158,7 @@ export class ImageClient {
     if (res?.status !== 200) {
       throw new ImageGenerationError(`HTTP ${res?.status}`, {
         errorName: `HTTP_${res?.status || "Unknown"}`,
-        errorMessage: `HTTP ${res?.status || "Unknown"}: ${res?.statusText || "下载失败"}`,
+        errorMessage: `HTTP ${res?.status || "Unknown"}: ${res?.statusText || "Download failed"}`,
         statusCode: res?.status,
         requestUrl: endpoint,
         responseBody: res?.response,
@@ -805,7 +805,7 @@ export class ImageClient {
         throw new ImageGenerationError("API 未返回图片数据", {
           errorName: "NoImageData",
           errorMessage:
-            "OpenAI 兼容接口响应中未识别到图片数据。请确认接口是否支持图片输出，或尝试将 API 地址设置为完整端点（如 /v1/chat/completions 或 /v1/images/generations）。",
+            "OpenAI 兼容接口响应中未识别到图片数据。Please confirm接口是否支持图片输出，或尝试将 API 地址设置为完整端点（如 /v1/chat/completions 或 /v1/images/generations）。",
           requestUrl: endpoint,
           responseBody: preview,
         });
@@ -825,7 +825,7 @@ export class ImageClient {
    * 生成学术概念海报图片
    *
    * @param prompt 生图提示词 (已经过变量替换)
-   * @param options 可选配置覆盖
+   * @param options Optional配置覆盖
    * @returns 包含 Base64 图片数据和 MIME 类型的结果
    */
   public static async generateImage(
@@ -874,12 +874,12 @@ export class ImageClient {
       (getPref("imageSummaryResolutionEnabled" as any) as boolean) ?? false;
 
     if (!apiKey) {
-      throw new ImageGenerationError("一图总结 API Key 未配置", {
+      throw new ImageGenerationError("Image Summary API Key 未配置", {
         errorName: "ConfigurationError",
         errorMessage:
           requestMode === "openai"
-            ? "请在设置页面配置一图总结的 OpenAI API Key"
-            : "请在设置页面配置一图总结的 Gemini API Key",
+            ? "请在设置页面配置Image Summary的 OpenAI API Key"
+            : "请在设置页面配置Image Summary的 Gemini API Key",
       });
     }
 
@@ -1125,7 +1125,7 @@ export class ImageClient {
         if (textPart) {
           throw new ImageGenerationError("API 返回了文本而非图片", {
             errorName: "NoImageGenerated",
-            errorMessage: `模型返回了文本内容而非图片。请检查模型是否支持图片生成。\n\n返回内容: ${textPart.text?.substring(0, 200)}...`,
+            errorMessage: `模型返回了文本内容而非图片。Please check模型是否支持Image generation。\n\n返回内容: ${textPart.text?.substring(0, 200)}...`,
             requestUrl: endpoint,
             responseBody:
               typeof response.response === "string"
@@ -1174,7 +1174,7 @@ export class ImageClient {
   /**
    * 测试 API 连接
    *
-   * @param options 可选配置覆盖
+   * @param options Optional配置覆盖
    * @returns 测试结果
    */
   public static async testConnection(options?: {

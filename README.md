@@ -1,4 +1,5 @@
 # ⚠️ IMPORTANT NOTICE: DIRECT ENGLISH TRANSLATION
+
 > **This is a direct English translation of the original Chinese project.**  
 > **It works with Zotero 8 as-is.**  
 > **All features and functionality remain the same as the original project by [steven-jianhao-li](https://github.com/steven-jianhao-li/zotero-AI-Butler).**  
@@ -135,13 +136,13 @@ AI Butler supports multi-turn dialogue functionality, allowing users to ask foll
 
 AI Butler supports multiple mainstream LLM platforms to meet different users' needs:
 
-| Platform             | Recommended Model        | Features                                                                                           |
-| -------------------- | ------------------------ | -------------------------------------------------------------------------------------------------- |
-| **Google Gemini**    | gemini-3-pro-preview     | 🌟 Recommended! Strong multimodal capabilities, accurate PDF understanding                         |
-| **OpenAI**           | gpt-5                    | Official new interface                                                                             |
-| **Anthropic Claude** | claude-opus-4-5-20251101 | Excellent comprehensive capabilities                                                               |
-| **OpenAI Compatible**| Custom                   | OpenAI legacy interface, uses standard Chat Completions API format, supports third-party services like SiliconFlow |
-| **Volcano Ark**      | doubao-seed-1-8-251228   | 🆕 2 million tokens free daily quota, supports Doubao LLM series                                   |
+| Platform              | Recommended Model        | Features                                                                                                           |
+| --------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Google Gemini**     | gemini-3-pro-preview     | 🌟 Recommended! Strong multimodal capabilities, accurate PDF understanding                                         |
+| **OpenAI**            | gpt-5                    | Official new interface                                                                                             |
+| **Anthropic Claude**  | claude-opus-4-5-20251101 | Excellent comprehensive capabilities                                                                               |
+| **OpenAI Compatible** | Custom                   | OpenAI legacy interface, uses standard Chat Completions API format, supports third-party services like SiliconFlow |
+| **Volcano Ark**       | doubao-seed-1-8-251228   | 🆕 2 million tokens free daily quota, supports Doubao LLM series                                                   |
 
 ![Multi-Platform API Configuration](./assets/images/多平台API配置.png)
 
@@ -160,11 +161,11 @@ AI Butler provides powerful prompt management features:
 
 AI Butler's new feature—supports multi-turn prompt configuration. Users can customize the prompts for each dialogue turn, including: research background and questions, research methods and techniques, experimental design and results, conclusions and outlook, etc., finally aggregating multi-turn dialogues into one complete summary.
 
-| Mode                 | Description                                      | Token Usage | Applicable Scenarios                  |
-| -------------------- | ------------------------------------------------ | ----------- | ------------------------------------- |
-| **Single Dialogue**  | One-time generation of complete summary          | Minimal     | Quick reading, time constraints       |
-| **Multi-Turn Concat**| Multi-turn in-depth questioning, concatenate all answers | Higher      | Deep study, detailed analysis needed  |
-| **Multi-Turn Summary**| AI aggregates and refines after multi-turn dialogue | Medium      | Balance depth and conciseness         |
+| Mode                   | Description                                              | Token Usage | Applicable Scenarios                 |
+| ---------------------- | -------------------------------------------------------- | ----------- | ------------------------------------ |
+| **Single Dialogue**    | One-time generation of complete summary                  | Minimal     | Quick reading, time constraints      |
+| **Multi-Turn Concat**  | Multi-turn in-depth questioning, concatenate all answers | Higher      | Deep study, detailed analysis needed |
+| **Multi-Turn Summary** | AI aggregates and refines after multi-turn dialogue      | Medium      | Balance depth and conciseness        |
 
 - **Multi-Turn Prompt Configuration**: Users can customize the prompts for each dialogue turn, including: research background and questions, research methods and techniques, experimental design and results, conclusions and outlook, etc.
 - **Final Summary Prompt**: In multi-turn summary mode, you can configure the prompt used by AI for the final aggregation.

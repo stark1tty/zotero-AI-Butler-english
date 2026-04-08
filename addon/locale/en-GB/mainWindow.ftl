@@ -114,7 +114,6 @@ stat-failed = Failed
 dashboard-button-view-queue = View Task Queue
 dashboard-button-settings = Open Settings
 dashboard-task-failed = ❌ Processing failed: { $title }
-
 button-save-preset = Save Preset
 button-generate-review = 🚀 Generate Review
 button-example-prompt = e.g., Compare only "Research Methods" dimension, provide differences and applicable scenarios

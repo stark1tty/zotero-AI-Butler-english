@@ -167,7 +167,7 @@ export class AutoScanManager {
       return false;
     }
 
-    // 排除报告类型（文献综述生成的条目）
+    // 排除报告类型（文献Review generation的条目）
     const itemType = item.itemType || (item as any).getType?.() || "";
     if (itemType === "report") {
       return false;
@@ -307,7 +307,7 @@ export class AutoScanManager {
   }
 
   /**
-   * 重新加载配置（用于设置更改后刷新）
+   * Reload配置（用于设置更改后Refresh）
    */
   public reload(): void {
     const enabled = getPref("autoScan") as boolean;

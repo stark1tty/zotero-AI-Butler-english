@@ -29,6 +29,7 @@ import { MainWindow } from "./MainWindow";
 import { AutoScanManager } from "../autoScanManager";
 import { getPref, setPref } from "../../utils/prefs";
 import { createCard, createStyledButton } from "./ui/components";
+import { getString } from "../../utils/locale";
 
 /**
  * 管家状态枚举
@@ -36,7 +37,7 @@ import { createCard, createStyledButton } from "./ui/components";
 export enum ButlerStatus {
   WORKING = "working", // 工作中
   IDLE = "idle", // 休息中
-  ERROR = "error", // 错误状态
+  ERROR = "error", // Error状态
 }
 
 /**
@@ -46,7 +47,7 @@ export interface DashboardStats {
   totalProcessed: number; // 总处理数
   todayProcessed: number; // 今日处理数
   pendingCount: number; // 待处理数
-  failedCount: number; // 失败数
+  failedCount: number; // Failed数
   successRate: number; // 成功率
   averageTime: number; // 平均处理时间(秒)
 }
@@ -94,13 +95,13 @@ export class DashboardView extends BaseView {
   /** 任务队列管理器 */
   private taskQueueManager: TaskQueueManager;
 
-  /** 数据刷新定时器 */
+  /** 数据Refresh定时器 */
   private refreshTimerId: number | null = null;
 
-  /** 进度回调取消函数 */
+  /** 进度回调Cancel函数 */
   private unsubscribeProgress: (() => void) | null = null;
 
-  /** 完成回调取消函数 */
+  /** 完成回调Cancel函数 */
   private unsubscribeComplete: (() => void) | null = null;
 
   /**
@@ -113,7 +114,7 @@ export class DashboardView extends BaseView {
 
   /**
    * 视图挂载时的回调
-   * 注册任务队列事件监听器并启动数据刷新
+   * 注册任务队列事件监听器并启动数据Refresh
    *
    * @protected
    */
@@ -134,10 +135,10 @@ export class DashboardView extends BaseView {
       },
     );
 
-    // 启动定时刷新
+    // 启动定时Refresh
     this.startRefreshTimer();
 
-    // 立即刷新一次数据
+    // 立即Refresh一次数据
     this.refreshData();
 
     // 应用主题
@@ -151,7 +152,7 @@ export class DashboardView extends BaseView {
    * @protected
    */
   protected onDestroy(): void {
-    // 取消任务队列回调
+    // Cancel任务队列回调
     if (this.unsubscribeProgress) {
       this.unsubscribeProgress();
       this.unsubscribeProgress = null;
@@ -162,7 +163,7 @@ export class DashboardView extends BaseView {
       this.unsubscribeComplete = null;
     }
 
-    // 停止定时刷新
+    // 停止定时Refresh
     this.stopRefreshTimer();
 
     super.onDestroy();
@@ -228,7 +229,7 @@ export class DashboardView extends BaseView {
             borderBottom: "2px solid #59c0bc",
             paddingBottom: "10px",
           },
-          innerHTML: "📊 仪表盘",
+          innerHTML: getString("dashboard-title"),
         }),
       ],
     });
@@ -268,7 +269,7 @@ export class DashboardView extends BaseView {
         fontWeight: "700",
         marginBottom: "10px",
       },
-      textContent: "AI 管家正在休息",
+      textContent: getString("dashboard-status-resting"),
     });
 
     const statusDetail = this.createElement("div", {
@@ -277,7 +278,9 @@ export class DashboardView extends BaseView {
         fontSize: "14px",
         opacity: "0.9",
       },
-      textContent: "管家已为您总结 0 篇文献",
+      textContent: getString("dashboard-status-detail-resting", {
+        args: { count: 0 },
+      }),
     });
 
     card.appendChild(statusIcon);
@@ -302,12 +305,48 @@ export class DashboardView extends BaseView {
         gap: "15px",
       },
       children: [
-        this.createStatCard("total", "总处理数", "0", "#2196f3", "📚"),
-        this.createStatCard("today", "今日处理", "0", "#4caf50", "📅"),
-        this.createStatCard("pending", "待处理", "0", "#ff9800", "⏳"),
-        this.createStatCard("success-rate", "成功率", "100%", "#9c27b0", "✨"),
-        this.createStatCard("avg-time", "平均用时", "0s", "#607d8b", "⚡"),
-        this.createStatCard("failed", "失败数", "0", "#f44336", "❌"),
+        this.createStatCard(
+          "total",
+          getString("stat-total-processed"),
+          "0",
+          "#2196f3",
+          "📚",
+        ),
+        this.createStatCard(
+          "today",
+          getString("stat-today-processed"),
+          "0",
+          "#4caf50",
+          "📅",
+        ),
+        this.createStatCard(
+          "pending",
+          getString("stat-pending"),
+          "0",
+          "#ff9800",
+          "⏳",
+        ),
+        this.createStatCard(
+          "success-rate",
+          getString("stat-success-rate"),
+          "100%",
+          "#9c27b0",
+          "✨",
+        ),
+        this.createStatCard(
+          "avg-time",
+          getString("stat-avg-time"),
+          "0s",
+          "#607d8b",
+          "⚡",
+        ),
+        this.createStatCard(
+          "failed",
+          getString("stat-failed"),
+          "0",
+          "#f44336",
+          "❌",
+        ),
       ],
     });
   }
@@ -330,7 +369,7 @@ export class DashboardView extends BaseView {
       icon,
       classes: ["stat-card"],
     });
-    // 设置元素 id，便于后续更新
+    // 设置元素 id，便于后续Update
     card.id = `stat-${id}`;
     return card;
   }
@@ -353,7 +392,7 @@ export class DashboardView extends BaseView {
         fontSize: "16px",
         color: "var(--ai-text)",
       },
-      textContent: "⚡ 快捷操作",
+      textContent: "⚡ Quick Actions",
     });
 
     const actionsGrid = this.createElement("div", {
@@ -365,12 +404,36 @@ export class DashboardView extends BaseView {
     });
 
     const actions = [
-      { icon: "🔍", label: "扫描未分析论文", color: "#2196f3" },
-      { icon: "🚀", label: "开始自动扫描", color: "#4caf50" },
-      { icon: "⏸️", label: "暂停自动扫描", color: "#ff9800" },
-      { icon: "📋", label: "查看任务队列", color: "#9c27b0" },
-      { icon: "🗑️", label: "清除已完成", color: "#9e9e9e" },
-      { icon: "⚙️", label: "打开设置", color: "#607d8b" },
+      {
+        icon: "🔍",
+        label: getString("dashboard-button-scan"),
+        color: "#2196f3",
+      },
+      {
+        icon: "🚀",
+        label: getString("dashboard-button-start-auto"),
+        color: "#4caf50",
+      },
+      {
+        icon: "⏸️",
+        label: getString("dashboard-button-pause-auto"),
+        color: "#ff9800",
+      },
+      {
+        icon: "📋",
+        label: getString("dashboard-button-view-queue"),
+        color: "#9c27b0",
+      },
+      {
+        icon: "🗑️",
+        label: getString("dashboard-button-clear"),
+        color: "#9e9e9e",
+      },
+      {
+        icon: "⚙️",
+        label: getString("dashboard-button-settings"),
+        color: "#607d8b",
+      },
     ];
 
     actions.forEach((action) => {
@@ -412,7 +475,7 @@ export class DashboardView extends BaseView {
         fontSize: "16px",
         color: "var(--ai-text)",
       },
-      textContent: "🕒 最近活动",
+      textContent: "🕒 Recent Activities",
     });
 
     const activityList = this.createElement("div", {
@@ -434,7 +497,7 @@ export class DashboardView extends BaseView {
           color: "#9e9e9e",
           fontSize: "14px",
         },
-        textContent: "暂无最近活动",
+        textContent: "No recent activities",
       });
       activityList.appendChild(emptyMsg);
     }
@@ -446,7 +509,7 @@ export class DashboardView extends BaseView {
   }
 
   /**
-   * 更新管家状态
+   * Update管家状态
    *
    * @param status 状态
    * @param currentItem 当前处理的文献标题
@@ -470,26 +533,35 @@ export class DashboardView extends BaseView {
     switch (status) {
       case ButlerStatus.WORKING:
         statusIcon.textContent = "🧐";
-        statusText.textContent = "AI 管家正在废寝忘食地工作";
+        statusText.textContent = getString("dashboard-status-working");
         statusDetail.textContent = currentItem
-          ? `正在阅读: ${currentItem}${remaining ? ` (还剩 ${remaining} 篇)` : ""}`
-          : "正在处理文献...";
+          ? remaining
+            ? getString("dashboard-status-detail-working-remaining", {
+                args: { item: currentItem, remaining },
+              })
+            : getString("dashboard-status-detail-working", {
+                args: { item: currentItem },
+              })
+          : getString("dashboard-status-detail-processing");
         this.statusCard.style.background =
           "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
         break;
 
       case ButlerStatus.IDLE:
         statusIcon.textContent = "😴";
-        statusText.textContent = "AI 管家正在休息";
-        statusDetail.textContent = `管家已为您总结 ${this.stats.totalProcessed} 篇文献`;
+        statusText.textContent = getString("dashboard-status-resting");
+        statusDetail.textContent = getString(
+          "dashboard-status-detail-resting",
+          { args: { count: this.stats.totalProcessed } },
+        );
         this.statusCard.style.background =
           "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
         break;
 
       case ButlerStatus.ERROR:
         statusIcon.textContent = "😵";
-        statusText.textContent = "AI 管家遇到了问题";
-        statusDetail.textContent = "请检查配置或查看错误日志";
+        statusText.textContent = getString("dashboard-status-error");
+        statusDetail.textContent = getString("dashboard-status-detail-error");
         this.statusCard.style.background =
           "linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%)";
         break;
@@ -497,7 +569,7 @@ export class DashboardView extends BaseView {
   }
 
   /**
-   * 更新统计数据
+   * Update统计数据
    *
    * @param stats 统计数据
    */
@@ -506,7 +578,7 @@ export class DashboardView extends BaseView {
 
     if (!this.statsContainer) return;
 
-    // 更新各个统计卡片
+    // Update各个统计卡片
     this.updateStatValue("total", this.stats.totalProcessed.toString());
     this.updateStatValue("today", this.stats.todayProcessed.toString());
     this.updateStatValue("pending", this.stats.pendingCount.toString());
@@ -519,7 +591,7 @@ export class DashboardView extends BaseView {
   }
 
   /**
-   * 更新单个统计值
+   * Update单个统计值
    *
    * @private
    */
@@ -569,7 +641,7 @@ export class DashboardView extends BaseView {
           color: "#9e9e9e",
           fontSize: "14px",
         },
-        textContent: "暂无最近活动",
+        textContent: "No recent activities",
       });
       activityList.appendChild(emptyMsg);
       return;
@@ -658,12 +730,12 @@ export class DashboardView extends BaseView {
     const now = new Date();
     const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-    if (diff < 60) return "刚刚";
-    if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
-    if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`;
+    if (diff < 60) return "Just now";
+    if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} days ago`;
 
-    return date.toLocaleDateString("zh-CN");
+    return date.toLocaleDateString("en-US");
   }
 
   /**
@@ -672,51 +744,61 @@ export class DashboardView extends BaseView {
    * @private
    */
   private async handleQuickAction(action: string): Promise<void> {
-    ztoolkit.log(`[AI Butler] 快捷操作: ${action}`);
+    ztoolkit.log(`[AI Butler] Quick action: ${action}`);
 
     switch (action) {
-      case "扫描未分析论文":
-        // 切换到库扫描视图
+      case getString("dashboard-button-scan"):
         MainWindow.getInstance().switchTab("scanner");
         break;
 
-      case "开始自动扫描":
+      case getString("dashboard-button-start-auto"):
         setPref("autoScan", true);
         AutoScanManager.getInstance().start();
         new ztoolkit.ProgressWindow("AI Butler")
-          .createLine({ text: "✅ 已启动自动扫描", type: "success" })
+          .createLine({
+            text: getString("dashboard-success-auto-started"),
+            type: "success",
+          })
           .show();
         break;
 
-      case "暂停自动扫描":
+      case getString("dashboard-button-pause-auto"):
         setPref("autoScan", false);
         AutoScanManager.getInstance().stop();
         new ztoolkit.ProgressWindow("AI Butler")
-          .createLine({ text: "⏸️ 已暂停自动扫描", type: "default" })
+          .createLine({
+            text: getString("dashboard-success-auto-paused"),
+            type: "default",
+          })
           .show();
         break;
 
-      case "查看任务队列":
+      case getString("dashboard-button-view-queue"):
         // 切换到任务队列标签页
         MainWindow.getInstance().switchTab("tasks");
         break;
 
-      case "清除已完成":
+      case getString("dashboard-button-clear"):
         this.taskQueueManager.clearCompleted();
         new ztoolkit.ProgressWindow("AI Butler")
-          .createLine({ text: "🗑️ 已清除已完成任务", type: "success" })
+          .createLine({
+            text: getString("dashboard-success-cleared"),
+            type: "success",
+          })
           .show();
         this.refreshData();
         break;
 
-      case "打开设置":
-        // 切换到设置标签页
+      case getString("dashboard-button-settings"):
         MainWindow.getInstance().switchTab("settings");
         break;
 
       default:
         new ztoolkit.ProgressWindow("AI Butler")
-          .createLine({ text: `功能开发中: ${action}`, type: "default" })
+          .createLine({
+            text: `Feature under development: ${action}`,
+            type: "default",
+          })
           .show();
     }
   }
@@ -732,10 +814,10 @@ export class DashboardView extends BaseView {
     return ((win as any).__aiButlerMainWindow as MainWindow) || null;
   }
 
-  // ==================== 数据刷新 ====================
+  // ==================== 数据Refresh ====================
 
   /**
-   * 启动定时刷新
+   * 启动定时Refresh
    *
    * @private
    */
@@ -744,14 +826,14 @@ export class DashboardView extends BaseView {
       return;
     }
 
-    // 每5秒刷新一次
+    // 每5秒Refresh一次
     this.refreshTimerId = setInterval(() => {
       this.refreshData();
     }, 5000) as any as number;
   }
 
   /**
-   * 停止定时刷新
+   * 停止定时Refresh
    *
    * @private
    */
@@ -763,7 +845,7 @@ export class DashboardView extends BaseView {
   }
 
   /**
-   * 刷新所有数据
+   * Refresh所有数据
    *
    * @private
    */
@@ -781,7 +863,7 @@ export class DashboardView extends BaseView {
       TaskStatus.PROCESSING,
     )[0];
 
-    // 更新管家状态
+    // Update管家状态
     this.updateButlerStatus(
       butlerStatus,
       processingTask?.title,
@@ -798,7 +880,7 @@ export class DashboardView extends BaseView {
           completedTasks.length
         : 0;
 
-    // 更新统计数据
+    // Update统计数据
     this.updateStats({
       totalProcessed: queueStats.completed,
       todayProcessed: this.taskQueueManager.getTodayCompletedCount(),
@@ -837,7 +919,7 @@ export class DashboardView extends BaseView {
   private loadRecentActivitiesFromQueue(): void {
     const allTasks = this.taskQueueManager.getAllTasks();
 
-    // 筛选已完成和失败的任务
+    // 筛选Completed和Failed的任务
     const finishedTasks = allTasks
       .filter((t) => t.status === "completed" || t.status === "failed")
       .filter((t) => t.completedAt)
@@ -866,7 +948,7 @@ export class DashboardView extends BaseView {
   // ==================== 任务队列事件处理 ====================
 
   /**
-   * 处理任务进度更新
+   * 处理任务进度Update
    *
    * @private
    */
@@ -875,9 +957,9 @@ export class DashboardView extends BaseView {
     progress: number,
     message: string,
   ): void {
-    ztoolkit.log(`任务进度: ${taskId} - ${progress}% - ${message}`);
+    ztoolkit.log(`Task progress: ${taskId} - ${progress}% - ${message}`);
 
-    // 刷新数据以更新状态
+    // Refresh数据以Update状态
     this.refreshData();
   }
 
@@ -891,7 +973,7 @@ export class DashboardView extends BaseView {
     success: boolean,
     error?: string,
   ): void {
-    ztoolkit.log(`任务完成: ${taskId} - 成功=${success}`);
+    ztoolkit.log(`Task completed: ${taskId} - success=${success}`);
 
     // 获取任务信息
     const task = this.taskQueueManager.getTask(taskId);
@@ -906,7 +988,7 @@ export class DashboardView extends BaseView {
       });
     }
 
-    // 刷新数据
+    // Refresh数据
     this.refreshData();
 
     // 显示通知
@@ -914,14 +996,27 @@ export class DashboardView extends BaseView {
       new ztoolkit.ProgressWindow("AI Butler", {
         closeTime: 3000,
       })
-        .createLine({ text: `✅ 已完成: ${task?.title}`, type: "success" })
+        .createLine({
+          text: getString("dashboard-task-completed", {
+            args: { title: task?.title },
+          }),
+          type: "success",
+        })
         .show();
     } else {
       new ztoolkit.ProgressWindow("AI Butler", {
         closeTime: 5000,
       })
-        .createLine({ text: `❌ 处理失败: ${task?.title}`, type: "fail" })
-        .createLine({ text: error || "未知错误", type: "default" })
+        .createLine({
+          text: getString("dashboard-task-failed", {
+            args: { title: task?.title },
+          }),
+          type: "fail",
+        })
+        .createLine({
+          text: error || getString("dashboard-error-unknown"),
+          type: "default",
+        })
         .show();
     }
   }

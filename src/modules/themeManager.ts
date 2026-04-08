@@ -88,7 +88,7 @@ export class ThemeManager {
       return css;
     }
 
-    // 主题不存在，返回默认主题
+    // 主题Does not exist，返回默认主题
     return this.loadThemeCss(DEFAULT_THEME);
   }
 
@@ -244,7 +244,7 @@ export class ThemeManager {
   white-space: nowrap;
 }
 
-/* 确保笔记内容容器不会被公式撑大 */
+/* 确保Note content容器不会被公式撑大 */
 .ai-butler-note-content-wrapper {
   overflow-x: hidden !important;
   width: 100% !important;

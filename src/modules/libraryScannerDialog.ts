@@ -4,11 +4,11 @@
  * ================================================================
  *
  * 本模块提供一个交互式对话框，用于扫描整个 Zotero 库，
- * 显示所有未分析的文献，并允许用户通过树形结构选择要分析的条目
+ * 显示所有Unanalyzed的文献，并允许用户通过树形结构选择要分析的条目
  *
  * 主要职责:
  * 1. 扫描所有收藏夹和条目
- * 2. 检测哪些条目缺少 AI 笔记
+ * 2. 检测哪些条目Missing AI 笔记
  * 3. 以树形结构展示扫描结果（支持多级目录）
  * 4. 提供父子联动的复选框选择逻辑
  * 5. 将用户选择的条目批量加入队列
@@ -43,7 +43,7 @@ export class LibraryScannerDialog {
   private selectedCount: number = 0;
 
   /**
-   * 打开扫描对话框
+   * Open扫描对话框
    */
   public static async open(): Promise<void> {
     const scanner = new LibraryScannerDialog();
@@ -59,11 +59,11 @@ export class LibraryScannerDialog {
 
     if (this.totalUnprocessed === 0) {
       // 没有未处理的条目
-      new ztoolkit.ProgressWindow("AI 管家", {
+      new ztoolkit.ProgressWindow("AI Butler", {
         closeTime: 3000,
       })
         .createLine({
-          text: "🎉 所有文献都已分析完成！",
+          text: "🎉 所有文献都已Analysis complete！",
           type: "success",
         })
         .show();
@@ -290,7 +290,7 @@ export class LibraryScannerDialog {
 
     // 设置窗口标题
     if (doc.title) {
-      doc.title = "扫描未分析文献 - AI 管家";
+      doc.title = "扫描Unanalyzed文献 - AI 管家";
     }
 
     // 创建根容器
@@ -325,7 +325,7 @@ export class LibraryScannerDialog {
     header.innerHTML = `
       <h2 style="margin: 0 0 10px 0; font-size: 18px;">📚 库扫描结果</h2>
       <p style="margin: 0; font-size: 14px; opacity: 0.9;">
-        发现 <strong>${this.totalUnprocessed}</strong> 篇文献未进行 AI 分析
+        发现 <strong>${this.totalUnprocessed}</strong> items文献未进行 AI 分析
       </p>
     `;
     root.appendChild(header);
@@ -357,7 +357,7 @@ export class LibraryScannerDialog {
 
     const selectedLabel = doc.createElement("span");
     selectedLabel.id = "selected-count";
-    selectedLabel.textContent = `已选择: 0 篇`;
+    selectedLabel.textContent = `Selected: 0 items`;
     selectedLabel.style.color = "#666";
     footer.appendChild(selectedLabel);
 
@@ -366,7 +366,7 @@ export class LibraryScannerDialog {
     buttonGroup.style.gap = "10px";
 
     const cancelBtn = doc.createElement("button");
-    cancelBtn.textContent = "取消";
+    cancelBtn.textContent = "Cancel";
     cancelBtn.style.cssText = `
       padding: 8px 20px;
       border: 1px solid #ddd;
@@ -464,13 +464,13 @@ export class LibraryScannerDialog {
     checked: boolean,
     doc: Document,
   ): void {
-    // 更新当前节点
+    // Update当前节点
     node.checked = checked;
 
-    // 递归更新子节点
+    // 递归Update子节点
     this.updateChildrenChecked(node, checked);
 
-    // 更新父节点
+    // Update父节点
     this.updateParentChecked(node);
 
     // 重新计算选中数量
@@ -478,7 +478,7 @@ export class LibraryScannerDialog {
   }
 
   /**
-   * 递归更新子节点选中状态
+   * 递归Update子节点选中状态
    */
   private updateChildrenChecked(node: TreeNode, checked: boolean): void {
     for (const child of node.children) {
@@ -488,7 +488,7 @@ export class LibraryScannerDialog {
   }
 
   /**
-   * 更新父节点选中状态
+   * Update父节点选中状态
    */
   private updateParentChecked(node: TreeNode): void {
     if (!node.parentNode) return;
@@ -499,22 +499,22 @@ export class LibraryScannerDialog {
 
     parent.checked = allChecked;
 
-    // 递归更新祖先节点
+    // 递归Update祖先节点
     this.updateParentChecked(parent);
   }
 
   /**
-   * 更新选中数量显示
+   * Update选中数量显示
    */
   private updateSelectedCount(doc: Document): void {
     this.selectedCount = this.countSelectedItems(this.treeRoot);
 
     const label = doc.getElementById("selected-count");
     if (label) {
-      label.textContent = `已选择: ${this.selectedCount} 篇`;
+      label.textContent = `Selected: ${this.selectedCount} items`;
     }
 
-    // 更新确认按钮状态
+    // Update确认按钮状态
     const btn = doc.getElementById("confirm-btn") as HTMLButtonElement;
     if (btn) {
       btn.disabled = this.selectedCount === 0;
@@ -522,7 +522,7 @@ export class LibraryScannerDialog {
       btn.style.cursor = this.selectedCount === 0 ? "not-allowed" : "pointer";
     }
 
-    // 重新渲染以更新复选框状态
+    // 重新渲染以Update复选框状态
     const container = doc.getElementById("tree-container");
     if (container) {
       container.innerHTML = "";
@@ -573,21 +573,21 @@ export class LibraryScannerDialog {
       const manager = TaskQueueManager.getInstance();
       await manager.addTasks(selectedItems, false);
 
-      // 关闭对话框
+      // Close对话框
       win.close();
 
       // 显示成功提示
-      new ztoolkit.ProgressWindow("AI 管家", {
+      new ztoolkit.ProgressWindow("AI Butler", {
         closeTime: 3000,
       })
         .createLine({
-          text: `✅ 已将 ${selectedItems.length} 篇文献加入分析队列`,
+          text: `✅ 已将 ${selectedItems.length} items文献加入分析队列`,
           type: "success",
         })
         .show();
     } catch (error: any) {
       ztoolkit.log("[LibraryScanner] 加入队列失败:", error);
-      new ztoolkit.ProgressWindow("AI 管家", {
+      new ztoolkit.ProgressWindow("AI Butler", {
         closeTime: 3000,
       })
         .createLine({

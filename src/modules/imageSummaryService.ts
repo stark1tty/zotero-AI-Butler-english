@@ -1,9 +1,9 @@
 /**
  * ================================================================
- * 一图总结服务模块
+ * Image Summary服务模块
  * ================================================================
  *
- * 整合完整的一图总结工作流：
+ * 整合完整的Image Summary工作流：
  * 1. 提取论文 PDF 内容
  * 2. 调用 LLM 生成视觉摘要
  * 3. 调用 Gemini 生成学术概念海报
@@ -45,11 +45,11 @@ export type WorkflowProgressCallback = (
 ) => void;
 
 /**
- * 一图总结服务类
+ * Image Summary服务类
  */
 export class ImageSummaryService {
   /**
-   * 为文献条目生成一图总结
+   * 为文献条目生成Image Summary
    *
    * @param item Zotero 文献条目
    * @param progressCallback 进度回调
@@ -62,8 +62,8 @@ export class ImageSummaryService {
     const itemTitle = item.getField("title") as string;
 
     try {
-      // ========== 阶段 1: 获取论文内容 ==========
-      progressCallback?.("extracting", "正在提取论文内容...", 10);
+      // ========== 阶段 1: 获取Paper content ==========
+      progressCallback?.("extracting", "ExtractingPaper content...", 10);
 
       // 检查 PDF 文件大小限制
       const enableSizeLimit =
@@ -88,7 +88,7 @@ export class ImageSummaryService {
         (getPref("imageSummaryUseExistingNote" as any) as boolean) || false;
 
       if (useExistingNote) {
-        // 尝试获取已有的 AI 笔记内容
+        // 尝试获取已有的 AI Note content
         const existingNote = await NoteGenerator["findExistingNote"](item);
         if (existingNote) {
           const noteHtml = (existingNote as any).getNote?.() || "";
@@ -102,7 +102,7 @@ export class ImageSummaryService {
           );
         } else {
           // 没有已有笔记，回退到 PDF 提取
-          ztoolkit.log("[AI-Butler] 未找到已有 AI 笔记，使用 PDF 提取");
+          ztoolkit.log("[AI-Butler] Not found已有 AI 笔记，使用 PDF 提取");
           pdfContent = await this.extractPdfContent(item);
           isBase64 = this.isBase64Mode();
         }
@@ -113,7 +113,7 @@ export class ImageSummaryService {
       }
 
       // ========== 阶段 2: 生成视觉摘要 ==========
-      progressCallback?.("summarizing", "正在生成视觉摘要...", 30);
+      progressCallback?.("summarizing", "Generating visual summary...", 30);
 
       const visualSummary = await this.generateVisualSummary(
         pdfContent,
@@ -122,22 +122,26 @@ export class ImageSummaryService {
       );
 
       ztoolkit.log(
-        `[AI-Butler] 视觉摘要生成完成，长度: ${visualSummary.length}`,
+        `[AI-Butler] 视觉摘要Generation complete，长度: ${visualSummary.length}`,
       );
 
       // ========== 阶段 3: 生成学术概念海报 ==========
-      progressCallback?.("generating", "正在生成学术概念海报...", 60);
+      progressCallback?.(
+        "generating",
+        "Generating academic concept poster...",
+        60,
+      );
 
       const imagePrompt = this.buildImagePrompt(visualSummary, itemTitle);
 
       const imageResult = await ImageClient.generateImage(imagePrompt);
 
       ztoolkit.log(
-        `[AI-Butler] 图片生成完成，大小: ${Math.round(imageResult.imageBase64.length / 1024)} KB`,
+        `[AI-Butler] 图片Generation complete，大小: ${Math.round(imageResult.imageBase64.length / 1024)} KB`,
       );
 
       // ========== 阶段 4: 保存笔记 ==========
-      progressCallback?.("saving", "正在保存一图总结笔记...", 90);
+      progressCallback?.("saving", "Saving image summary note...", 90);
 
       const note = await ImageNoteGenerator.createImageNote(
         item,
@@ -145,20 +149,24 @@ export class ImageSummaryService {
         imageResult.mimeType,
       );
 
-      progressCallback?.("completed", "一图总结生成完成！", 100);
+      progressCallback?.(
+        "completed",
+        "Image summary generation complete!",
+        100,
+      );
 
       return note;
     } catch (error: any) {
-      progressCallback?.("failed", `生成失败: ${error.message}`, 0);
+      progressCallback?.("failed", `Generation failed: ${error.message}`, 0);
 
       // 记录详细错误日志
       if (error instanceof ImageGenerationError) {
         ztoolkit.log(
-          "[AI-Butler] 一图总结生成失败:",
+          "[AI-Butler] Image Summary生成失败:",
           ImageClient.formatError(error),
         );
       } else {
-        ztoolkit.log("[AI-Butler] 一图总结生成失败:", error);
+        ztoolkit.log("[AI-Butler] Image Summary生成失败:", error);
       }
 
       throw error;

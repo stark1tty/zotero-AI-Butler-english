@@ -30,7 +30,7 @@ export interface APITestResult {
   rawResponse: string; // 原始 JSON 响应文本
 }
 
-// API 连接测试错误详情
+// API 连接测试Error详情
 export interface APITestErrorDetails {
   errorName: string;
   errorMessage: string;
@@ -41,7 +41,7 @@ export interface APITestErrorDetails {
   responseBody?: string;
 }
 
-// API 连接测试错误类
+// API 连接测试Error类
 export class APITestError extends Error {
   details: APITestErrorDetails;
   constructor(message: string, details: APITestErrorDetails) {
@@ -50,12 +50,12 @@ export class APITestError extends Error {
     this.details = details;
   }
 
-  // 格式化为用户友好的错误报告
+  // 格式化为用户友好的Error报告
   formatReport(): string {
     const d = this.details;
     const lines: string[] = [];
-    lines.push(`错误名称: ${d.errorName}`);
-    lines.push(`错误信息: ${d.errorMessage}`);
+    lines.push(`Error名称: ${d.errorName}`);
+    lines.push(`Error信息: ${d.errorMessage}`);
     if (d.statusCode !== undefined) {
       lines.push(`状态码: ${d.statusCode}`);
     }

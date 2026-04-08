@@ -12,7 +12,7 @@
  * 4. 根据需要截断文本以适应 API 限制
  *
  * 技术实现:
- * - 可选Zotero 的全文索引功能, 或PDF解析APIMinerU
+ * - OptionalZotero 的全文索引功能, 或PDF解析APIMinerU
  * - 自动触发索引,确保文本可用性
  * - 提供多级文本清理,去除 PDF 常见伪影
  *
@@ -103,7 +103,7 @@ export class PDFExtractor {
    * 用于在处理前检查文件大小，避免处理过大的扫描版 PDF
    *
    * @param item Zotero 文献条目对象
-   * @returns 文件大小 (MB), 如果无法获取则返回 0
+   * @returns 文件大小 (MB), 如果Cannot get则返回 0
    */
   public static async getPdfFileSize(item: Zotero.Item): Promise<number> {
     try {
@@ -187,7 +187,7 @@ export class PDFExtractor {
       throw new Error("No attachments found for this item");
     }
 
-    // 策略修改: 获取所有 PDF 并按添加时间排序，取最早的一个 (通常是原文)
+    // 策略Modify: 获取所有 PDF 并按添加时间排序，取最早的一个 (通常是原文)
     const pdfAttachments: Zotero.Item[] = [];
 
     for (const attachmentID of attachments) {
@@ -420,7 +420,7 @@ export class PDFExtractor {
       return truncated.substring(0, lastPeriod + 1);
     }
 
-    // 无法找到合适的句子边界,添加省略号标记
+    // Cannot find合适的句子边界,添加省略号标记
     return truncated + "...";
   }
 
@@ -429,11 +429,11 @@ export class PDFExtractor {
    *
    * 用于支持多模态大模型(如 Gemini)直接处理 PDF 文件
    * Base64 编码后的 PDF 可以直接发送给 API,保留完整的文档信息
-   * 包括图片、表格、公式等文本提取无法获取的内容
+   * 包括图片、表格、公式等文本提取Cannot get的内容
    *
    * @param item Zotero 文献条目对象
    * @returns Base64 编码的 PDF 字符串
-   * @throws 当无法读取 PDF 文件时抛出错误
+   * @throws 当Cannot read PDF 文件时抛出错误
    *
    * @example
    * ```typescript
@@ -452,7 +452,7 @@ export class PDFExtractor {
       throw new Error("No attachments found for this item");
     }
 
-    // 策略修改: 获取所有 PDF 并按添加时间排序，取最早的一个
+    // 策略Modify: 获取所有 PDF 并按添加时间排序，取最早的一个
     const pdfAttachments: Zotero.Item[] = [];
 
     for (const attachmentID of attachments) {

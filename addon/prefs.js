@@ -48,23 +48,23 @@ pref("__prefsPrefix__.requestTimeout", "300000"); // 5分钟超时
 // MINERU API KEY
 pref("__prefsPrefix__.mineruApiKey", "");
 
-// ==================== 提示词配置 ====================
+// ==================== Prompt Configuration ====================
 pref(
   "__prefsPrefix__.summaryPrompt",
-  "# 角色\n您好，我是您的AI管家。我将为您 meticulously 地阅读这篇论文，并为您整理一份详尽的笔记。\n\n# 任务\n请为我分析下方提供的学术论文，并生成一份包含以下三个部分的综合性总结：\n\n### 第一部分：核心摘要\n请用一个段落高度概括论文的核心内容，包括研究问题、方法、关键发现和主要结论，让我能迅速掌握论文的精髓。\n\n### 第二部分：章节详解\n请识别并划分论文的主要章节（如引言、方法、结果、讨论等），并为每个章节提供一个清晰的标题和详细的内容总结。\n\n### 第三部分：创新与局限\n请根据论文内容，分析并总结其主要创新点和存在的局限性，并指出未来可能的研究方向。\n\n# 输出要求\n- 结构清晰，逻辑严谨。\n- 语言精炼，准确传达。\n- 请使用中文进行回答。",
+  "# Role\nHello, I am your AI Butler. I will meticulously read this paper and organize comprehensive notes for you.\n\n# Task\nPlease analyze the academic paper provided below and generate a comprehensive summary containing the following three sections:\n\n### Section 1: Core Summary\nProvide a one-paragraph overview of the paper's core content, including the research question, methods, key findings, and main conclusions, allowing me to quickly grasp the essence of the paper.\n\n### Section 2: Section Analysis\nIdentify and divide the paper's main sections (such as Introduction, Methods, Results, Discussion, etc.), and provide a clear title and detailed content summary for each section.\n\n### Section 3: Innovation and Limitations\nBased on the paper's content, analyze and summarize its main innovations and existing limitations, and point out possible future research directions.\n\n# Output Requirements\n- Clear structure and rigorous logic\n- Concise language that accurately conveys information\n- Please respond in English.",
 );
 pref("__prefsPrefix__.customPrompts", "[]");
-// 多轮对话总结模式: "single"(单次对话) | "multi_concat"(多轮拼接) | "multi_summarize"(多轮后总结)
+// Multi-round summary mode: "single"(single conversation) | "multi_concat"(multi-round concatenation) | "multi_summarize"(multi-round with final summary)
 pref("__prefsPrefix__.summaryMode", "single");
-// 多轮提示词 (JSON 数组): 每个元素包含 id、title、prompt、order
+// Multi-round prompts (JSON array): each element contains id, title, prompt, order
 pref(
   "__prefsPrefix__.multiRoundPrompts",
-  '[{"id":"round1","title":"研究背景与问题","prompt":"请详细介绍这篇论文的研究背景和动机。具体包括：1) 这个研究领域目前面临哪些主要挑战？2) 现有方法存在什么不足？3) 本文要解决的核心问题是什么？请用中文回答。","order":1},{"id":"round2","title":"研究方法与技术","prompt":"请详细解释这篇论文提出的方法和技术。具体包括：1) 核心方法/算法/框架是什么？2) 关键技术细节和创新点有哪些？3) 与现有方法相比有什么改进？请用中文回答。","order":2},{"id":"round3","title":"实验设计与结果","prompt":"请详细分析这篇论文的实验部分。具体包括：1) 使用了哪些数据集和评价指标？2) 主要的实验结果是什么？3) 与基线方法相比表现如何？4) 有哪些消融实验和分析？请用中文回答。","order":3},{"id":"round4","title":"结论与展望","prompt":"请总结这篇论文的结论和贡献。具体包括：1) 论文的主要贡献和创新点是什么？2) 存在哪些局限性？3) 未来可能的研究方向有哪些？请用中文回答。","order":4}]',
+  '[{"id":"round1","title":"Background and Research Question","prompt":"Please introduce the research background and motivation of this paper in detail. Specifically: 1) What are the main challenges currently facing this research field? 2) What are the shortcomings of existing methods? 3) What is the core problem this paper aims to solve? Please answer in English.","order":1},{"id":"round2","title":"Methods and Techniques","prompt":"Please explain the methods and techniques proposed in this paper in detail. Specifically: 1) What is the core method/algorithm/framework? 2) What are the key technical details and innovations? 3) What improvements does it make compared to existing methods? Please answer in English.","order":2},{"id":"round3","title":"Experimental Design and Results","prompt":"Please analyze the experimental section of this paper in detail. Specifically: 1) What datasets and evaluation metrics were used? 2) What are the main experimental results? 3) How does it perform compared to baseline methods? 4) What ablation studies and analyses were conducted? Please answer in English.","order":3},{"id":"round4","title":"Conclusions and Future Work","prompt":"Please summarize the conclusions and contributions of this paper. Specifically: 1) What are the main contributions and innovations? 2) What limitations exist? 3) What are possible future research directions? Please answer in English.","order":4}]',
 );
-// 多轮对话后的最终总结提示词
+// Final summary prompt after multi-round conversation
 pref(
   "__prefsPrefix__.multiRoundFinalPrompt",
-  "基于以上多轮对话的内容，请为我生成一份完整、结构化的论文总结笔记。要求：\\n1. 开头用一段话概括论文的核心内容\\n2. 分章节整理各部分的关键信息\\n3. 突出论文的创新点和贡献\\n4. 指出论文的局限性和未来方向\\n5. 语言简洁清晰，使用中文",
+  "Based on the multi-round conversation above, please generate a complete, structured paper summary note. Requirements:\\n1. Begin with a paragraph summarizing the core content\\n2. Organize key information from each section\\n3. Highlight the paper's innovations and contributions\\n4. Point out the paper's limitations and future directions\\n5. Use clear and concise language in English",
 );
 // 多轮总结模式下是否保存中间对话内容到笔记（仅对 multi_summarize 生效）
 pref("__prefsPrefix__.multiSummarySaveIntermediate", false);

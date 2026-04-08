@@ -23,7 +23,7 @@ export class DataSettingsPage {
     this.container.innerHTML = "";
 
     const title = Zotero.getMainWindow().document.createElement("h2");
-    title.textContent = "💾 数据管理";
+    title.textContent = "💾 Data Management";
     Object.assign(title.style, {
       color: "#59c0bc",
       marginBottom: "20px",
@@ -34,13 +34,15 @@ export class DataSettingsPage {
     this.container.appendChild(title);
 
     this.container.appendChild(
-      createNotice("包含任务队列清理、设置导入/导出与一键重置等工具。"),
+      createNotice(
+        "Includes task queue cleanup, settings import/export, and one-click reset tools.",
+      ),
     );
 
     const section = Zotero.getMainWindow().document.createElement("div");
     Object.assign(section.style, { maxWidth: "820px" });
 
-    // 任务统计
+    // Task statistics
     const stats = this.getStats();
     const statsBox = Zotero.getMainWindow().document.createElement("div");
     Object.assign(statsBox.style, {
@@ -51,9 +53,9 @@ export class DataSettingsPage {
     });
 
     const statConfigs = [
-      { label: "总任务", val: stats.total.toString(), icon: "📊" },
-      { label: "已完成", val: stats.completed.toString(), icon: "✅" },
-      { label: "失败", val: stats.failed.toString(), icon: "⚠️" },
+      { label: "Total Tasks", val: stats.total.toString(), icon: "📊" },
+      { label: "Completed", val: stats.completed.toString(), icon: "✅" },
+      { label: "Failed", val: stats.failed.toString(), icon: "⚠️" },
     ];
 
     statConfigs.forEach((s) => {
@@ -67,65 +69,80 @@ export class DataSettingsPage {
 
     section.appendChild(statsBox);
 
-    // 操作按钮行
+    // Action button row
     const row1 = Zotero.getMainWindow().document.createElement("div");
     Object.assign(row1.style, {
       display: "flex",
       gap: "12px",
       marginBottom: "12px",
     });
-    const btnClearDone = createStyledButton("🧹 清空已完成任务", "#9e9e9e");
+    const btnClearDone = createStyledButton(
+      "🧹 Clear Completed Tasks",
+      "#9e9e9e",
+    );
     btnClearDone.addEventListener("click", async () => {
       await TaskQueueManager.getInstance().clearCompleted();
       this.render();
-      new ztoolkit.ProgressWindow("数据管理")
-        .createLine({ text: "已清空已完成任务", type: "success" })
+      new ztoolkit.ProgressWindow("Data Management")
+        .createLine({ text: "Completed tasks cleared", type: "success" })
         .show();
     });
-    const btnClearAll = createStyledButton("🗑️ 清空所有任务", "#f44336");
+    const btnClearAll = createStyledButton("🗑️ Clear All Tasks", "#f44336");
     btnClearAll.addEventListener("click", async () => {
       const ok = Services.prompt.confirm(
         Zotero.getMainWindow() as any,
-        "清空任务",
-        "确定清空所有任务吗?",
+        "Clear Tasks",
+        "Are you sure you want to clear all tasks?",
       );
       if (!ok) return;
       await TaskQueueManager.getInstance().clearAll();
       this.render();
-      new ztoolkit.ProgressWindow("数据管理")
-        .createLine({ text: "所有任务已清空", type: "success" })
+      new ztoolkit.ProgressWindow("Data Management")
+        .createLine({ text: "All tasks cleared", type: "success" })
         .show();
     });
-    const btnClearEmptyNotes = createStyledButton("🧹 清空空笔记", "#ff9800");
+    const btnClearEmptyNotes = createStyledButton(
+      "🧹 Clear Empty Notes",
+      "#ff9800",
+    );
     btnClearEmptyNotes.addEventListener("click", () => this.clearEmptyNotes());
     row1.appendChild(btnClearDone);
     row1.appendChild(btnClearAll);
     row1.appendChild(btnClearEmptyNotes);
     section.appendChild(row1);
 
-    // 设置导出/导入
+    // Settings export/import
     const row2 = Zotero.getMainWindow().document.createElement("div");
     Object.assign(row2.style, {
       display: "flex",
       gap: "12px",
       marginBottom: "12px",
     });
-    const btnExport = createStyledButton("📤 导出设置(JSON)", "#2196f3");
+    const btnExport = createStyledButton(
+      "📤 Export Settings (JSON)",
+      "#2196f3",
+    );
     btnExport.addEventListener("click", () => this.exportSettings());
-    const btnImport = createStyledButton("📥 导入设置(JSON)", "#673ab7");
+    const btnImport = createStyledButton(
+      "📥 Import Settings (JSON)",
+      "#673ab7",
+    );
     btnImport.addEventListener("click", () => this.importSettings());
     row2.appendChild(btnExport);
     row2.appendChild(btnImport);
     section.appendChild(row2);
 
-    // 一键重置
+    // One-click reset
     const row3 = Zotero.getMainWindow().document.createElement("div");
     Object.assign(row3.style, {
       display: "flex",
       gap: "12px",
       marginBottom: "12px",
     });
-    const btnResetAll = createStyledButton("♻️ 恢复所有默认设置", "#9e9e9e");
+    const btnResetAll = createStyledButton(
+      "♻️ Restore All Default Settings",
+      "#9e9e9e",
+    );
     btnResetAll.addEventListener("click", () => this.resetAll());
     section.appendChild(row3);
     row3.appendChild(btnResetAll);
@@ -145,7 +162,7 @@ export class DataSettingsPage {
   }
 
   private exportSettings(): void {
-    // 采集 prefs.d.ts 中声明的键
+    // Collect keys declared in prefs.d.ts
     const keys = [
       "provider",
       "openaiApiKey",
@@ -182,13 +199,13 @@ export class DataSettingsPage {
       try {
         data[k] = getPref(k as any);
       } catch (e) {
-        // 忽略单个首选项读取失败
+        // Ignore individual preference read failures
         return;
       }
     });
     const json = JSON.stringify(data, null, 2);
 
-    // 用对话框展示,方便复制
+    // Display in dialog for easy copying
     const win = Zotero.getMainWindow().document;
     const overlay = win.createElement("div");
     Object.assign(overlay.style, {
@@ -217,7 +234,7 @@ export class DataSettingsPage {
       fontSize: "12px",
     });
     ta.value = json;
-    const close = createStyledButton("关闭", "#9e9e9e");
+    const close = createStyledButton("Close", "#9e9e9e");
     close.addEventListener("click", () => overlay.remove());
     modal.appendChild(ta);
     modal.appendChild(close);
@@ -230,8 +247,8 @@ export class DataSettingsPage {
     const text = { value: "" } as any;
     const ok = Services.prompt.prompt(
       win,
-      "导入设置",
-      "粘贴 JSON: ",
+      "Import Settings",
+      "Paste JSON: ",
       text,
       "",
       { value: false },
@@ -243,17 +260,17 @@ export class DataSettingsPage {
         try {
           setPref(k as any, v as any);
         } catch (e) {
-          // 忽略无法设置的项，继续处理其他项
+          // Ignore items that cannot be set, continue processing others
           return;
         }
       });
-      new ztoolkit.ProgressWindow("导入设置")
-        .createLine({ text: "✅ 导入成功", type: "success" })
+      new ztoolkit.ProgressWindow("Import Settings")
+        .createLine({ text: "✅ Import Successful", type: "success" })
         .show();
       this.render();
     } catch (e: any) {
-      new ztoolkit.ProgressWindow("导入设置")
-        .createLine({ text: `❌ 解析失败: ${e.message}`, type: "fail" })
+      new ztoolkit.ProgressWindow("Import Settings")
+        .createLine({ text: `❌ Parsing Failed: ${e.message}`, type: "fail" })
         .show();
     }
   }
@@ -261,12 +278,12 @@ export class DataSettingsPage {
   private resetAll(): void {
     const ok = Services.prompt.confirm(
       Zotero.getMainWindow() as any,
-      "恢复默认",
-      "将重置大多数插件设置,继续吗?",
+      "Restore Defaults",
+      "This will reset most plugin settings. Continue?",
     );
     if (!ok) return;
 
-    // 恢复常用项
+    // Restore common items
     setPref("summaryPrompt", getDefaultSummaryPrompt());
     setPref("provider", "openai");
     setPref("openaiApiUrl", "https://api.openai.com/v1/responses");
@@ -289,25 +306,25 @@ export class DataSettingsPage {
     setPref("batchInterval", "60");
     clearPref("customPrompts");
 
-    // 任务队列本地存储
+    // Task queue local storage
     Zotero.Prefs.clear("extensions.zotero.aibutler.taskQueue", true);
 
-    new ztoolkit.ProgressWindow("数据管理")
-      .createLine({ text: "✅ 已恢复默认设置", type: "success" })
+    new ztoolkit.ProgressWindow("Data Management")
+      .createLine({ text: "✅ Restored to Default Settings", type: "success" })
       .show();
     this.render();
   }
 
   /**
-   * 清空所有空的 AI 笔记
+   * Clear all empty AI notes
    *
-   * 扫描库中所有论文，删除只有标题没有实际内容的 AI 笔记
+   * Scan all papers in the library and delete AI notes that only have a title but no actual content
    */
   private async clearEmptyNotes(): Promise<void> {
     const ok = Services.prompt.confirm(
       Zotero.getMainWindow() as any,
-      "清空空笔记",
-      "此操作将扫描库中所有论文，删除只有标题没有实际内容的 AI 笔记。\n\n确定继续吗？",
+      "Clear Empty Notes",
+      "This operation will scan all papers in the library and delete AI notes that only have a title but no actual content.\n\nContinue?",
     );
     if (!ok) return;
 
@@ -315,13 +332,13 @@ export class DataSettingsPage {
     let scannedCount = 0;
 
     try {
-      // 获取所有条目
+      // Get all items
       const allItems = await Zotero.Items.getAll(
         Zotero.Libraries.userLibraryID,
       );
 
       for (const item of allItems) {
-        // 跳过非普通条目（如笔记、附件等）
+        // Skip non-regular items (e.g. notes, attachments)
         if (!item.isRegularItem()) continue;
 
         scannedCount++;
@@ -331,41 +348,41 @@ export class DataSettingsPage {
           const note = await Zotero.Items.getAsync(noteID);
           if (!note) continue;
 
-          // 检查是否是 AI 生成的笔记
+          // Check if this is an AI-generated note
           const tags: Array<{ tag: string }> = (note as any).getTags?.() || [];
           const hasTag = tags.some((t) => t.tag === "AI-Generated");
           const noteHtml: string = (note as any).getNote?.() || "";
-          const titleMatch = /<h2>\s*AI 管家\s*-/.test(noteHtml);
+          const titleMatch = /<h2>\s*(AI Butler|AI 管家)\s*-/.test(noteHtml);
 
           if (!hasTag && !titleMatch) continue;
 
-          // 检查笔记内容是否为空
-          // 移除标题和包装标签后检查剩余内容
+          // Check if note content is empty
+          // Remove title and wrapper tags then check remaining content
           const contentWithoutTitle = noteHtml
             .replace(/<h2>.*?<\/h2>/gi, "")
             .replace(/<div>|<\/div>/gi, "")
-            .replace(/<[^>]+>/g, "") // 移除所有 HTML 标签
+            .replace(/<[^>]+>/g, "") // Remove all HTML tags
             .trim();
 
           if (!contentWithoutTitle) {
-            // 这是一个空笔记，删除它
+            // This is an empty note, delete it
             await (note as any).eraseTx?.();
             deletedCount++;
           }
         }
       }
 
-      new ztoolkit.ProgressWindow("数据管理")
+      new ztoolkit.ProgressWindow("Data Management")
         .createLine({
-          text: `✅ 已扫描 ${scannedCount} 篇论文，删除 ${deletedCount} 个空笔记`,
+          text: `✅ Scanned ${scannedCount} papers, deleted ${deletedCount} empty notes`,
           type: "success",
         })
         .show();
     } catch (error: any) {
-      ztoolkit.log("[AI Butler] 清空空笔记失败:", error);
-      new ztoolkit.ProgressWindow("数据管理")
+      ztoolkit.log("[AI Butler] Failed to clear empty notes:", error);
+      new ztoolkit.ProgressWindow("Data Management")
         .createLine({
-          text: `❌ 操作失败: ${error.message}`,
+          text: `❌ Operation Failed: ${error.message}`,
           type: "fail",
         })
         .show();

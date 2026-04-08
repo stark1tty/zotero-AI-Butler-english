@@ -416,20 +416,20 @@ export function createSelect(
       e.stopPropagation();
       const newValue = item.getAttribute("data-value")!;
 
-      // 更新容器的当前值
+      // Update容器的当前值
       container.setAttribute("data-value", newValue);
 
-      // 更新显示文本
+      // Update显示文本
       display.childNodes[0].textContent = opt.label;
 
-      // 更新所有选项的背景色
+      // Update所有选项的背景色
       dropdown.querySelectorAll("div").forEach((el: Element) => {
         const elValue = el.getAttribute("data-value");
         (el as HTMLElement).style.backgroundColor =
           elValue === newValue ? "var(--ai-accent-tint)" : "var(--ai-surface)";
       });
 
-      // 关闭下拉框
+      // Close下拉框
       dropdown.style.display = "none";
       arrow.textContent = "▼";
 
@@ -460,7 +460,7 @@ export function createSelect(
     }
   });
 
-  // 点击外部关闭下拉框
+  // 点击外部Close下拉框
   doc.addEventListener(
     "click",
     () => {
@@ -525,14 +525,14 @@ export function createCheckbox(id: string, checked: boolean): HTMLElement {
   });
 
   const label = doc.createElement("span");
-  label.textContent = checked ? "已启用" : "已禁用";
+  label.textContent = checked ? "Enabled" : "Disabled";
   Object.assign(label.style, {
     fontSize: "14px",
     color: "var(--ai-text-muted)",
   });
 
   checkbox.addEventListener("change", () => {
-    label.textContent = checkbox.checked ? "已启用" : "已禁用";
+    label.textContent = checkbox.checked ? "Enabled" : "Disabled";
   });
 
   container.appendChild(checkbox);
@@ -634,7 +634,7 @@ export function createNotice(
 export type CardType = "stat" | "activity" | "generic";
 
 interface CardOptions {
-  accentColor?: string; // 统计卡片左侧或主色（可选）
+  accentColor?: string; // 统计卡片左侧或主色（Optional）
   icon?: string; // 右上角或背景图标
   value?: string; // 主数值（stat）
   extra?: HTMLElement | string; // 右侧附加内容（如按钮/徽标）
@@ -684,7 +684,7 @@ export function createCard(
 
   if (type === "stat") {
     const valueEl = doc.createElement("div");
-    // 兼容旧选择器 .stat-value，避免现有视图更新逻辑失效
+    // 兼容旧选择器 .stat-value，避免现有视图Update逻辑失效
     valueEl.className = "ai-card__value stat-value";
     valueEl.textContent = opts.value || "-";
     body.appendChild(valueEl);
@@ -708,7 +708,7 @@ export function createCard(
   card.appendChild(header);
   card.appendChild(body);
 
-  // 便捷访问更新数值的方法
+  // 便捷访问Update数值的方法
   (card as any).setValue = (val: string) => {
     const v = card.querySelector(".ai-card__value");
     if (v) v.textContent = val;

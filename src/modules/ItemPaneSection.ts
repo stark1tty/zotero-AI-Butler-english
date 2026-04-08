@@ -132,7 +132,7 @@ async function runSidebarRefresh(): Promise<void> {
       "ai-butler-note-content",
     ) as HTMLElement | null;
     if (noteContent) {
-      noteContent.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">正在刷新...</div>`;
+      noteContent.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">Refreshing...</div>`;
       await loadNoteContent(doc, item, noteContent);
     }
   }
@@ -145,7 +145,7 @@ async function runSidebarRefresh(): Promise<void> {
       "ai-butler-image-btn-container",
     ) as HTMLElement | null;
     if (imageContainer && imageBtnContainer) {
-      imageContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">正在刷新...</div>`;
+      imageContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">Refreshing...</div>`;
       await loadImageSummary(doc, item, imageContainer, imageBtnContainer);
     }
   }
@@ -155,7 +155,7 @@ async function runSidebarRefresh(): Promise<void> {
       "ai-butler-mindmap-container",
     ) as HTMLElement | null;
     if (mindmapContainer) {
-      mindmapContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">正在刷新...</div>`;
+      mindmapContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">Refreshing...</div>`;
       await loadMindmapContent(doc, item, mindmapContainer);
     }
   }
@@ -165,7 +165,7 @@ async function runSidebarRefresh(): Promise<void> {
       "ai-butler-table-content",
     ) as HTMLElement | null;
     if (tableContent) {
-      tableContent.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">正在刷新...</div>`;
+      tableContent.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">Refreshing...</div>`;
       await loadTableContent(item, tableContent);
     }
   }
@@ -194,7 +194,7 @@ async function ensureSidebarAutoRefresh(): Promise<void> {
 /**
  * 注册条目面板侧边栏区块
  *
- * @param handleOpenAIChat 打开 AI 追问的回调函数
+ * @param handleOpenAIChat Open AI 追问的回调函数
  */
 export function registerItemPaneSection(
   handleOpenAIChat: (itemId: number) => Promise<void>,
@@ -208,12 +208,12 @@ export function registerItemPaneSection(
       pluginID: pluginID,
       header: {
         l10nID: getLocaleID("itempane-ai-section-header" as any),
-        label: "AI 管家",
+        label: "AI Butler",
         icon: rootURI + "icons/icon24.png",
       },
       sidenav: {
         l10nID: getLocaleID("itempane-ai-section-sidenav" as any),
-        tooltiptext: "AI 管家",
+        tooltiptext: "AI Butler",
         icon: rootURI + "icons/icon24.png",
       },
       onRender: ({ body, item, editable, tabType }: any) => {
@@ -221,9 +221,9 @@ export function registerItemPaneSection(
       },
     });
 
-    ztoolkit.log("[AI-Butler] 条目面板区块已注册");
+    ztoolkit.log("[AI-Butler] Item pane section registered");
   } catch (error) {
-    ztoolkit.log("[AI-Butler] 注册条目面板区块失败:", error);
+    ztoolkit.log("[AI-Butler] Failed to register item pane section:", error);
   }
 }
 
@@ -240,7 +240,7 @@ function renderItemPaneSection(
 
   // 安全检查 doc
   if (!doc) {
-    ztoolkit.log("[AI-Butler] 无法获取 ownerDocument");
+    ztoolkit.log("[AI-Butler] Cannot get ownerDocument");
     return;
   }
 
@@ -357,7 +357,7 @@ function renderActionButtons(
     try {
       await handleOpenAIChat(item.id);
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] 完整追问按钮点击失败:", error);
+      ztoolkit.log("[AI-Butler] Full follow-up button click failed:", error);
     }
   });
 
@@ -369,10 +369,10 @@ function renderActionButtons(
   );
   quickChatBtn.id = "ai-butler-quick-chat-btn";
 
-  // 刷新按钮
+  // Refresh按钮
   const refreshBtn = doc.createElement("button");
   refreshBtn.id = "ai-butler-refresh-btn";
-  refreshBtn.title = "刷新AI笔记、一图总结和思维导图";
+  refreshBtn.title = "Refresh AI Note, Image Summary, and Mind Map";
   refreshBtn.textContent = "🔄";
   refreshBtn.style.cssText = `
     padding: 8px 12px;
@@ -395,19 +395,19 @@ function renderActionButtons(
     refreshBtn.style.background = "transparent";
   });
   refreshBtn.addEventListener("click", async () => {
-    // 显示刷新中状态
+    // 显示Refresh中状态
     refreshBtn.textContent = "⏳";
     refreshBtn.style.pointerEvents = "none";
     try {
-      // 刷新 AI 笔记
+      // Refresh AI 笔记
       const noteContent = doc.getElementById(
         "ai-butler-note-content",
       ) as HTMLElement | null;
       if (noteContent) {
-        noteContent.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">正在刷新...</div>`;
+        noteContent.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">Refreshing...</div>`;
         await loadNoteContent(doc, item, noteContent);
       }
-      // 刷新一图总结
+      // Refresh一图总结
       const imageContainer = doc.getElementById(
         "ai-butler-image-container",
       ) as HTMLElement | null;
@@ -415,20 +415,20 @@ function renderActionButtons(
         "ai-butler-image-btn-container",
       ) as HTMLElement | null;
       if (imageContainer && imageBtnContainer) {
-        imageContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">正在刷新...</div>`;
+        imageContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">Refreshing...</div>`;
         imageBtnContainer.innerHTML = "";
         await loadImageSummary(doc, item, imageContainer, imageBtnContainer);
       }
-      // 刷新思维导图
+      // Refresh思维导图
       const mindmapContainer = doc.getElementById(
         "ai-butler-mindmap-container",
       ) as HTMLElement | null;
       if (mindmapContainer) {
-        mindmapContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">正在刷新...</div>`;
+        mindmapContainer.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">Refreshing...</div>`;
         await loadMindmapContent(doc, item, mindmapContainer);
       }
     } catch (err: any) {
-      ztoolkit.log("[AI-Butler] 刷新失败:", err);
+      ztoolkit.log("[AI-Butler] Refresh failed:", err);
     } finally {
       // 恢复按钮状态
       refreshBtn.textContent = "🔄";
@@ -489,7 +489,7 @@ function renderNoteSection(
     align-items: center;
     gap: 6px;
   `;
-  noteTitle.innerHTML = `📄 <span>AI 笔记</span>`;
+  noteTitle.innerHTML = `📄 <span>AI Note</span>`;
 
   // 字体大小控制
   const fontSizeControl = doc.createElement("div");
@@ -532,7 +532,7 @@ function renderNoteSection(
     savedNoteHeight = DEFAULT_NOTE_HEIGHT;
   }
 
-  // 笔记内容区域
+  // Note content区域
   const noteContentWrapper = doc.createElement("div");
   noteContentWrapper.className = "ai-butler-note-content-wrapper";
   noteContentWrapper.style.cssText = `
@@ -622,7 +622,7 @@ function renderNoteSection(
   // 添加内置主题选项
   const themes = [
     { id: "github", name: "GitHub" },
-    { id: "redstriking", name: "红印" },
+    { id: "redstriking", name: "Red Striking" },
   ];
   const currentTheme = (
     (getPref("markdownTheme" as any) as string) || "github"
@@ -656,7 +656,7 @@ function renderNoteSection(
   // 恢复默认高度按钮
   const resetHeightBtn = doc.createElement("button");
   resetHeightBtn.textContent = "↕";
-  resetHeightBtn.title = "恢复默认高度";
+  resetHeightBtn.title = "Reset to Default Height";
   resetHeightBtn.style.cssText = `
     width: 20px;
     height: 20px;
@@ -688,7 +688,7 @@ function renderNoteSection(
   // 复制 Markdown 按钮
   const copyBtn = doc.createElement("button");
   copyBtn.textContent = "📋";
-  copyBtn.title = "复制为 Markdown";
+  copyBtn.title = "Copy as Markdown";
   copyBtn.id = "ai-butler-copy-note-btn";
   copyBtn.style.cssText = `
     width: 20px;
@@ -727,7 +727,7 @@ function renderNoteSection(
         copyBtn.style.color = "inherit";
       }, 1500);
     } catch (err) {
-      ztoolkit.log("[AI-Butler] 复制笔记失败:", err);
+      ztoolkit.log("[AI-Butler] Failed to copy note:", err);
       copyBtn.textContent = "❌";
       setTimeout(() => {
         copyBtn.textContent = "📋";
@@ -804,7 +804,7 @@ function renderNoteSection(
   noteSection.appendChild(resizeHandle);
   body.appendChild(noteSection);
 
-  // 异步加载笔记内容
+  // 异步加载Note content
   loadNoteContent(doc, item, noteContent);
 }
 
@@ -848,11 +848,11 @@ async function loadTableContent(
         });
       });
     } else {
-      container.innerHTML = `<div style="color: #9e9e9e; font-size: 12px; text-align: center; padding: 12px;">暂无填表数据</div>`;
+      container.innerHTML = `<div style="color: #9e9e9e; font-size: 12px; text-align: center; padding: 12px;">No table data available</div>`;
     }
   } catch (error) {
-    ztoolkit.log("[AI-Butler] 加载表格内容失败:", error);
-    container.innerHTML = `<div style="color: #9e9e9e; font-size: 12px; text-align: center; padding: 12px;">加载失败</div>`;
+    ztoolkit.log("[AI-Butler] Failed to load table content:", error);
+    container.innerHTML = `<div style="color: #9e9e9e; font-size: 12px; text-align: center; padding: 12px;">Loading failed</div>`;
   }
 }
 
@@ -899,7 +899,7 @@ function renderTableSection(
     align-items: center;
     gap: 6px;
   `;
-  tableTitle.innerHTML = `📊 <span>表格归纳</span>`;
+  tableTitle.innerHTML = `📊 <span>Table Summary</span>`;
 
   // 异步加载综述状态徽章
   void (async () => {
@@ -926,15 +926,15 @@ function renderTableSection(
 
     let badges = "";
     if (hasTable) {
-      badges += `<span style="margin-left:6px;padding:1px 5px;border-radius:3px;font-size:9px;background:rgba(76,175,80,0.15);color:#4caf50;">📊 已填表</span>`;
+      badges += `<span style="margin-left:6px;padding:1px 5px;border-radius:3px;font-size:9px;background:rgba(76,175,80,0.15);color:#4caf50;">📊 Table Filled</span>`;
     }
     if (isReviewed) {
-      badges += `<span style="margin-left:4px;padding:1px 5px;border-radius:3px;font-size:9px;background:rgba(99,102,241,0.15);color:#6366f1;">✅ 已综述</span>`;
+      badges += `<span style="margin-left:4px;padding:1px 5px;border-radius:3px;font-size:9px;background:rgba(99,102,241,0.15);color:#6366f1;">✅ Reviewed</span>`;
     }
     if (badges) {
       const titleSpan = tableTitle.querySelector("span");
       if (titleSpan) {
-        titleSpan.innerHTML = `表格归纳${badges}`;
+        titleSpan.innerHTML = `Table Summary${badges}`;
       }
     }
   })();
@@ -952,8 +952,8 @@ function renderTableSection(
 
   // 重新填表按钮
   const refillBtn = doc.createElement("button");
-  refillBtn.textContent = "🔄 重新生成";
-  refillBtn.title = "重新填表";
+  refillBtn.textContent = "🔄 Regenerate";
+  refillBtn.title = "Regenerate Table";
   refillBtn.style.cssText = `
     padding: 2px 8px;
     border: 1px solid currentColor;
@@ -977,7 +977,7 @@ function renderTableSection(
     refillBtn.style.background = "transparent";
   });
   refillBtn.addEventListener("click", async () => {
-    refillBtn.textContent = "⏳ 生成中...";
+    refillBtn.textContent = "⏳ Generating...";
     refillBtn.style.pointerEvents = "none";
     try {
       const { LiteratureReviewService } =
@@ -1019,7 +1019,7 @@ function renderTableSection(
         }
       }
 
-      // 刷新内容
+      // Refresh内容
       const tableContent = doc.getElementById(
         "ai-butler-table-content",
       ) as HTMLElement | null;
@@ -1027,9 +1027,9 @@ function renderTableSection(
         await loadTableContent(item, tableContent);
       }
     } catch (err) {
-      ztoolkit.log("[AI-Butler] 重新填表失败:", err);
+      ztoolkit.log("[AI-Butler] Failed to regenerate table:", err);
     } finally {
-      refillBtn.textContent = "🔄 重新生成";
+      refillBtn.textContent = "🔄 Regenerate";
       refillBtn.style.pointerEvents = "auto";
     }
   });
@@ -1178,7 +1178,7 @@ function renderImageSummarySection(
     align-items: center;
     gap: 6px;
   `;
-  imageSummaryTitle.innerHTML = `🖼️ <span>一图总结</span>`;
+  imageSummaryTitle.innerHTML = `🖼️ <span>Image Summary</span>`;
 
   // 按钮容器
   const imageBtnContainer = doc.createElement("div");
@@ -1296,7 +1296,7 @@ function renderMindmapSection(
     align-items: center;
     gap: 6px;
   `;
-  mindmapTitle.innerHTML = `🧠 <span>思维导图</span>`;
+  mindmapTitle.innerHTML = `🧠 <span>Mind Map</span>`;
 
   const mindmapToggleIcon = doc.createElement("span");
   mindmapToggleIcon.textContent = "▼";
@@ -1405,7 +1405,7 @@ async function loadMindmapContent(
         // 优先检查标签，其次检查标题（支持新旧格式）
         const isMindmapNote =
           tags.some((t) => t.tag === "AI-Mindmap") ||
-          /AI\s*管家思维导图\s*-/.test(noteHtml);
+          /AI\s*(Butler Mind Map|管家思维导图)\s*-/.test(noteHtml);
 
         if (isMindmapNote) {
           if (!mindmapNote) {
@@ -1423,7 +1423,7 @@ async function loadMindmapContent(
 
     if (!mindmapNote) {
       const generateMindmapBtn = doc.createElement("button");
-      generateMindmapBtn.textContent = "🧠 生成思维导图";
+      generateMindmapBtn.textContent = "🧠 Generate Mind Map";
       generateMindmapBtn.style.cssText = `
         padding: 8px 16px;
         border: 1px solid #4caf50;
@@ -1444,15 +1444,15 @@ async function loadMindmapContent(
       generateMindmapBtn.addEventListener("click", async () => {
         try {
           generateMindmapBtn.disabled = true;
-          generateMindmapBtn.textContent = "正在加入队列...";
+          generateMindmapBtn.textContent = "Adding to queue...";
           const { TaskQueueManager } = await import("./taskQueue");
           const queueManager = TaskQueueManager.getInstance();
           await queueManager.addMindmapTask(targetItem);
-          generateMindmapBtn.textContent = "✅ 已加入队列";
+          generateMindmapBtn.textContent = "✅ Added to Queue";
         } catch (err: any) {
-          generateMindmapBtn.textContent = "❌ 失败";
+          generateMindmapBtn.textContent = "❌ Failed";
           setTimeout(() => {
-            generateMindmapBtn.textContent = "🧠 生成思维导图";
+            generateMindmapBtn.textContent = "🧠 Generate Mind Map";
             generateMindmapBtn.disabled = false;
           }, 2000);
         }
@@ -1461,7 +1461,7 @@ async function loadMindmapContent(
       container.innerHTML = `
         <div style="text-align: center; color: #9e9e9e; padding: 16px;">
           <div style="font-size: 24px; margin-bottom: 8px;">🧠</div>
-          <div style="font-size: 12px; margin-bottom: 8px;">暂无思维导图</div>
+          <div style="font-size: 12px; margin-bottom: 8px;">No mind map available</div>
         </div>
       `;
       container.appendChild(generateMindmapBtn);
@@ -1476,25 +1476,25 @@ async function loadMindmapContent(
     const markmapRegex = /```markmap\s*\n([\s\S]*?)\n```/;
     const match = noteHtml.match(markmapRegex);
 
-    ztoolkit.log("[AI-Butler] 思维导图笔记 HTML 长度:", noteHtml.length);
+    ztoolkit.log("[AI-Butler] Mind map note HTML length:", noteHtml.length);
     ztoolkit.log(
-      "[AI-Butler] 思维导图正则匹配结果:",
-      match ? "匹配成功" : "匹配失败",
+      "[AI-Butler] Mind map regex match result:",
+      match ? "Matched" : "No match",
     );
     if (match) {
-      ztoolkit.log("[AI-Butler] 匹配的内容长度:", match[1]?.length);
+      ztoolkit.log("[AI-Butler] Matched content length:", match[1]?.length);
     } else {
       // 尝试调试：检查是否包含 markmap 关键字
       ztoolkit.log(
-        "[AI-Butler] 笔记是否包含 markmap:",
+        "[AI-Butler] Note contains markmap:",
         noteHtml.includes("markmap"),
       );
-      ztoolkit.log("[AI-Butler] 笔记是否包含 ```:", noteHtml.includes("```"));
+      ztoolkit.log("[AI-Butler] Note contains ```:", noteHtml.includes("```"));
       // 尝试查找 markmap 位置
       const markmapIdx = noteHtml.indexOf("markmap");
       if (markmapIdx >= 0) {
         ztoolkit.log(
-          "[AI-Butler] markmap 周围内容:",
+          "[AI-Butler] Content around markmap:",
           noteHtml.substring(Math.max(0, markmapIdx - 20), markmapIdx + 50),
         );
       }
@@ -1504,7 +1504,7 @@ async function loadMindmapContent(
       container.innerHTML = `
         <div style="text-align: center; color: #9e9e9e; padding: 16px;">
           <div style="font-size: 24px; margin-bottom: 8px;">⚠️</div>
-          <div>思维导图格式错误</div>
+          <div>Mind map format error</div>
         </div>
       `;
       return;
@@ -1520,7 +1520,7 @@ async function loadMindmapContent(
       container.innerHTML = `
         <div style="text-align: center; color: #9e9e9e; padding: 16px;">
           <div style="font-size: 24px; margin-bottom: 8px;">📄</div>
-          <div>思维导图内容为空</div>
+          <div>Mind map content is empty</div>
         </div>
       `;
       return;
@@ -1577,7 +1577,7 @@ async function loadMindmapContent(
       const messageHandler = async (event: MessageEvent) => {
         if (event.data && event.data.type === "mindmap-ready") {
           ztoolkit.log(
-            "[AI-Butler] 收到 iframe ready 消息，发送 markdown 数据",
+            "[AI-Butler] Received iframe ready message, sending markdown data",
           );
           try {
             iframe.contentWindow?.postMessage(
@@ -1587,24 +1587,29 @@ async function loadMindmapContent(
               },
               "*",
             );
-            ztoolkit.log("[AI-Butler] 已发送 markdown 数据到 iframe");
+            ztoolkit.log("[AI-Butler] Markdown data sent to iframe");
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 发送数据到 iframe 失败:", e);
+            ztoolkit.log("[AI-Butler] Failed to send data to iframe:", e);
           }
         }
 
         if (event.data && event.data.type === "open-mindmap-viewer") {
-          ztoolkit.log("[AI-Butler] 收到打开思维导图预览窗口请求");
+          ztoolkit.log(
+            "[AI-Butler] Received mind map preview window open request",
+          );
           try {
             await openMindmapViewerWindow(mdContent, targetItem);
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 打开思维导图预览窗口失败:", e);
+            ztoolkit.log(
+              "[AI-Butler] Failed to open mind map preview window:",
+              e,
+            );
             new ztoolkit.ProgressWindow("AI Butler", {
               closeOnClick: true,
               closeTime: 3000,
             })
               .createLine({
-                text: "打开思维导图预览窗口失败",
+                text: "Failed to open mind map preview window",
                 type: "error",
               })
               .show();
@@ -1613,7 +1618,10 @@ async function loadMindmapContent(
 
         // 处理导出请求
         if (event.data && event.data.type === "export-mindmap") {
-          ztoolkit.log("[AI-Butler] 收到导出请求, 格式:", event.data.format);
+          ztoolkit.log(
+            "[AI-Butler] Received export request, format:",
+            event.data.format,
+          );
           try {
             const format = event.data.format || "png";
             const filename = event.data.filename || `mindmap.${format}`;
@@ -1632,7 +1640,10 @@ async function loadMindmapContent(
                   ignoreExisting: true,
                 });
               } catch (e) {
-                ztoolkit.log("[AI-Butler] 自定义目录创建失败，回退到桌面:", e);
+                ztoolkit.log(
+                  "[AI-Butler] Custom directory creation failed, falling back to desktop:",
+                  e,
+                );
                 downloadDir = "";
               }
             }
@@ -1644,7 +1655,7 @@ async function loadMindmapContent(
                 downloadDir = desktopDir.path;
               } catch (e) {
                 ztoolkit.log(
-                  "[AI-Butler] 无法获取桌面目录，使用 Zotero 数据目录:",
+                  "[AI-Butler] Cannot get desktop directory, using Zotero data directory:",
                   e,
                 );
                 // 回退到 Zotero 数据目录
@@ -1683,27 +1694,27 @@ async function loadMindmapContent(
               await IOUtils.write(filePath, bytes);
             }
 
-            ztoolkit.log("[AI-Butler] 思维导图已保存到:", filePath);
+            ztoolkit.log("[AI-Butler] Mind map saved to:", filePath);
 
             // 显示通知
-            new ztoolkit.ProgressWindow("思维导图已导出")
+            new ztoolkit.ProgressWindow("Mind Map Exported")
               .createLine({
-                text: `已保存到桌面: ${filename}`,
+                text: `Saved to desktop: ${filename}`,
                 type: "success",
               })
               .show();
 
-            // 打开文件
+            // Open文件
             try {
               Zotero.launchFile(filePath);
             } catch (e) {
-              // 忽略打开文件失败
+              // 忽略Open文件失败
             }
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 保存思维导图失败:", e);
-            new ztoolkit.ProgressWindow("导出失败")
+            ztoolkit.log("[AI-Butler] Failed to save mind map:", e);
+            new ztoolkit.ProgressWindow("Export Failed")
               .createLine({
-                text: `错误: ${e}`,
+                text: `Error: ${e}`,
                 type: "error",
               })
               .show();
@@ -1718,12 +1729,12 @@ async function loadMindmapContent(
 
       // 监听 iframe 加载完成（备用方案）
       iframe.addEventListener("load", () => {
-        ztoolkit.log("[AI-Butler] mindmap.html 加载完成");
+        ztoolkit.log("[AI-Butler] mindmap.html loaded");
 
         // 备用：如果 500ms 内没收到 ready 消息，直接发送
         setTimeout(() => {
           try {
-            ztoolkit.log("[AI-Butler] 备用方案：直接发送数据");
+            ztoolkit.log("[AI-Butler] Fallback: sending data directly");
             iframe.contentWindow?.postMessage(
               {
                 type: "render-mindmap",
@@ -1732,7 +1743,7 @@ async function loadMindmapContent(
               "*",
             );
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 发送数据到 iframe 失败:", e);
+            ztoolkit.log("[AI-Butler] Failed to send data to iframe:", e);
           }
         }, 500);
       });
@@ -1748,9 +1759,9 @@ async function loadMindmapContent(
       );
       container.appendChild(resizeHandle);
 
-      ztoolkit.log("[AI-Butler] 思维导图 iframe 创建成功");
+      ztoolkit.log("[AI-Butler] Mind map iframe created successfully");
     } catch (renderError: any) {
-      ztoolkit.log("[AI-Butler] 思维导图渲染失败:", renderError);
+      ztoolkit.log("[AI-Butler] Mind map render failed:", renderError);
 
       // 回退显示格式化的 Markdown
       container.innerHTML = `
@@ -1758,8 +1769,8 @@ async function loadMindmapContent(
       `;
     }
   } catch (err: any) {
-    ztoolkit.log("[AI-Butler] 加载思维导图失败:", err);
-    container.innerHTML = `<div style="color: #d32f2f; padding: 10px;">加载思维导图失败: ${err.message}</div>`;
+    ztoolkit.log("[AI-Butler] Failed to load mind map:", err);
+    container.innerHTML = `<div style="color: #d32f2f; padding: 10px;">Failed to load mind map: ${err.message}</div>`;
   }
 }
 
@@ -1804,7 +1815,7 @@ function renderChatArea(
   `;
 
   const inputBox = doc.createElement("textarea");
-  inputBox.placeholder = "输入问题...";
+  inputBox.placeholder = "Enter your question...";
   inputBox.style.cssText = `
     flex: 1;
     min-height: 36px;
@@ -1820,7 +1831,7 @@ function renderChatArea(
   `;
 
   const sendBtn = doc.createElement("button");
-  sendBtn.textContent = "发送";
+  sendBtn.textContent = "Send";
   sendBtn.style.cssText = `
     padding: 6px 12px;
     background: #59c0bc;
@@ -1838,7 +1849,7 @@ function renderChatArea(
   chatArea.appendChild(inputArea);
   body.appendChild(chatArea);
 
-  // 快速提问按钮点击事件 - 打开时加载 PDF 内容
+  // 快速提问按钮点击事件 - Open时加载 PDF 内容
   const quickChatBtn = body.querySelector(
     "#ai-butler-quick-chat-btn",
   ) as HTMLButtonElement;
@@ -1858,7 +1869,7 @@ function renderChatArea(
               (getPref("pdfProcessMode" as any) as string) || "base64";
             const isBase64 = prefMode === "base64";
 
-            messagesArea.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">📄 正在加载论文内容...</div>`;
+            messagesArea.innerHTML = `<div style="color: #999; text-align: center; padding: 10px;">📄 Loading paper content...</div>`;
 
             let pdfContent = "";
             if (isBase64) {
@@ -1870,13 +1881,13 @@ function renderChatArea(
             if (pdfContent) {
               currentChatState.pdfContent = pdfContent;
               currentChatState.isBase64 = isBase64;
-              messagesArea.innerHTML = `<div style="color: #4caf50; text-align: center; padding: 10px;">✅ 论文内容已加载，可以开始提问！</div>`;
+              messagesArea.innerHTML = `<div style="color: #4caf50; text-align: center; padding: 10px;">✅ Paper content loaded, you can start asking!</div>`;
             } else {
-              messagesArea.innerHTML = `<div style="color: #f44336; text-align: center; padding: 10px;">❌ 无法加载论文内容，请确保该文献有 PDF 附件</div>`;
+              messagesArea.innerHTML = `<div style="color: #f44336; text-align: center; padding: 10px;">❌ Cannot load paper content, please ensure this item has a PDF attachment</div>`;
             }
           } catch (err: any) {
-            ztoolkit.log("[AI-Butler] 快速提问加载 PDF 失败:", err);
-            messagesArea.innerHTML = `<div style="color: #f44336; text-align: center; padding: 10px;">❌ 加载失败: ${err?.message || "未知错误"}</div>`;
+            ztoolkit.log("[AI-Butler] Quick question PDF loading failed:", err);
+            messagesArea.innerHTML = `<div style="color: #f44336; text-align: center; padding: 10px;">❌ Loading failed: ${err?.message || "Unknown error"}</div>`;
           }
         }
       } else {
@@ -1899,13 +1910,13 @@ function renderChatArea(
 
     // 检查是否有 PDF 内容
     if (!currentChatState.pdfContent) {
-      messagesArea.innerHTML = `<div style="color: #f44336; text-align: center; padding: 10px;">❌ 请先等待论文内容加载完成</div>`;
+      messagesArea.innerHTML = `<div style="color: #f44336; text-align: center; padding: 10px;">❌ Please wait for paper content to finish loading</div>`;
       return;
     }
 
     // 设置为正在聊天状态
     currentChatState.isChatting = true;
-    sendBtn.textContent = "发送中...";
+    sendBtn.textContent = "Sending...";
     sendBtn.style.background = "#9e9e9e";
     (sendBtn as HTMLButtonElement).disabled = true;
     (inputBox as HTMLTextAreaElement).disabled = true;
@@ -1934,7 +1945,7 @@ function renderChatArea(
       border-radius: 6px;
       border-left: 3px solid #59c0bc;
     `;
-    userMsgDiv.innerHTML = `<strong>👤 您:</strong> ${escapeHtmlForChat(question)}`;
+    userMsgDiv.innerHTML = `<strong>👤 You:</strong> ${escapeHtmlForChat(question)}`;
     pairWrapper.appendChild(userMsgDiv);
 
     // 创建 AI 回复区域
@@ -1946,7 +1957,7 @@ function renderChatArea(
       border-radius: 6px;
       border-left: 3px solid #667eea;
     `;
-    aiMsgDiv.innerHTML = `<strong>🤖 AI管家:</strong> <em style="color: #999;">思考中...</em>`;
+    aiMsgDiv.innerHTML = `<strong>🤖 AI Butler:</strong> <em style="color: #999;">Thinking...</em>`;
     pairWrapper.appendChild(aiMsgDiv);
 
     // 创建保存按钮区域（初始隐藏）
@@ -1957,7 +1968,7 @@ function renderChatArea(
       margin-top: 4px;
     `;
     const saveBtn = doc.createElement("button");
-    saveBtn.textContent = "💾 保存为笔记";
+    saveBtn.textContent = "💾 Save as Note";
     saveBtn.style.cssText = `
       padding: 4px 10px;
       background: #667eea;
@@ -1992,15 +2003,15 @@ function renderChatArea(
         conversationHistory,
         (chunk: string) => {
           fullResponse += chunk;
-          // 流式更新 AI 回复
-          aiMsgDiv.innerHTML = `<strong>🤖 AI管家:</strong><br/>${escapeHtmlForChat(fullResponse)}`;
+          // 流式Update AI 回复
+          aiMsgDiv.innerHTML = `<strong>🤖 AI Butler:</strong><br/>${escapeHtmlForChat(fullResponse)}`;
           // 滚动到底部
           messagesArea.scrollTop = messagesArea.scrollHeight;
         },
       );
 
-      // 完成后最终更新
-      aiMsgDiv.innerHTML = `<strong>🤖 AI管家:</strong><br/>${escapeHtmlForChat(fullResponse)}`;
+      // 完成后最终Update
+      aiMsgDiv.innerHTML = `<strong>🤖 AI Butler:</strong><br/>${escapeHtmlForChat(fullResponse)}`;
 
       // 显示保存按钮
       saveArea.style.display = "flex";
@@ -2009,34 +2020,37 @@ function renderChatArea(
       saveBtn.addEventListener("click", async () => {
         // 检查是否已保存过
         if (currentChatState.savedPairIds.has(pairId)) {
-          saveBtn.textContent = "✅ 已保存";
+          saveBtn.textContent = "✅ Saved";
           return;
         }
 
         // 标记正在保存
-        saveBtn.textContent = "💾 保存中...";
+        saveBtn.textContent = "💾 Saving...";
         saveBtn.style.background = "#9e9e9e";
         (saveBtn as HTMLButtonElement).disabled = true;
 
         try {
           await saveChatPairToNote(item, pairId, question, fullResponse);
           currentChatState.savedPairIds.add(pairId);
-          saveBtn.textContent = "✅ 已保存";
+          saveBtn.textContent = "✅ Saved";
           saveBtn.style.background = "#4caf50";
         } catch (err: any) {
-          ztoolkit.log("[AI-Butler] 保存快速提问对话失败:", err);
-          saveBtn.textContent = "❌ 保存失败";
+          ztoolkit.log(
+            "[AI-Butler] Failed to save quick question dialogue:",
+            err,
+          );
+          saveBtn.textContent = "❌ Save Failed";
           saveBtn.style.background = "#f44336";
           (saveBtn as HTMLButtonElement).disabled = false;
         }
       });
     } catch (err: any) {
-      ztoolkit.log("[AI-Butler] 快速提问发送失败:", err);
-      aiMsgDiv.innerHTML = `<strong>🤖 AI管家:</strong> <span style="color: #f44336;">❌ 错误: ${err?.message || "发送失败"}</span>`;
+      ztoolkit.log("[AI-Butler] Quick question send failed:", err);
+      aiMsgDiv.innerHTML = `<strong>🤖 AI Butler:</strong> <span style="color: #f44336;">❌ Error: ${err?.message || "Send failed"}</span>`;
     } finally {
       // 恢复状态
       currentChatState.isChatting = false;
-      sendBtn.textContent = "发送";
+      sendBtn.textContent = "Send";
       sendBtn.style.background = "#59c0bc";
       (sendBtn as HTMLButtonElement).disabled = false;
       (inputBox as HTMLTextAreaElement).disabled = false;
@@ -2070,7 +2084,7 @@ function escapeHtmlForChat(text: string): string {
  * 获取或创建"AI管家-后续追问"独立笔记
  */
 async function getOrCreateChatNote(item: Zotero.Item): Promise<Zotero.Item> {
-  const title = (item.getField("title") as string) || "文献";
+  const title = (item.getField("title") as string) || "Literature";
 
   // 查找已有的聊天笔记
   const noteIDs = (item as any).getNotes?.() || [];
@@ -2081,7 +2095,9 @@ async function getOrCreateChatNote(item: Zotero.Item): Promise<Zotero.Item> {
       const tags: Array<{ tag: string }> = (n as any).getTags?.() || [];
       const hasChatTag = tags.some((t) => t.tag === "AI-Butler-Chat");
       const html: string = (n as any).getNote?.() || "";
-      const titleMatch = /<h2>\s*AI 管家\s*-\s*后续追问\s*-/.test(html);
+      const titleMatch = /<h2>\s*AI Butler\s*-\s*Follow-up Questions\s*-/.test(
+        html,
+      );
       if (hasChatTag || titleMatch) {
         return n as Zotero.Item;
       }
@@ -2094,7 +2110,7 @@ async function getOrCreateChatNote(item: Zotero.Item): Promise<Zotero.Item> {
   const note = new Zotero.Item("note");
   note.libraryID = item.libraryID;
   note.parentID = item.id;
-  const header = `<h2>AI 管家 - 后续追问 - ${escapeHtmlForNote(title)}</h2>`;
+  const header = `<h2>AI Butler - Follow-up Questions - ${escapeHtmlForNote(title)}</h2>`;
   note.setNote(header);
   note.addTag("AI-Butler-Chat");
   await note.saveTx();
@@ -2125,20 +2141,26 @@ async function saveChatPairToNote(
   const note = await getOrCreateChatNote(item);
   let noteHtml = (note as any).getNote?.() || "";
 
-  // 检查是否已存在相同 pairId 的对话对，防止重复保存
+  // 检查是否Already exists相同 pairId 的对话对，防止重复保存
   if (noteHtml.includes(`AI_BUTLER_CHAT_PAIR_START id=${pairId}`)) {
-    ztoolkit.log("[AI-Butler] 该对话对已保存过，跳过重复保存");
+    ztoolkit.log(
+      "[AI-Butler] This dialogue pair has already been saved, skipping duplicate save",
+    );
     return;
   }
 
   const jsonMarker = `<!-- AI_BUTLER_CHAT_JSON: ${JSON.stringify({ id: pairId, user: userMessage, assistant: assistantMessage })} -->`;
+  const userLabel = getString("chat-user-label");
+  const assistantLabel = getString("chat-assistant-label");
+  const savedTimeLabel = getString("chat-saved-time");
+  const quickLabel = getString("chat-saved-time-quick");
   const block = `
 <!-- AI_BUTLER_CHAT_PAIR_START id=${escapeHtmlForNote(pairId)} -->
 ${jsonMarker}
 <div id="ai-butler-pair-${escapeHtmlForNote(pairId)}" style="margin-top:14px; padding-top:8px; border-top:1px dashed #ccc;">
-  <div style="background-color:#e3f2fd; padding:10px; border-radius:6px; margin-bottom:8px;"><strong>👤 用户:</strong> ${escapeHtmlForNote(userMessage)}</div>
-  <div style="background-color:#f5f5f5; padding:10px; border-radius:6px;"><strong>🤖 AI管家:</strong><br/>${escapeHtmlForNote(assistantMessage).replace(/\n/g, "<br/>")}</div>
-  <div style="font-size:11px; color:#999; margin-top:6px;">保存时间: ${new Date().toLocaleString("zh-CN")} (来自快速提问)</div>
+  <div style="background-color:#e3f2fd; padding:10px; border-radius:6px; margin-bottom:8px;"><strong>👤 ${userLabel}:</strong> ${escapeHtmlForNote(userMessage)}</div>
+  <div style="background-color:#f5f5f5; padding:10px; border-radius:6px;"><strong>🤖 ${assistantLabel}:</strong><br/>${escapeHtmlForNote(assistantMessage).replace(/\n/g, "<br/>")}</div>
+  <div style="font-size:11px; color:#999; margin-top:6px;">${savedTimeLabel}: ${new Date().toLocaleString()} (${quickLabel})</div>
 </div>
 <!-- AI_BUTLER_CHAT_PAIR_END id=${escapeHtmlForNote(pairId)} -->
 `;
@@ -2146,7 +2168,7 @@ ${jsonMarker}
   noteHtml += block;
   (note as any).setNote(noteHtml);
   await (note as any).saveTx();
-  ztoolkit.log("[AI-Butler] 快速提问对话已保存到笔记");
+  ztoolkit.log("[AI-Butler] Quick question dialogue saved to note");
 }
 
 /**
@@ -2236,7 +2258,7 @@ function createResizeHandle(
 }
 
 /**
- * 异步加载笔记内容
+ * 异步加载Note content
  */
 async function loadNoteContent(
   doc: Document,
@@ -2269,13 +2291,13 @@ async function loadNoteContent(
         // 排除: 思维导图笔记、一图总结笔记、对话笔记
         const isMindmapNote =
           tags.some((t) => t.tag === "AI-Mindmap") ||
-          /AI\s*管家思维导图\s*-/.test(noteHtml);
+          /AI\s*(Butler Mind Map|管家思维导图)\s*-/.test(noteHtml);
         const isImageSummaryNote =
           tags.some((t) => t.tag === "AI-Image-Summary") ||
-          /AI\s*管家一图总结\s*-/.test(noteHtml);
+          /AI\s*(Butler Image Summary|管家一图总结)\s*-/.test(noteHtml);
         const isChatNote =
           tags.some((t) => t.tag === "AI-Butler-Chat") ||
-          /<h2>\s*AI\s+管家\s*-\s*后续追问\s*-/.test(noteHtml);
+          /<h2>\s*AI Butler\s*-\s*Follow-up Questions\s*-/.test(noteHtml);
         // 严格匹配: 必须满足以下条件之一
         // 1. 有 AI-Generated 标签 且 不是其他特殊类型
         // 2. 标题精确匹配 "<h2>AI 管家 - " 格式
@@ -2287,7 +2309,7 @@ async function loadNoteContent(
           !isChatNote &&
           !isTableNote &&
           (hasAiGeneratedTag ||
-            noteHtml.includes("<h2>AI 管家 - ") ||
+            noteHtml.includes("<h2>AI Butler - ") ||
             noteHtml.includes("[AI-Butler]"));
 
         if (isAiSummaryNote) {
@@ -2308,7 +2330,7 @@ async function loadNoteContent(
       noteContent.innerHTML = `
         <div style="text-align: center; color: #9e9e9e; padding: 16px;">
           <div style="font-size: 24px; margin-bottom: 8px;">📝</div>
-          <div>暂无 AI 笔记</div>
+          <div>No AI note available</div>
         </div>
       `;
       return;
@@ -2582,13 +2604,13 @@ async function loadNoteContent(
 
       const headerText = doc.createElement("div");
       headerText.style.fontWeight = "bold";
-      headerText.textContent = "⚠ 笔记渲染失败 (XML解析错误)";
+      headerText.textContent = "⚠ Note Render Failed (XML Parsing Error)";
 
       // Prepare full error text for copying
       const fullErrorText = `XML Parsing Error\n${errorText}\n\nLocation: ${errorLocation}\n\nContext:\n${errorContext}`;
 
       const copyBtn = doc.createElement("button");
-      copyBtn.textContent = "📋 复制";
+      copyBtn.textContent = "📋 Copy";
       copyBtn.style.cssText = `
         padding: 2px 6px;
         font-size: 12px;
@@ -2612,15 +2634,15 @@ async function loadNoteContent(
             doc.execCommand("copy");
             insertTarget.removeChild(textarea);
           }
-          copyBtn.textContent = "✅ 已复制";
+          copyBtn.textContent = "✅ Copied";
           setTimeout(() => {
-            copyBtn.textContent = "📋 复制";
+            copyBtn.textContent = "📋 Copy";
           }, 2000);
         } catch (e) {
           ztoolkit.log("[AI-Butler] Copy failed:", e);
-          copyBtn.textContent = "❌ 失败";
+          copyBtn.textContent = "❌ Failed";
           setTimeout(() => {
-            copyBtn.textContent = "📋 复制";
+            copyBtn.textContent = "📋 Copy";
           }, 2000);
         }
       });
@@ -2663,8 +2685,8 @@ async function loadNoteContent(
       noteContent.innerHTML = sanitizedContent;
     }
   } catch (err: any) {
-    ztoolkit.log("[AI-Butler] 加载笔记失败:", err);
-    noteContent.innerHTML = `<div style="color: #d32f2f; padding: 10px;">加载笔记失败: ${err.message}</div>`;
+    ztoolkit.log("[AI-Butler] Failed to load note:", err);
+    noteContent.innerHTML = `<div style="color: #d32f2f; padding: 10px;">Failed to load note: ${err.message}</div>`;
   }
 }
 
@@ -2697,7 +2719,7 @@ async function loadImageSummary(
     if (!imageNote) {
       // 显示生成按钮
       const generateImageBtn = doc.createElement("button");
-      generateImageBtn.textContent = "🖼️ 生成一图总结";
+      generateImageBtn.textContent = "🖼️ Generate Image Summary";
       generateImageBtn.style.cssText = `
         padding: 8px 16px;
         border: 1px solid #9c27b0;
@@ -2718,15 +2740,15 @@ async function loadImageSummary(
       generateImageBtn.addEventListener("click", async () => {
         try {
           generateImageBtn.disabled = true;
-          generateImageBtn.textContent = "正在加入队列...";
+          generateImageBtn.textContent = "Adding to queue...";
           const { TaskQueueManager } = await import("./taskQueue");
           const queueManager = TaskQueueManager.getInstance();
           await queueManager.addImageSummaryTask(targetItem);
-          generateImageBtn.textContent = "✅ 已加入队列";
+          generateImageBtn.textContent = "✅ Added to Queue";
         } catch (err: any) {
-          generateImageBtn.textContent = "❌ 失败";
+          generateImageBtn.textContent = "❌ Failed";
           setTimeout(() => {
-            generateImageBtn.textContent = "🖼️ 生成一图总结";
+            generateImageBtn.textContent = "🖼️ Generate Image Summary";
             generateImageBtn.disabled = false;
           }, 2000);
         }
@@ -2735,7 +2757,7 @@ async function loadImageSummary(
       imageContainer.innerHTML = `
         <div style="color: #9e9e9e; margin-bottom: 8px;">
           <div style="font-size: 24px; margin-bottom: 4px;">🖼️</div>
-          <div style="font-size: 12px;">暂无一图总结</div>
+          <div style="font-size: 12px;">No image summary available</div>
         </div>
       `;
       imageContainer.appendChild(generateImageBtn);
@@ -2746,14 +2768,14 @@ async function loadImageSummary(
     const imgSrc = await ImageNoteGenerator.getImageFromNote(imageNote);
 
     if (!imgSrc) {
-      imageContainer.innerHTML = `<div style="color: #9e9e9e; font-size: 12px;">笔记中未找到图片</div>`;
+      imageContainer.innerHTML = `<div style="color: #9e9e9e; font-size: 12px;">No image found in note</div>`;
       return;
     }
 
     // 创建图片元素
     const imgElement = doc.createElement("img");
     imgElement.src = imgSrc;
-    imgElement.alt = "一图总结";
+    imgElement.alt = "Image Summary";
     imgElement.style.cssText = `
       width: 100%;
       max-width: 100%;
@@ -2774,7 +2796,7 @@ async function loadImageSummary(
     imgElement.addEventListener("click", () => {
       void openImageSummaryViewerWindow(imgSrc, targetItem).catch((err) => {
         ztoolkit.log(
-          "[AI-Butler] 打开一图总结预览窗口失败，回退到覆盖层:",
+          "[AI-Butler] Failed to open image summary preview window, falling back to overlay:",
           err,
         );
         openImageOverlayFallback(doc, imgSrc);
@@ -2784,7 +2806,7 @@ async function loadImageSummary(
     // 放大按钮
     const zoomBtn = doc.createElement("button");
     zoomBtn.textContent = "🔍";
-    zoomBtn.title = "放大查看";
+    zoomBtn.title = "Zoom In";
     zoomBtn.style.cssText = `
       padding: 4px 8px;
       border: 1px solid #9c27b0;
@@ -2800,7 +2822,7 @@ async function loadImageSummary(
     // 下载按钮
     const downloadBtn = doc.createElement("button");
     downloadBtn.textContent = "⬇️";
-    downloadBtn.title = "下载图片";
+    downloadBtn.title = "Download Image";
     downloadBtn.style.cssText = `
       padding: 4px 8px;
       border: 1px solid #9c27b0;
@@ -2821,7 +2843,7 @@ async function loadImageSummary(
           const ext = mimeExt === "jpeg" ? "jpg" : mimeExt;
 
           const desktopDir = Services.dirsvc.get("Desk", Ci.nsIFile);
-          const filename = `AI管家_一图总结_${targetItem
+          const filename = `AI_Butler_Image_Summary_${targetItem
             .getField("title")
             .substring(0, 30)
             .replace(/[\\/:*?"<>|]/g, "_")}.${ext}`;
@@ -2840,7 +2862,7 @@ async function loadImageSummary(
             closeTime: 3000,
           })
             .createLine({
-              text: `图片已保存到桌面: ${filename}`,
+              text: `Image saved to desktop: ${filename}`,
               type: "success",
             })
             .show();
@@ -2849,25 +2871,31 @@ async function loadImageSummary(
             closeOnClick: true,
             closeTime: 3000,
           })
-            .createLine({ text: "仅支持 data URI 格式的图片", type: "error" })
+            .createLine({
+              text: "Only data URI format images are supported",
+              type: "error",
+            })
             .show();
         }
       } catch (err: any) {
-        ztoolkit.log("[AI-Butler] 下载图片失败:", err);
+        ztoolkit.log("[AI-Butler] Failed to download image:", err);
         new ztoolkit.ProgressWindow("AI Butler", {
           closeOnClick: true,
           closeTime: 3000,
         })
-          .createLine({ text: `下载失败: ${err.message}`, type: "error" })
+          .createLine({
+            text: `Download failed: ${err.message}`,
+            type: "error",
+          })
           .show();
       }
     });
     imageBtnContainer.appendChild(downloadBtn);
 
-    // 打开文件夹按钮
+    // Open文件夹按钮
     const openFolderBtn = doc.createElement("button");
     openFolderBtn.textContent = "📂";
-    openFolderBtn.title = "打开图片所在文件夹";
+    openFolderBtn.title = "Open Image Folder";
     openFolderBtn.style.cssText = `
       padding: 4px 8px;
       border: 1px solid #9c27b0;
@@ -2884,7 +2912,7 @@ async function loadImageSummary(
           await ImageNoteGenerator.getImageAttachmentPath(imageNote);
 
         if (imagePath) {
-          // 使用 Zotero 的方法打开文件所在文件夹
+          // 使用 Zotero 的方法Open文件所在文件夹
           const file = Zotero.File.pathToFile(imagePath);
           if (file.exists()) {
             file.reveal();
@@ -2892,14 +2920,14 @@ async function loadImageSummary(
               closeOnClick: true,
               closeTime: 2000,
             })
-              .createLine({ text: "已打开图片所在文件夹", type: "success" })
+              .createLine({ text: "Image folder opened", type: "success" })
               .show();
           } else {
             new ztoolkit.ProgressWindow("AI Butler", {
               closeOnClick: true,
               closeTime: 3000,
             })
-              .createLine({ text: "图片文件不存在", type: "error" })
+              .createLine({ text: "Image file does not exist", type: "error" })
               .show();
           }
         } else {
@@ -2908,18 +2936,18 @@ async function loadImageSummary(
             closeTime: 3000,
           })
             .createLine({
-              text: "未找到图片附件（可能是旧版内嵌图片）",
+              text: "Image attachment not found (may be old embedded image)",
               type: "error",
             })
             .show();
         }
       } catch (err: any) {
-        ztoolkit.log("[AI-Butler] 打开文件夹失败:", err);
+        ztoolkit.log("[AI-Butler] Failed to open folder:", err);
         new ztoolkit.ProgressWindow("AI Butler", {
           closeOnClick: true,
           closeTime: 3000,
         })
-          .createLine({ text: `打开失败: ${err.message}`, type: "error" })
+          .createLine({ text: `Failed to open: ${err.message}`, type: "error" })
           .show();
       }
     });
@@ -2928,8 +2956,8 @@ async function loadImageSummary(
     imageContainer.innerHTML = "";
     imageContainer.appendChild(imgElement);
   } catch (err: any) {
-    ztoolkit.log("[AI-Butler] 加载一图总结失败:", err);
-    imageContainer.innerHTML = `<div style="color: #d32f2f; font-size: 12px;">加载失败: ${err.message}</div>`;
+    ztoolkit.log("[AI-Butler] Failed to load image summary:", err);
+    imageContainer.innerHTML = `<div style="color: #d32f2f; font-size: 12px;">Loading failed: ${err.message}</div>`;
   }
 }
 
@@ -2962,7 +2990,7 @@ async function openImageSummaryViewerWindow(
     ? Math.max(600, Math.floor(screenObj.availHeight * 0.95))
     : 800;
 
-  const title = itemTitle ? `一图总结 - ${itemTitle}` : "一图总结";
+  const title = itemTitle ? `Image Summary - ${itemTitle}` : "Image Summary";
   const viewerURL = `chrome://${config.addonRef}/content/imageSummaryViewer.html`;
 
   const dialogWin: any = mainWin.openDialog(
@@ -3021,7 +3049,7 @@ async function openMindmapViewerWindow(
     width = Math.min(width, Math.floor(screenObj.availWidth * 0.9));
   }
 
-  const title = itemTitle ? `思维导图 - ${itemTitle}` : "思维导图";
+  const title = itemTitle ? `Mind Map - ${itemTitle}` : "Mind Map";
   const viewerURL = `chrome://${config.addonRef}/content/mindmapViewer.html`;
 
   const dialogWin: any = mainWin.openDialog(
@@ -3073,7 +3101,7 @@ function openImageOverlayFallback(doc: Document, imageDataUri: string): void {
 
   const fullImg = doc.createElement("img");
   fullImg.src = imageDataUri;
-  fullImg.alt = "一图总结";
+  fullImg.alt = "Image Summary";
   fullImg.style.cssText = `
     max-width: 95%;
     max-height: 95%;
@@ -3141,7 +3169,7 @@ function openImageOverlayFallback(doc: Document, imageDataUri: string): void {
  * 获取 AI 笔记的 Markdown 内容
  *
  * @param item 文献条目
- * @returns Markdown 格式的笔记内容，如果不存在则返回 null
+ * @returns Markdown 格式的Note content，如果Does not exist则返回 null
  */
 async function getNoteMarkdownContent(
   item: Zotero.Item,
@@ -3170,10 +3198,10 @@ async function getNoteMarkdownContent(
         // 检查是否是 AI-Butler 生成的摘要笔记
         const isChatNote =
           tags.some((t) => t.tag === "AI-Butler-Chat") ||
-          /<h2>\s*AI 管家\s*-\s*后续追问\s*-/.test(noteHtml);
+          /<h2>\s*AI Butler\s*-\s*Follow-up Questions\s*-/.test(noteHtml);
         const isAiSummaryNote =
           tags.some((t) => t.tag === "AI-Generated") ||
-          (/<h2>\s*AI 管家\s*-/.test(noteHtml) && !isChatNote) ||
+          (/<h2>\s*AI Butler\s*-/.test(noteHtml) && !isChatNote) ||
           noteHtml.includes("[AI-Butler]");
 
         if (isAiSummaryNote) {
@@ -3198,7 +3226,7 @@ async function getNoteMarkdownContent(
     // 将 HTML 转换为 Markdown 文本
     return htmlToMarkdown(noteHtml);
   } catch (err) {
-    ztoolkit.log("[AI-Butler] 获取笔记 Markdown 内容失败:", err);
+    ztoolkit.log("[AI-Butler] Failed to get note Markdown content:", err);
     return null;
   }
 }
@@ -3398,7 +3426,7 @@ async function copyToClipboard(doc: Document, text: string): Promise<void> {
       doc.body.removeChild(textArea);
     }
   } catch (err) {
-    ztoolkit.log("[AI-Butler] 复制到剪贴板失败:", err);
+    ztoolkit.log("[AI-Butler] Failed to copy to clipboard:", err);
     throw err;
   }
 }

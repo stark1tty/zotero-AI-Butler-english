@@ -67,7 +67,7 @@ export abstract class BaseView {
    * 视图首次渲染后的初始化逻辑
    *
    * 可用于绑定事件、加载数据等
-   * 子类可选择性覆盖
+   * 子类Optional择性覆盖
    */
   protected onMount(): void {
     // 默认空实现,子类可覆盖
@@ -77,7 +77,7 @@ export abstract class BaseView {
    * 视图显示时的回调
    *
    * 每次视图从隐藏状态变为可见时调用
-   * 子类可选择性覆盖
+   * 子类Optional择性覆盖
    */
   protected onShow(): void {
     // 默认空实现,子类可覆盖
@@ -87,7 +87,7 @@ export abstract class BaseView {
    * 视图隐藏时的回调
    *
    * 每次视图从可见状态变为隐藏时调用
-   * 子类可选择性覆盖
+   * 子类Optional择性覆盖
    */
   protected onHide(): void {
     // 默认空实现,子类可覆盖
@@ -96,8 +96,8 @@ export abstract class BaseView {
   /**
    * 视图销毁前的清理逻辑
    *
-   * 用于取消事件监听、释放资源等
-   * 子类可选择性覆盖
+   * 用于Cancel事件监听、释放资源等
+   * 子类Optional择性覆盖
    */
   protected onDestroy(): void {
     // 默认空实现,子类可覆盖
@@ -196,7 +196,7 @@ export abstract class BaseView {
       try {
         isDark = Services.prefs.getBoolPref("zotero.theme.dark", false);
       } catch (e1) {
-        // 如果不存在,尝试其他方法
+        // 如果Does not exist,尝试其他方法
       }
 
       // 方法2: 检查系统暗色模式
@@ -223,7 +223,7 @@ export abstract class BaseView {
         }
       }
     } catch (e) {
-      ztoolkit.log("[AI Butler] 检测暗色模式失败:", e);
+      ztoolkit.log("[AI Butler] 检测暗色模式Failed:", e);
     }
 
     ztoolkit.log(
@@ -284,7 +284,7 @@ export abstract class BaseView {
       try {
         isDark = Services.prefs.getBoolPref("zotero.theme.dark", false);
       } catch (e1) {
-        // 如果不存在,尝试其他方法
+        // 如果Does not exist,尝试其他方法
       }
 
       // 方法2: 检查系统暗色模式
@@ -311,7 +311,7 @@ export abstract class BaseView {
         }
       }
     } catch (e) {
-      // 忽略错误
+      // 忽略Error
     }
 
     return isDark;

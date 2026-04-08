@@ -29,6 +29,7 @@ import { marked } from "marked";
 import { getPref } from "../../utils/prefs";
 import { createStyledButton } from "./ui/components";
 import katex from "katex";
+import { getString } from "../../utils/locale";
 
 /**
  * AI 总结视图类
@@ -82,7 +83,7 @@ export class SummaryView extends BaseView {
   /** 加载开始时间 */
   private loadingStartTime: number = 0;
 
-  /** 当前论文的item ID (用于追问功能) */
+  /** 当前论文的item ID (用于Follow-up Question功能) */
   private currentItemId: number | null = null;
 
   /** 当前论文的PDF内容 (Base64或文本) */
@@ -94,19 +95,19 @@ export class SummaryView extends BaseView {
   /** 对话历史 */
   private conversationHistory: Array<{ role: string; content: string }> = [];
 
-  /** 追问容器 */
+  /** Follow-up Question容器 */
   private chatContainer: HTMLElement | null = null;
 
-  /** 追问输入框 */
+  /** Follow-up Question输入框 */
   private chatInput: HTMLTextAreaElement | null = null;
 
-  /** 追问发送按钮 */
+  /** Follow-up Question发送按钮 */
   private chatSendButton: HTMLButtonElement | null = null;
 
-  /** 是否正在处理追问 */
+  /** 是否ProcessingFollow-up Question */
   private isChatting: boolean = false;
 
-  /** 已保存的追问对（仅限后续追问，不含首轮“提示词+总结”） */
+  /** Saved的Follow-up Question对（仅限后续Follow-up Question，不含首轮“提示词+总结”） */
   private chatPairs: Array<{ id: string; user: string; assistant: string }> =
     [];
 
@@ -154,7 +155,7 @@ export class SummaryView extends BaseView {
             paddingBottom: "10px",
             color: "var(--ai-text)",
           },
-          innerHTML: "AI 总结输出",
+          innerHTML: "AI Butler Summary",
         }),
       ],
     });
@@ -196,7 +197,7 @@ export class SummaryView extends BaseView {
         wordWrap: "break-word", // 确保长文本换行
         overflowWrap: "break-word", // 兼容性换行
         userSelect: "text", // 确保文本可以被选择
-        cursor: "text", // 鼠标样式提示可选择
+        cursor: "text", // 鼠标样式提示Optional择
       },
     });
 
@@ -208,7 +209,7 @@ export class SummaryView extends BaseView {
         try {
           this.chatInput?.blur();
         } catch (e) {
-          // 忽略失焦失败
+          // 忽略失焦Failed
           void 0;
         }
       });
@@ -216,7 +217,7 @@ export class SummaryView extends BaseView {
         try {
           (this.outputContainer as any).focus();
         } catch (e) {
-          // 忽略聚焦失败
+          // 忽略聚焦Failed
           void 0;
         }
       });
@@ -237,14 +238,14 @@ export class SummaryView extends BaseView {
               // 优先使用主窗口的剪贴板能力
               if (win?.navigator?.clipboard?.writeText) {
                 win.navigator.clipboard.writeText(text).catch((err: any) => {
-                  // 忽略剪贴板写入失败
+                  // 忽略剪贴板写入Failed
                   void 0;
                 });
               } else if (win?.document?.execCommand) {
                 try {
                   win.document.execCommand("copy");
                 } catch (e) {
-                  // 忽略旧式复制失败
+                  // 忽略旧式Copy failed
                   void 0;
                 }
               }
@@ -263,11 +264,11 @@ export class SummaryView extends BaseView {
       try {
         winAny.addEventListener("keydown", copyHandler, true);
       } catch (e) {
-        // 忽略事件绑定失败
+        // 忽略事件绑定Failed
         void 0;
       }
     } catch (e) {
-      // 忽略初始化复制相关事件失败
+      // 忽略初始化复制相关事件Failed
       void 0;
     }
 
@@ -283,7 +284,7 @@ export class SummaryView extends BaseView {
 
     // 底部按钮区域：统一使用 createStyledButton，适配明暗主题
     const queueButton = createStyledButton(
-      "📋 返回任务队列",
+      "📋 Back to Task Queue",
       "#59c0bc",
       "medium",
     );
@@ -305,7 +306,7 @@ export class SummaryView extends BaseView {
       children: [queueButton],
     });
 
-    // 创建追问容器 (默认隐藏)
+    // 创建Follow-up Question容器 (默认隐藏)
     this.chatContainer = this.createChatContainer();
 
     container.appendChild(header);
@@ -317,7 +318,7 @@ export class SummaryView extends BaseView {
   }
 
   /**
-   * 创建追问容器
+   * 创建Follow-up Question容器
    * @private
    */
   private createChatContainer(): HTMLElement {
@@ -333,8 +334,12 @@ export class SummaryView extends BaseView {
       },
     });
 
-    // 追问按钮 - 使用统一的按钮组件
-    const chatButton = createStyledButton("💬 后续追问", "#667eea", "medium");
+    // Follow-up Question按钮 - 使用统一的按钮组件
+    const chatButton = createStyledButton(
+      "💬 Follow-up Question",
+      "#667eea",
+      "medium",
+    );
     chatButton.id = "ai-butler-chat-toggle-button";
     Object.assign(chatButton.style, {
       marginBottom: "12px",
@@ -347,10 +352,10 @@ export class SummaryView extends BaseView {
       if (inputArea) {
         if (inputArea.style.display === "none" || !inputArea.style.display) {
           inputArea.style.display = "flex";
-          chatButton.innerHTML = "🔽 收起追问";
+          chatButton.innerHTML = "🔽 Collapse Follow-up";
         } else {
           inputArea.style.display = "none";
-          chatButton.innerHTML = "💬 后续追问";
+          chatButton.innerHTML = "💬 Follow-up Question";
         }
       }
     });
@@ -383,7 +388,7 @@ export class SummaryView extends BaseView {
         color: "var(--ai-input-text)",
       },
     }) as HTMLTextAreaElement;
-    this.chatInput.placeholder = "在这里输入您的问题...";
+    this.chatInput.placeholder = "Enter your question here...";
 
     // 自动调整高度
     this.chatInput.addEventListener("input", () => {
@@ -395,7 +400,7 @@ export class SummaryView extends BaseView {
     });
 
     // 发送按钮 - 使用统一的按钮组件
-    this.chatSendButton = createStyledButton("📤 发送", "#4caf50", "medium");
+    this.chatSendButton = createStyledButton("📤 Send", "#4caf50", "medium");
     this.chatSendButton.id = "ai-butler-chat-send";
     Object.assign(this.chatSendButton.style, {
       alignSelf: "flex-end",
@@ -423,7 +428,7 @@ export class SummaryView extends BaseView {
   }
 
   /**
-   * 处理追问发送
+   * 处理Follow-up Question发送
    * @private
    */
   private async handleChatSend(): Promise<void> {
@@ -432,23 +437,26 @@ export class SummaryView extends BaseView {
 
     const userMessage = this.chatInput.value.trim();
     if (!userMessage) {
-      new ztoolkit.ProgressWindow("追问", { closeTime: 2000 })
-        .createLine({ text: "请输入问题内容", type: "default" })
+      new ztoolkit.ProgressWindow("Follow-up Question", { closeTime: 2000 })
+        .createLine({ text: "Please enter your question", type: "default" })
         .show();
       return;
     }
 
     // 检查是否有PDF内容
     if (!this.currentPdfContent) {
-      new ztoolkit.ProgressWindow("追问", { closeTime: 3000 })
-        .createLine({ text: "没有可用的论文上下文,请先生成总结", type: "fail" })
+      new ztoolkit.ProgressWindow("Follow-up Question", { closeTime: 3000 })
+        .createLine({
+          text: "No paper context available, please generate summary first",
+          type: "fail",
+        })
         .show();
       return;
     }
 
     this.isChatting = true;
     this.chatSendButton.disabled = true;
-    this.chatSendButton.innerHTML = "⏳ 发送中...";
+    this.chatSendButton.innerHTML = "⏳ Sending...";
     this.chatSendButton.style.backgroundColor = "#9e9e9e";
     this.chatInput.disabled = true;
 
@@ -503,7 +511,7 @@ export class SummaryView extends BaseView {
         },
         innerHTML: "🗑️",
       }) as HTMLButtonElement;
-      deleteBtn.title = "删除该提问-响应对";
+      deleteBtn.title = "Delete this Q&A pair";
       deleteBtn.addEventListener("click", async () => {
         await this.deleteChatPair(pairId);
       });
@@ -533,7 +541,7 @@ export class SummaryView extends BaseView {
           },
           innerHTML: "▾",
         }) as HTMLButtonElement;
-        collapseBtn.title = "折叠/展开";
+        collapseBtn.title = "Collapse/Expand";
         collapseBtn.addEventListener("click", () => {
           if ((asstBody as HTMLElement).style.display === "none") {
             (asstBody as HTMLElement).style.display = "block";
@@ -549,7 +557,7 @@ export class SummaryView extends BaseView {
         pairContainer.appendChild(asstBody);
         this.outputContainer.appendChild(pairContainer);
       } catch (e) {
-        ztoolkit.log("[AI-Butler] 包装聊天卡片失败:", e);
+        ztoolkit.log("[AI-Butler] 包装聊天卡片Failed:", e);
       }
     }
 
@@ -565,7 +573,7 @@ export class SummaryView extends BaseView {
         this.conversationHistory,
         (chunk: string) => {
           fullResponse += chunk;
-          // 更新助手消息显示
+          // Update助手消息显示
           if (assistantMessageContainer) {
             const contentDiv = assistantMessageContainer.querySelector(
               ".chat-message-content",
@@ -586,7 +594,7 @@ export class SummaryView extends BaseView {
         content: fullResponse,
       });
 
-      // 记录该追问对（不含首轮“提示词+总结”）
+      // 记录该Follow-up Question对（不含首轮“提示词+总结”）
       this.chatPairs.push({
         id: pairId,
         user: userMessage,
@@ -602,20 +610,20 @@ export class SummaryView extends BaseView {
         );
       }
     } catch (error: any) {
-      // 显示错误
+      // 显示Error
       if (assistantMessageContainer) {
         const contentDiv = assistantMessageContainer.querySelector(
           ".chat-message-content",
         ) as HTMLElement;
         if (contentDiv) {
-          contentDiv.innerHTML = `<p style="color: #d32f2f;">❌ 错误: ${error?.message || String(error)}</p>`;
+          contentDiv.innerHTML = `<p style="color: #d32f2f;">❌ Error: ${error?.message || String(error)}</p>`;
         }
       }
     } finally {
       this.isChatting = false;
       if (this.chatSendButton) {
         this.chatSendButton.disabled = false;
-        this.chatSendButton.innerHTML = "📤 发送";
+        this.chatSendButton.innerHTML = "📤 Send";
         this.chatSendButton.style.backgroundColor = "var(--ai-accent)";
         this.chatSendButton.style.color = "#ffffff";
       }
@@ -649,7 +657,7 @@ export class SummaryView extends BaseView {
         marginBottom: "8px",
         color: "var(--ai-text)",
       },
-      innerHTML: role === "user" ? "👤 您" : "🤖 AI管家",
+      innerHTML: role === "user" ? "👤 You" : "🤖 AI Butler",
     });
 
     const contentDiv = this.createElement("div", {
@@ -658,11 +666,11 @@ export class SummaryView extends BaseView {
         fontSize: "14px",
         lineHeight: "1.6",
         userSelect: "text", // 确保文本可以被选择
-        cursor: "text", // 鼠标样式提示可选择
+        cursor: "text", // 鼠标样式提示Optional择
       },
       innerHTML: content
         ? SummaryView.convertMarkdownToHTMLCore(content)
-        : "<em>思考中...</em>",
+        : "<em>Thinking...</em>",
     });
 
     messageDiv.appendChild(roleLabel);
@@ -685,7 +693,7 @@ export class SummaryView extends BaseView {
     userMessage: string,
     assistantMessage: string,
   ): Promise<void> {
-    // 为兼容旧方法保留，但不再使用。后续追问改为保存到独立笔记。
+    // 为兼容旧方法保留，但不再使用。后续Follow-up Question改为保存到独立笔记。
     if (!this.currentItemId) return;
     try {
       await this.saveChatPairToSeparateNote(
@@ -694,7 +702,7 @@ export class SummaryView extends BaseView {
         assistantMessage,
       );
     } catch (error) {
-      ztoolkit.log("[AI-Butler] 兼容保存对话到独立笔记失败:", error);
+      ztoolkit.log("[AI-Butler] 兼容保存对话到独立笔记Failed:", error);
     }
   }
 
@@ -707,10 +715,10 @@ export class SummaryView extends BaseView {
   }
 
   /**
-   * 获取或创建“AI管家-后续追问-论文名”独立笔记
+   * 获取或创建“AI管家-后续Follow-up Question-论文名”独立笔记
    */
   private async getOrCreateChatNote(item: Zotero.Item): Promise<Zotero.Item> {
-    const title = (item.getField("title") as string) || "文献";
+    const title = (item.getField("title") as string) || "Reference";
 
     // 查找已有的聊天笔记：条件为包含我们约定的标题标识或带有专属标签
     const noteIDs = (item as any).getNotes?.() || [];
@@ -721,7 +729,10 @@ export class SummaryView extends BaseView {
         const tags: Array<{ tag: string }> = (n as any).getTags?.() || [];
         const hasChatTag = tags.some((t) => t.tag === "AI-Butler-Chat");
         const html: string = (n as any).getNote?.() || "";
-        const titleMatch = /<h2>\s*AI 管家\s*-\s*后续追问\s*-/.test(html);
+        const titleMatch =
+          /<h2>\s*(AI Butler|AI 管家)\s*-\s*(Follow-up Question|后续Follow-up Question)\s*-/.test(
+            html,
+          );
         if (hasChatTag || titleMatch) {
           return n as Zotero.Item;
         }
@@ -734,7 +745,7 @@ export class SummaryView extends BaseView {
     const note = new Zotero.Item("note");
     note.libraryID = item.libraryID;
     note.parentID = item.id;
-    const header = `<h2>AI 管家 - 后续追问 - ${this.escapeHtml(title)}</h2>`;
+    const header = `<h2>AI Butler - Follow-up Question - ${this.escapeHtml(title)}</h2>`;
     note.setNote(header);
     note.addTag("AI-Butler-Chat");
     await note.saveTx();
@@ -757,13 +768,16 @@ export class SummaryView extends BaseView {
       let noteHtml = (note as any).getNote?.() || "";
 
       const jsonMarker = `<!-- AI_BUTLER_CHAT_JSON: ${JSON.stringify({ id: pairId, user: userMessage, assistant: assistantMessage })} -->`;
+      const userLabel = getString("chat-user-label");
+      const assistantLabel = getString("chat-assistant-label");
+      const savedTimeLabel = getString("chat-saved-time");
       const block = `
 <!-- AI_BUTLER_CHAT_PAIR_START id=${this.escapeHtml(pairId)} -->
 ${jsonMarker}
 <div id="ai-butler-pair-${this.escapeHtml(pairId)}" style="margin-top:14px; padding-top:8px; border-top:1px dashed #ccc;">
-  <div style="background-color:#e3f2fd; padding:10px; border-radius:6px; margin-bottom:8px;"><strong>👤 用户:</strong> ${this.escapeHtml(userMessage)}</div>
-  <div style="background-color:#f5f5f5; padding:10px; border-radius:6px;"><strong>🤖 AI管家:</strong><br/>${SummaryView.convertMarkdownToHTMLCore(assistantMessage)}</div>
-  <div style="font-size:11px; color:#999; margin-top:6px;">保存时间: ${new Date().toLocaleString("zh-CN")}</div>
+  <div style="background-color:#e3f2fd; padding:10px; border-radius:6px; margin-bottom:8px;"><strong>👤 ${userLabel}:</strong> ${this.escapeHtml(userMessage)}</div>
+  <div style="background-color:#f5f5f5; padding:10px; border-radius:6px;"><strong>🤖 ${assistantLabel}:</strong><br/>${SummaryView.convertMarkdownToHTMLCore(assistantMessage)}</div>
+  <div style="font-size:11px; color:#999; margin-top:6px;">${savedTimeLabel}: ${new Date().toLocaleString()}</div>
 </div>
 <!-- AI_BUTLER_CHAT_PAIR_END id=${this.escapeHtml(pairId)} -->
 `;
@@ -771,9 +785,9 @@ ${jsonMarker}
       noteHtml += block;
       (note as any).setNote(noteHtml);
       await (note as any).saveTx();
-      ztoolkit.log("[AI-Butler] 追问对已保存到独立笔记");
+      ztoolkit.log("[AI-Butler] Follow-up Question对Saved到独立笔记");
     } catch (e) {
-      ztoolkit.log("[AI-Butler] 保存追问对到独立笔记失败:", e);
+      ztoolkit.log("[AI-Butler] 保存Follow-up Question对到独立笔记Failed:", e);
     }
   }
 
@@ -800,7 +814,7 @@ ${jsonMarker}
         await (note as any).saveTx();
       }
     } catch (e) {
-      ztoolkit.log("[AI-Butler] 从独立笔记删除追问对失败:", e);
+      ztoolkit.log("[AI-Butler] 从独立笔记删除Follow-up Question对Failed:", e);
     }
   }
 
@@ -836,7 +850,7 @@ ${jsonMarker}
         fontWeight: "600",
         color: "var(--ai-accent)",
       },
-      textContent: "📘 AI管家笔记",
+      textContent: "📘 AI Butler Notes",
     });
     // 预览：取前100字符，去掉换行
     const previewText = (aiSummary || "").replace(/\s+/g, " ").slice(0, 100);
@@ -850,7 +864,7 @@ ${jsonMarker}
         textOverflow: "ellipsis",
       },
       textContent: previewText
-        ? `摘要：${previewText}${aiSummary.length > 100 ? "…" : ""}`
+        ? `Summary: ${previewText}${aiSummary.length > 100 ? "…" : ""}`
         : "",
     }) as HTMLElement;
     header.appendChild(titleEl);
@@ -873,7 +887,7 @@ ${jsonMarker}
       },
       innerHTML: "▾",
     }) as HTMLButtonElement;
-    collapseBtn.title = "折叠/展开";
+    collapseBtn.title = "Collapse/Expand";
     collapseBtn.addEventListener("click", () => {
       if ((body as HTMLElement).style.display === "none") {
         (body as HTMLElement).style.display = "block";
@@ -924,7 +938,7 @@ ${jsonMarker}
         this.outputContainer.removeChild(pairNode);
       }
     } catch (e) {
-      ztoolkit.log("[AI-Butler] 移除聊天卡片 UI 失败:", e);
+      ztoolkit.log("[AI-Butler] 移除聊天卡片 UI Failed:", e);
     }
 
     // 2) 内存数据移除
@@ -959,11 +973,11 @@ ${jsonMarker}
   }
 
   /**
-   * 设置当前论文上下文 (用于追问)
-   * @param itemId 文献条目ID
+   * 设置当前论文上下文 (用于Follow-up Question)
+   * @param itemId Reference条目ID
    * @param pdfContent PDF内容(Base64或文本)
    * @param isBase64 是否为Base64编码
-   * @param aiSummary 已生成的AI总结内容(可选)
+   * @param aiSummary 已生成的AISummary content(Optional)
    */
   public setCurrentPaperContext(
     itemId: number,
@@ -978,11 +992,11 @@ ${jsonMarker}
     // 初始化对话历史:第一轮是用户提示词和AI回复
     this.conversationHistory = [];
 
-    // 如果提供了AI总结内容,将其作为第一轮对话
+    // 如果提供了AISummary content,将其作为第一轮对话
     if (aiSummary && aiSummary.trim()) {
       // 获取用户的提示词
       const summaryPrompt =
-        (getPref("summaryPrompt") as string) || "请分析这篇论文";
+        (getPref("summaryPrompt") as string) || "Please analyze this paper";
 
       this.conversationHistory.push({
         role: "user",
@@ -995,7 +1009,7 @@ ${jsonMarker}
       });
     }
 
-    // 显示追问容器
+    // 显示Follow-up Question容器
     if (this.chatContainer) {
       this.chatContainer.style.display = "flex";
     }
@@ -1010,25 +1024,25 @@ ${jsonMarker}
     this.currentIsBase64 = false;
     this.conversationHistory = [];
 
-    // 隐藏追问容器
+    // 隐藏Follow-up Question容器
     if (this.chatContainer) {
       this.chatContainer.style.display = "none";
     }
   }
 
   /**
-   * 从外部加载指定文献的追问界面
+   * 从外部加载指定Reference的Follow-up Question界面
    *
    * 用于 Reader 工具栏按钮和条目面板的快捷入口
    * 会自动提取 PDF 内容并设置论文上下文
    *
-   * @param itemId 文献条目 ID
+   * @param itemId Reference条目 ID
    */
   public async loadItemForChat(itemId: number): Promise<void> {
     try {
       // 清空并显示加载提示
       this.clear();
-      this.showLoadingState("正在加载文献...");
+      this.showLoadingState("Loading reference...");
 
       const item = await Zotero.Items.getAsync(itemId);
       if (!item) {
@@ -1038,14 +1052,14 @@ ${jsonMarker}
           closeTime: 3000,
         })
           .createLine({
-            text: "无法加载该文献",
+            text: "Unable to load this reference",
             type: "error",
           })
           .show();
         return;
       }
 
-      const title = (item.getField("title") as string) || "文献";
+      const title = (item.getField("title") as string) || "Reference";
 
       // 显示标题
       this.startItem(title);
@@ -1064,13 +1078,15 @@ ${jsonMarker}
           const noteHtml: string = (n as any).getNote?.() || "";
           const isChatNote =
             tags.some((t) => t.tag === "AI-Butler-Chat") ||
-            /<h2>\s*AI 管家\s*-\s*后续追问\s*-/.test(noteHtml);
+            /<h2>\s*(AI Butler|AI 管家)\s*-\s*(Follow-up Question|后续Follow-up Question)\s*-/.test(
+              noteHtml,
+            );
           // 支持所有 AI 生成的笔记类型：总结、思维导图、一图总结
           const isAiSummaryNote =
             tags.some((t) => t.tag === "AI-Generated") ||
             tags.some((t) => t.tag === "AI-Mindmap") ||
             tags.some((t) => t.tag === "AI-ImageSummary") ||
-            (/<h2>\s*AI 管家\s*-/.test(noteHtml) && !isChatNote);
+            (/<h2>\s*(AI Butler|AI 管家)\s*-/.test(noteHtml) && !isChatNote);
 
           if (isAiSummaryNote) {
             if (!targetNote) {
@@ -1086,7 +1102,7 @@ ${jsonMarker}
         }
       }
 
-      // 提取 AI 总结内容
+      // 提取 AI Summary content
       if (targetNote) {
         const html = (targetNote as any).getNote?.() || "";
         aiSummaryText = html
@@ -1100,7 +1116,7 @@ ${jsonMarker}
           .trim();
       }
 
-      // 获取 PDF 内容以支持追问
+      // 获取 PDF 内容以支持Follow-up Question
       try {
         const { PDFExtractor } = await import("../pdfExtractor");
         const prefMode =
@@ -1130,7 +1146,7 @@ ${jsonMarker}
             try {
               this.appendSummaryCard(aiSummaryText);
             } catch (e) {
-              ztoolkit.log("[AI-Butler] 渲染 AI 总结卡片失败:", e);
+              ztoolkit.log("[AI-Butler] 渲染 AI 总结卡片Failed:", e);
             }
           } else {
             // 没有已有总结，显示欢迎提示
@@ -1147,25 +1163,25 @@ ${jsonMarker}
               `;
               welcomeHint.innerHTML = `
                 <div style="font-size: 15px; font-weight: 600; margin-bottom: 8px; color: #59c0bc;">
-                  🤖 准备好开始追问了！
+                  🤖 Ready to start asking questions!
                 </div>
                 <div style="font-size: 13px; color: var(--ai-text-muted); line-height: 1.6;">
-                  该文献尚未生成 AI 总结。您可以直接在下方输入问题与 AI 对话，
-                  或者先右键该文献选择"召唤 AI 管家进行分析"生成完整总结。
+                  This reference has no AI summary yet. You can ask questions directly below,
+                  or right-click the reference and select "Summon AI Butler for Analysis" to generate a complete summary.
                 </div>
               `;
               this.outputContainer.appendChild(welcomeHint);
             }
           }
 
-          // 加载已有的追问历史
+          // 加载已有的Follow-up Question历史
           try {
             await this.loadExistingChatPairs(item);
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 加载历史追问失败:", e);
+            ztoolkit.log("[AI-Butler] 加载历史Follow-up QuestionFailed:", e);
           }
 
-          // 自动展开追问输入区域
+          // 自动展开Follow-up Question输入区域
           const inputArea = this.chatContainer?.querySelector(
             "#ai-butler-chat-input-area",
           ) as HTMLElement;
@@ -1174,7 +1190,7 @@ ${jsonMarker}
           ) as HTMLElement;
           if (inputArea && toggleBtn) {
             inputArea.style.display = "flex";
-            toggleBtn.innerHTML = "🔽 收起追问";
+            toggleBtn.innerHTML = "🔽 Collapse Questions";
           }
 
           // 聚焦输入框
@@ -1191,7 +1207,7 @@ ${jsonMarker}
             closeTime: 3000,
           })
             .createLine({
-              text: "该文献没有可用的 PDF 附件",
+              text: "This reference has no available PDF attachment",
               type: "error",
             })
             .show();
@@ -1199,13 +1215,13 @@ ${jsonMarker}
         }
       } catch (err) {
         this.hideLoading();
-        ztoolkit.log("[AI-Butler] 获取 PDF 内容失败:", err);
+        ztoolkit.log("[AI-Butler] Failed to get PDF content:", err);
         new ztoolkit.ProgressWindow("AI Butler", {
           closeOnClick: true,
           closeTime: 3000,
         })
           .createLine({
-            text: "获取 PDF 内容失败",
+            text: "Failed to get PDF content",
             type: "error",
           })
           .show();
@@ -1213,21 +1229,21 @@ ${jsonMarker}
       }
     } catch (err) {
       this.hideLoading();
-      ztoolkit.log("[AI-Butler] loadItemForChat 失败:", err);
+      ztoolkit.log("[AI-Butler] loadItemForChat Failed:", err);
       this.clearPaperContext();
     }
   }
 
   /**
-   * 显示已保存的笔记内容(来自 Zotero 笔记,HTML 直接渲染)
+   * 显示Saved的Note content(来自 Zotero 笔记,HTML 直接渲染)
    *
-   * @param itemId 文献条目ID
+   * @param itemId Reference条目ID
    */
   public async showSavedNoteForItem(itemId: number): Promise<void> {
     try {
       // 清空并显示加载提示
       this.clear();
-      this.showLoadingState("正在加载已保存的总结...");
+      this.showLoadingState("Loading saved summary...");
 
       const item = await Zotero.Items.getAsync(itemId);
       if (!item) {
@@ -1235,14 +1251,14 @@ ${jsonMarker}
         return;
       }
 
-      const title = (item.getField("title") as string) || "文献";
+      const title = (item.getField("title") as string) || "Reference";
 
       // 获取子笔记ID列表
       const noteIDs = (item as any).getNotes?.() || [];
       let targetNote: any = null;
 
       // 遍历寻找带有 AI-Generated 标签或标题包含“AI 管家”的最新笔记
-      // 注意：应排除“后续追问”聊天笔记，避免把聊天内容直接渲染到总结区
+      // 注意：应排除“后续Follow-up Question”聊天笔记，避免把聊天内容直接渲染到总结区
       for (const nid of noteIDs) {
         try {
           const n = await Zotero.Items.getAsync(nid);
@@ -1251,19 +1267,21 @@ ${jsonMarker}
           const noteHtml: string = (n as any).getNote?.() || "";
           const isChatNote =
             tags.some((t) => t.tag === "AI-Butler-Chat") ||
-            /<h2>\s*AI 管家\s*-\s*后续追问\s*-/.test(noteHtml);
+            /<h2>\s*(AI Butler|AI 管家)\s*-\s*(Follow-up Question|后续Follow-up Question)\s*-/.test(
+              noteHtml,
+            );
           // 支持所有 AI 生成的笔记类型：总结、思维导图、一图总结
           const isAiSummaryNote =
             tags.some((t) => t.tag === "AI-Generated") ||
             tags.some((t) => t.tag === "AI-Mindmap") ||
             tags.some((t) => t.tag === "AI-ImageSummary") ||
-            (/<h2>\s*AI 管家\s*-/.test(noteHtml) && !isChatNote);
+            (/<h2>\s*(AI Butler|AI 管家)\s*-/.test(noteHtml) && !isChatNote);
 
           if (isAiSummaryNote) {
             if (!targetNote) {
               targetNote = n;
             } else {
-              // 选择修改时间更新的那个
+              // 选择Modify时间Update的那个
               const a = (targetNote as any).dateModified || 0;
               const b = (n as any).dateModified || 0;
               if (b > a) targetNote = n;
@@ -1280,7 +1298,7 @@ ${jsonMarker}
       if (!targetNote) {
         // 没有找到匹配的 AI 笔记
         this.startItem(title);
-        this.appendContent("未找到已保存的 AI 总结笔记。");
+        this.appendContent("No saved AI summary notes found.");
         this.finishItem();
         return;
       }
@@ -1302,7 +1320,7 @@ ${jsonMarker}
         .replace(/&amp;/g, "&")
         .trim();
 
-      // 获取PDF内容以支持后续追问
+      // 获取PDF内容以支持后续Follow-up Question
       try {
         const { PDFExtractor } = await import("../pdfExtractor");
         // 尊重用户的 PDF 处理模式选择（不再根据 Provider 强制联动）
@@ -1318,7 +1336,7 @@ ${jsonMarker}
         }
 
         if (pdfContent) {
-          // 设置论文上下文，传入AI总结内容
+          // 设置论文上下文，传入AISummary content
           this.setCurrentPaperContext(
             itemId,
             pdfContent,
@@ -1330,37 +1348,40 @@ ${jsonMarker}
           try {
             this.appendSummaryCard(aiSummaryText);
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 渲染AI总结卡片失败:", e);
+            ztoolkit.log("[AI-Butler] 渲染AI总结卡片Failed:", e);
           }
 
-          // 载入并渲染已有的“后续追问”历史（如有），恢复为原生对话格式
+          // 载入并渲染已有的“后续Follow-up Question”历史（如有），恢复为原生对话格式
           try {
             const itemObj = await Zotero.Items.getAsync(itemId);
             if (itemObj) {
               await this.loadExistingChatPairs(itemObj);
             }
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 加载历史追问失败:", e);
+            ztoolkit.log("[AI-Butler] 加载历史Follow-up QuestionFailed:", e);
           }
         } else {
-          // 没有PDF内容，不显示追问按钮
+          // 没有PDF内容，不显示Follow-up Question按钮
           this.clearPaperContext();
         }
       } catch (err) {
-        ztoolkit.log("[AI-Butler] 获取PDF内容失败，无法启用追问功能:", err);
+        ztoolkit.log(
+          "[AI-Butler] 获取PDF内容Failed，无法启用Follow-up Question功能:",
+          err,
+        );
         this.clearPaperContext();
       }
     } catch (err) {
       this.hideLoading();
-      this.startItem("加载失败");
-      this.appendContent("无法加载该条目的已保存总结。");
+      this.startItem("Loading failed");
+      this.appendContent("Unable to load saved summary for this item.");
       this.finishItem();
       this.clearPaperContext();
     }
   }
 
   /**
-   * 从独立笔记读取已保存的追问对，并恢复为卡片与会话历史
+   * 从独立笔记读取Saved的Follow-up Question对，并恢复为卡片与会话历史
    */
   private async loadExistingChatPairs(item: Zotero.Item): Promise<void> {
     try {
@@ -1386,7 +1407,7 @@ ${jsonMarker}
             });
           }
         } catch (e) {
-          // 跳过解析失败的块
+          // 跳过解析Failed的块
           continue;
         }
       }
@@ -1430,7 +1451,7 @@ ${jsonMarker}
             },
             innerHTML: "🗑️",
           }) as HTMLButtonElement;
-          deleteBtn.title = "删除该提问-响应对";
+          deleteBtn.title = "Delete this Q&A pair";
           deleteBtn.addEventListener("click", async () => {
             await this.deleteChatPair(p.id);
           });
@@ -1454,7 +1475,7 @@ ${jsonMarker}
             },
             innerHTML: "▾",
           }) as HTMLButtonElement;
-          collapseBtn.title = "折叠/展开";
+          collapseBtn.title = "Collapse/Expand";
           collapseBtn.addEventListener("click", () => {
             if ((asstBody as HTMLElement).style.display === "none") {
               (asstBody as HTMLElement).style.display = "block";
@@ -1471,7 +1492,7 @@ ${jsonMarker}
             pairDiv.appendChild(asstBody);
             this.outputContainer.appendChild(pairDiv);
           } catch (e) {
-            ztoolkit.log("[AI-Butler] 渲染历史聊天卡片失败:", e);
+            ztoolkit.log("[AI-Butler] 渲染历史聊天卡片Failed:", e);
           }
         }
 
@@ -1485,7 +1506,7 @@ ${jsonMarker}
       // 应用主题到新加载的历史聊天卡片
       this.applyTheme();
     } catch (e) {
-      ztoolkit.log("[AI-Butler] 读取并恢复历史追问失败:", e);
+      ztoolkit.log("[AI-Butler] 读取并恢复历史Follow-up QuestionFailed:", e);
     }
   }
 
@@ -1504,7 +1525,7 @@ ${jsonMarker}
         const button = this.queueButton;
         if (button) {
           button.disabled = true;
-          button.innerHTML = "⏳ 正在打开任务队列...";
+          button.innerHTML = "⏳ Opening task queue...";
           button.style.backgroundColor = "#9e9e9e";
           button.style.cursor = "not-allowed";
           button.style.opacity = "0.8";
@@ -1532,7 +1553,7 @@ ${jsonMarker}
               mw.switchTab("tasks", true);
             }
           } catch (e) {
-            ztoolkit.log("[AI Butler] 兜底导航失败:", e);
+            ztoolkit.log("[AI Butler] 兜底导航Failed:", e);
           }
         };
 
@@ -1540,20 +1561,20 @@ ${jsonMarker}
         setTimeout(ensureNavigate, 60); // 短延时：等待可能的同步 DOM 操作完成
         setTimeout(ensureNavigate, 600); // 次级延时：处理潜在的长时间流式/重绘阻塞
 
-        // 若回调是 Promise，完成后再尝试更新按钮状态
+        // 若回调是 Promise，完成后再尝试Update按钮状态
         if (p && typeof (p as any).then === "function") {
           (p as Promise<void>)
             .then(() => {
               this.updateQueueButton("ready");
             })
             .catch((err) => {
-              ztoolkit.log("[AI Butler] 返回任务队列异步回调失败:", err);
+              ztoolkit.log("[AI Butler] 返回任务队列异步回调Failed:", err);
               this.updateQueueButton("error");
             });
         } else {
           // 同步情况：立即交还按钮可用状态(回调内部也可能已调用 updateQueueButton 改写)
           setTimeout(() => {
-            // 若外部没有特别状态更新，则恢复 ready
+            // 若外部没有特别状态Update，则恢复 ready
             if (this.queueButton && this.queueButton.disabled) {
               this.updateQueueButton("ready");
             }
@@ -1586,7 +1607,7 @@ ${jsonMarker}
       this.autoScrollEnabled =
         auto === undefined || auto === null ? true : !!auto;
     } catch (e) {
-      ztoolkit.log("[AI Butler] 应用字体或滚动首选项失败:", e);
+      ztoolkit.log("[AI Butler] 应用字体或滚动首选项Failed:", e);
     }
   }
 
@@ -1616,7 +1637,7 @@ ${jsonMarker}
         const katexCss = await themeManager.loadKatexCss();
 
         if (!katexCss) {
-          ztoolkit.log("[AI-Butler] KaTeX CSS 加载失败，为空");
+          ztoolkit.log("[AI-Butler] KaTeX CSS Loading failed，为空");
           return;
         }
 
@@ -1674,7 +1695,7 @@ ${jsonMarker}
 
     const area = this.scrollArea;
 
-    // 使用 setTimeout 确保在 DOM 更新后滚动
+    // 使用 setTimeout 确保在 DOM Update后滚动
     setTimeout(() => {
       if (area) {
         area.scrollTop = area.scrollHeight;
@@ -1711,14 +1732,15 @@ ${jsonMarker}
             color: "#666",
             marginBottom: "10px",
           },
-          textContent: "等待 AI 总结",
+          textContent: "Waiting for AI summary",
         }),
         this.createElement("p", {
           styles: {
             fontSize: "14px",
             lineHeight: "1.6",
           },
-          textContent: "右键点击文献条目,选择「AI 管家分析」开始生成总结",
+          textContent:
+            "Right-click reference item and select 'AI Butler Analysis' to start generating summary",
         }),
       ],
     });
@@ -1733,7 +1755,7 @@ ${jsonMarker}
    * @private
    */
   private showLoading(
-    message: string = "正在请求 AI 分析",
+    message: string = "Requesting AI analysis",
     startedAt?: Date,
   ): void {
     // 清空初始提示
@@ -1783,7 +1805,7 @@ ${jsonMarker}
             fontSize: "14px",
             color: "#999",
           },
-          textContent: "已请求: 0 秒",
+          textContent: "Elapsed: 0 seconds",
         }),
       ],
     });
@@ -1808,7 +1830,7 @@ ${jsonMarker}
    * @param message 加载消息
    */
   public showLoadingState(
-    message: string = "正在请求 AI 分析",
+    message: string = "Requesting AI analysis",
     startedAt?: Date,
   ): void {
     this.showLoading(message, startedAt);
@@ -1840,7 +1862,7 @@ ${jsonMarker}
   }
 
   /**
-   * 更新加载计时器
+   * Update加载计时器
    *
    * @private
    */
@@ -1851,7 +1873,7 @@ ${jsonMarker}
     if (!timerElement) return;
 
     const elapsed = Math.floor((Date.now() - this.loadingStartTime) / 1000);
-    timerElement.textContent = `已请求: ${elapsed} 秒`;
+    timerElement.textContent = `Elapsed: ${elapsed} seconds`;
   }
 
   /**
@@ -1909,7 +1931,7 @@ ${jsonMarker}
         whiteSpace: "pre-wrap",
         wordWrap: "break-word",
         userSelect: "text", // 确保文本可以被选择
-        cursor: "text", // 鼠标样式提示可选择
+        cursor: "text", // 鼠标样式提示Optional择
       },
     });
 
@@ -1983,10 +2005,10 @@ ${jsonMarker}
   }
 
   /**
-   * 显示错误信息
+   * 显示Error信息
    *
    * @param itemTitle 条目标题
-   * @param errorMessage 错误消息
+   * @param errorMessage Error消息
    */
   public showError(itemTitle: string, errorMessage: string): void {
     if (!this.outputContainer) return;
@@ -2018,7 +2040,7 @@ ${jsonMarker}
             backgroundColor: "rgba(255, 87, 34, 0.1)",
             borderRadius: "4px",
           },
-          textContent: `错误: ${errorMessage}`,
+          textContent: `Error: ${errorMessage}`,
         }),
       ],
     });
@@ -2042,8 +2064,8 @@ ${jsonMarker}
 
     const message =
       successCount === totalCount
-        ? `✅ 所有 ${totalCount} 个条目处理完成！`
-        : `✅ 完成 ${successCount}/${totalCount} 个条目`;
+        ? `✅ All ${totalCount} items processing complete!`
+        : `✅ Completed ${successCount}/${totalCount} items`;
 
     const completeElement = this.createElement("div", {
       styles: {
@@ -2070,7 +2092,7 @@ ${jsonMarker}
    * 显示停止消息
    *
    * @param successCount 成功数量
-   * @param failedCount 失败数量
+   * @param failedCount Failed数量
    * @param notProcessed 未处理数量
    */
   public showStopped(
@@ -2080,7 +2102,7 @@ ${jsonMarker}
   ): void {
     if (!this.outputContainer) return;
 
-    const message = `⏸️ 已停止处理 - 成功: ${successCount}, 失败: ${failedCount}, 未处理: ${notProcessed}`;
+    const message = `⏸️ Processing stopped - Success: ${successCount}, Failed: ${failedCount}, Not processed: ${notProcessed}`;
 
     const stoppedElement = this.createElement("div", {
       styles: {
@@ -2122,7 +2144,7 @@ ${jsonMarker}
   }
 
   /**
-   * 更新导航按钮状态
+   * Update导航按钮状态
    */
   public updateQueueButton(
     state: "ready" | "stopped" | "completed" | "error",
@@ -2138,23 +2160,23 @@ ${jsonMarker}
 
     switch (state) {
       case "stopped":
-        button.innerHTML = "⏹️ 已中断, 查看任务队列";
+        button.innerHTML = "⏹️ Interrupted, view task queue";
         button.style.backgroundColor = "var(--ai-accent-tint)";
         button.style.color = "var(--ai-accent)";
         break;
       case "completed":
-        button.innerHTML = "✅ 查看任务队列";
+        button.innerHTML = "✅ View task queue";
         button.style.backgroundColor = "var(--ai-accent-tint)";
         button.style.color = "var(--ai-accent)";
         break;
       case "error":
-        button.innerHTML = "⚠️ 查看任务队列";
+        button.innerHTML = "⚠️ View task queue";
         button.style.backgroundColor = "var(--ai-accent-tint)";
         button.style.color = "var(--ai-accent)";
         break;
       case "ready":
       default:
-        button.innerHTML = "📋 返回任务队列";
+        button.innerHTML = "📋 Back to task queue";
         button.style.backgroundColor = "var(--ai-accent)";
         button.style.color = "var(--ai-accent)";
         break;
@@ -2191,8 +2213,8 @@ ${jsonMarker}
    * - 块级: ⒻⓄⓇⓂⓊⓁⒶ_BLOCK_<index>
    * - 行内: ⒻⓄⓇⓂⓊⓁⒶ_INLINE_<index>
    *
-   * 错误处理:
-   * - 如果 marked 解析失败,返回 HTML 转义的原文
+   * Error处理:
+   * - 如果 marked 解析Failed,返回 HTML 转义的原文
    *
    * @param markdown Markdown 源文本
    * @returns 转换后的 HTML 字符串
@@ -2242,8 +2264,8 @@ ${jsonMarker}
     try {
       html = marked.parse(html) as string;
     } catch (error) {
-      ztoolkit.log("[AI-Butler][SummaryView] Markdown 解析错误:", error);
-      // 如果解析失败，返回 HTML 转义的原文
+      ztoolkit.log("[AI-Butler][SummaryView] Markdown 解析Error:", error);
+      // 如果解析Failed，返回 HTML 转义的原文
       html = `<p>${SummaryView.escapeHtml(html)}</p>`;
     }
 
@@ -2265,7 +2287,7 @@ ${jsonMarker}
             strict: false,
           });
 
-          // 检查是否有渲染错误（KaTeX 会返回包含错误信息的 HTML）
+          // 检查是否有渲染Error（KaTeX 会返回包含Error信息的 HTML）
           if (rendered.includes("katex-error")) {
             ztoolkit.log("[AI-Butler] KaTeX 渲染有问题，内容:", content);
           }
@@ -2276,8 +2298,13 @@ ${jsonMarker}
             return `<span class="katex-inline">${rendered}</span>`;
           }
         } catch (e) {
-          // KaTeX 渲染失败，显示原始公式
-          ztoolkit.log("[AI-Butler] KaTeX 渲染失败:", e, "公式内容:", content);
+          // KaTeX 渲染Failed，显示原始公式
+          ztoolkit.log(
+            "[AI-Butler] KaTeX 渲染Failed:",
+            e,
+            "公式内容:",
+            content,
+          );
           if (isBlock) {
             return `<pre class="math-fallback">$$${SummaryView.escapeHtml(content)}$$</pre>`;
           } else {

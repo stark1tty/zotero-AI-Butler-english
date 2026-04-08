@@ -42,7 +42,7 @@ export class ImageSummarySettingsPage {
 
     // 标题
     const title = this.createElement("h2", {
-      textContent: "🖼️ 一图总结设置",
+      textContent: "🖼️ Image Summary Settings",
       styles: {
         color: "#9c27b0",
         marginBottom: "20px",
@@ -55,7 +55,7 @@ export class ImageSummarySettingsPage {
 
     // 功能说明
     const notice = createNotice(
-      "📝 <strong>功能说明</strong>：一图总结使用生图模型 (默认 gemini-3-pro-image-preview) 为论文生成学术概念海报，支持 Gemini 原生接口与 OpenAI 兼容接口两种请求方式。",
+      "📝 <strong>Function Description</strong>: Image Summary uses image generation models (default gemini-3-pro-image-preview) to create academic concept posters for papers, supporting both Gemini Native API and OpenAI Compatible API request modes.",
       "info",
     );
     this.container.appendChild(notice);
@@ -68,7 +68,7 @@ export class ImageSummarySettingsPage {
     });
 
     // === API 配置区域 ===
-    form.appendChild(createSectionTitle("🔌 API 配置"));
+    form.appendChild(createSectionTitle("🔌 API Configuration"));
 
     // 请求方式
     const requestModeValue =
@@ -76,12 +76,12 @@ export class ImageSummarySettingsPage {
     const requestModeSelect = createSelect(
       "imageSummaryRequestMode",
       [
-        { value: "gemini", label: "Gemini 原生接口 (x-goog-api-key)" },
-        { value: "openai", label: "OpenAI 兼容接口 (Bearer)" },
+        { value: "gemini", label: "Gemini Native API (x-goog-api-key)" },
+        { value: "openai", label: "OpenAI Compatible API (Bearer)" },
       ],
       requestModeValue,
       (newVal) => {
-        // 切换时，如 API 地址保持默认且用户尚未手动修改，则自动填充更合适的默认值
+        // 切换时，如 API 地址保持默认且用户尚未手动Modify，则自动填充更合适的默认值
         const urlInput = this.container.querySelector(
           "#setting-imageSummaryApiUrl",
         ) as HTMLInputElement | null;
@@ -101,9 +101,9 @@ export class ImageSummarySettingsPage {
     );
     form.appendChild(
       createFormGroup(
-        "请求方式",
+        "Request Mode",
         requestModeSelect,
-        "选择使用 Gemini 原生接口或 OpenAI 兼容接口来调用生图模型",
+        "Choose between Gemini Native API or OpenAI Compatible API to call the image generation model",
       ),
     );
 
@@ -114,16 +114,16 @@ export class ImageSummarySettingsPage {
         this.createPasswordInput(
           "imageSummaryApiKey",
           (getPref("imageSummaryApiKey" as any) as string) || "",
-          "您的 API Key",
+          "Your API Key",
         ),
-        "【必填】Gemini 模式使用 x-goog-api-key；OpenAI 模式使用 Authorization Bearer。",
+        "[Required] Gemini mode uses x-goog-api-key; OpenAI mode uses Authorization Bearer.",
       ),
     );
 
     // API Base URL
     form.appendChild(
       createFormGroup(
-        "API 基础地址",
+        "API Base URL",
         createInput(
           "imageSummaryApiUrl",
           "text",
@@ -135,14 +135,14 @@ export class ImageSummarySettingsPage {
             ? "https://api.openai.com/v1/chat/completions"
             : "https://generativelanguage.googleapis.com",
         ),
-        "Gemini: 填基础地址；OpenAI: 可填基础地址或完整端点（如 /v1/chat/completions）",
+        "Gemini: Enter base URL; OpenAI: Can enter base URL or full endpoint (e.g. /v1/chat/completions)",
       ),
     );
 
     // 模型名称
     form.appendChild(
       createFormGroup(
-        "生图模型",
+        "Image Generation Model",
         createInput(
           "imageSummaryModel",
           "text",
@@ -150,92 +150,92 @@ export class ImageSummarySettingsPage {
             "gemini-3-pro-image-preview",
           "gemini-3-pro-image-preview",
         ),
-        "Gemini 生图模型名称，推荐使用 gemini-3-pro-image-preview (Nano Banana Pro)",
+        "Gemini image generation model name, recommended: gemini-3-pro-image-preview (Nano Banana Pro)",
       ),
     );
 
     // === 生成选项区域 ===
-    form.appendChild(createSectionTitle("⚙️ 生成选项"));
+    form.appendChild(createSectionTitle("⚙️ Generation Options"));
 
     // 图片语言
     form.appendChild(
       createFormGroup(
-        "图片语言",
+        "Image Language",
         createInput(
           "imageSummaryLanguage",
           "text",
-          (getPref("imageSummaryLanguage" as any) as string) || "中文",
-          "中文",
+          (getPref("imageSummaryLanguage" as any) as string) || "Chinese",
+          "Chinese",
         ),
-        "生成图片中显示的文字语言",
+        "Language of text displayed in generated images",
       ),
     );
 
     // 启用图片宽高比参数
     form.appendChild(
       createFormGroup(
-        "启用宽高比参数",
+        "Enable Aspect Ratio Parameter",
         createCheckbox(
           "imageSummaryAspectRatioEnabled",
           (getPref("imageSummaryAspectRatioEnabled" as any) as boolean) ??
             false,
         ),
-        "是否在 API 请求中包含宽高比参数（关闭此选项可兼容不支持该参数的 API 代理）",
+        "Whether to include aspect ratio parameter in API requests (disable for compatibility with API proxies that don't support this parameter)",
       ),
     );
 
     // 图片宽高比
     form.appendChild(
       createFormGroup(
-        "图片宽高比",
+        "Image Aspect Ratio",
         createInput(
           "imageSummaryAspectRatio",
           "text",
           (getPref("imageSummaryAspectRatio" as any) as string) || "16:9",
           "16:9",
         ),
-        "生成图片的宽高比，如 16:9、1:1、9:16、4:3 等",
+        "Aspect ratio of generated images, e.g. 16:9, 1:1, 9:16, 4:3",
       ),
     );
 
     // 启用图片分辨率参数
     form.appendChild(
       createFormGroup(
-        "启用分辨率参数",
+        "Enable Resolution Parameter",
         createCheckbox(
           "imageSummaryResolutionEnabled",
           (getPref("imageSummaryResolutionEnabled" as any) as boolean) ?? false,
         ),
-        "是否在 API 请求中包含分辨率参数（关闭此选项可兼容不支持该参数的 API 代理）",
+        "Whether to include resolution parameter in API requests (disable for compatibility with API proxies that don't support this parameter)",
       ),
     );
 
     // 图片分辨率
     form.appendChild(
       createFormGroup(
-        "图片分辨率",
+        "Image Resolution",
         createSelect(
           "imageSummaryResolution",
           [
-            { value: "1K", label: "1K (默认)" },
+            { value: "1K", label: "1K (Default)" },
             { value: "2K", label: "2K" },
             { value: "4K", label: "4K" },
           ],
           (getPref("imageSummaryResolution" as any) as string) || "1K",
         ),
-        "生成图片的分辨率，更高分辨率可能会增加 API 费用",
+        "Resolution of generated images, higher resolutions may increase API costs",
       ),
     );
 
     // 使用已有 AI 笔记代替
     form.appendChild(
       createFormGroup(
-        "使用已有 AI 笔记",
+        "Use Existing AI Notes",
         createCheckbox(
           "imageSummaryUseExistingNote",
           (getPref("imageSummaryUseExistingNote" as any) as boolean) || false,
         ),
-        "开启后，将使用已存在的 AI 管家笔记内容作为视觉摘要输入，可节省 API 调用费用",
+        "When enabled, will use existing AI Butler note content as visual summary input, saving API costs",
       ),
     );
 
@@ -259,20 +259,20 @@ export class ImageSummarySettingsPage {
           if (!confirmed) {
             autoSummaryCheckbox.checked = false;
             if (autoSummaryLabel) {
-              autoSummaryLabel.textContent = "已禁用";
+              autoSummaryLabel.textContent = "Disabled";
             }
           } else {
             if (autoSummaryLabel) {
-              autoSummaryLabel.textContent = "已启用";
+              autoSummaryLabel.textContent = "Enabled";
             }
             // 用户确认后自动保存设置
             setPref("autoImageSummaryOnComplete" as any, true);
           }
         } else {
           if (autoSummaryLabel) {
-            autoSummaryLabel.textContent = "已禁用";
+            autoSummaryLabel.textContent = "Disabled";
           }
-          // 用户关闭时自动保存设置
+          // 用户Close时自动保存设置
           setPref("autoImageSummaryOnComplete" as any, false);
         }
       });
@@ -280,14 +280,14 @@ export class ImageSummarySettingsPage {
 
     form.appendChild(
       createFormGroup(
-        "自动添加一图总结",
+        "Auto Add Image Summary",
         autoSummaryContainer,
-        "⚠️ 开启后，论文AI总结完成时将自动生成一图总结（可能消耗大量API费用，请谨慎开启）",
+        "⚠️ When enabled, image summary will be automatically generated upon paper AI summary completion (may consume significant API costs, enable with caution)",
       ),
     );
 
     // === 提示词配置区域 ===
-    form.appendChild(createSectionTitle("📝 提示词配置"));
+    form.appendChild(createSectionTitle("📝 Prompt Configuration"));
 
     // 变量说明
     const varsNotice = this.createElement("div", {
@@ -302,36 +302,36 @@ export class ImageSummarySettingsPage {
       },
     });
     varsNotice.innerHTML =
-      "📌 <strong>可用变量</strong>：<code>${context}</code> 论文内容, <code>${title}</code> 论文标题, <code>${language}</code> 语言设置, <code>${summaryForImage}</code> 视觉摘要结果";
+      "📌 <strong>Available Variables</strong>: <code>${context}</code> Paper content, <code>${title}</code> Paper title, <code>${language}</code> Language setting, <code>${summaryForImage}</code> Visual summary result";
     form.appendChild(varsNotice);
 
     // 视觉信息提取提示词
     form.appendChild(
       createFormGroup(
-        "视觉信息提取提示词",
+        "Visual Information Extraction Prompt",
         createTextarea(
           "imageSummaryPrompt",
           (getPref("imageSummaryPrompt" as any) as string) ||
             getDefaultImageSummaryPrompt(),
           10,
-          "用于从论文中提取视觉信息的提示词...",
+          "Prompt for extracting visual information from paper...",
         ),
-        "第一阶段：从论文中提取用于生成图片的关键视觉信息",
+        "Stage 1: Extract key visual information from paper for image generation",
       ),
     );
 
     // 生图提示词
     form.appendChild(
       createFormGroup(
-        "生图提示词",
+        "Image Generation Prompt",
         createTextarea(
           "imageSummaryImagePrompt",
           (getPref("imageSummaryImagePrompt" as any) as string) ||
             getDefaultImageGenerationPrompt(),
           12,
-          "用于生成学术概念海报的提示词...",
+          "Prompt for generating academic concept poster...",
         ),
-        "第二阶段：根据视觉摘要生成学术概念海报图片",
+        "Stage 2: Generate academic concept poster image based on visual summary",
       ),
     );
 
@@ -347,18 +347,22 @@ export class ImageSummarySettingsPage {
     });
 
     // 测试连接按钮
-    const testButton = createStyledButton("🔍 测试 API", "#2196f3", "medium");
+    const testButton = createStyledButton("🔍 Test API", "#2196f3", "medium");
     testButton.addEventListener("click", () => this.testConnection());
     buttonGroup.appendChild(testButton);
 
     // 保存按钮
-    const saveButton = createStyledButton("💾 保存设置", "#4caf50", "medium");
+    const saveButton = createStyledButton(
+      "💾 Save Settings",
+      "#4caf50",
+      "medium",
+    );
     saveButton.addEventListener("click", () => this.saveSettings());
     buttonGroup.appendChild(saveButton);
 
     // 重置提示词按钮
     const resetButton = createStyledButton(
-      "🔄 重置提示词",
+      "🔄 Reset Prompts",
       "#9e9e9e",
       "medium",
     );
@@ -390,7 +394,7 @@ export class ImageSummarySettingsPage {
       },
     });
     const resultTitleText = this.createElement("span", {
-      textContent: "API 连接测试结果",
+      textContent: "API Connection Test Result",
       styles: { fontSize: "13px", fontWeight: "600" },
     });
     // 按钮容器
@@ -398,7 +402,7 @@ export class ImageSummarySettingsPage {
       styles: { display: "flex", gap: "8px" },
     });
     const copyBtn = this.createElement("button", {
-      textContent: "复制详情",
+      textContent: "Copy Details",
       styles: {
         border: "1px solid #ddd",
         background: "#fff",
@@ -424,8 +428,8 @@ export class ImageSummarySettingsPage {
         } else {
           throw new Error("clipboard api unavailable");
         }
-        new ztoolkit.ProgressWindow("一图总结", { closeTime: 1500 })
-          .createLine({ text: "已复制错误详情", type: "success" })
+        new ztoolkit.ProgressWindow("Image Summary", { closeTime: 1500 })
+          .createLine({ text: "Error details copied", type: "success" })
           .show();
       } catch {
         try {
@@ -438,13 +442,13 @@ export class ImageSummarySettingsPage {
           (tmp as any).select?.();
           (doc as any).execCommand?.("copy");
           (tmp as any).remove?.();
-          new ztoolkit.ProgressWindow("一图总结", { closeTime: 1500 })
-            .createLine({ text: "已复制错误详情", type: "success" })
+          new ztoolkit.ProgressWindow("Image Summary", { closeTime: 1500 })
+            .createLine({ text: "Error details copied", type: "success" })
             .show();
         } catch {
-          new ztoolkit.ProgressWindow("一图总结", { closeTime: 2500 })
+          new ztoolkit.ProgressWindow("Image Summary", { closeTime: 2500 })
             .createLine({
-              text: "复制失败，可手动选择文本复制",
+              text: "Copy failed, please select text manually",
               type: "default",
             })
             .show();
@@ -567,15 +571,15 @@ export class ImageSummarySettingsPage {
         closeOnClick: true,
         closeTime: 2000,
       })
-        .createLine({ text: "一图总结设置已保存", type: "success" })
+        .createLine({ text: "Image Summary settings saved", type: "success" })
         .show();
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] 保存一图总结设置失败:", error);
+      ztoolkit.log("[AI-Butler] Failed to save image summary settings:", error);
       new ztoolkit.ProgressWindow("AI Butler", {
         closeOnClick: true,
         closeTime: 3000,
       })
-        .createLine({ text: `保存失败: ${error.message}`, type: "error" })
+        .createLine({ text: `Save failed: ${error.message}`, type: "error" })
         .show();
     }
   }
@@ -625,7 +629,7 @@ export class ImageSummarySettingsPage {
         resultBox.style.backgroundColor = "#ffebee";
         resultBox.style.border = "1px solid #ffcdd2";
         resultPre.style.color = "#b71c1c";
-        resultPre.textContent = "❌ 请先填写 API Key";
+        resultPre.textContent = "❌ Please enter API Key first";
       }
       return;
     }
@@ -636,7 +640,7 @@ export class ImageSummarySettingsPage {
       resultBox.style.backgroundColor = "#fff8e1";
       resultBox.style.border = "1px solid #ffe082";
       resultPre.style.color = "#5d4037";
-      resultPre.textContent = "正在测试连接…\n请稍候。";
+      resultPre.textContent = "Testing connection…\nPlease wait.";
     }
 
     try {
@@ -655,15 +659,15 @@ export class ImageSummarySettingsPage {
         resultBox.style.backgroundColor = "#e8f5e9";
         resultBox.style.border = "1px solid #a5d6a7";
         resultPre.style.color = "#1b5e20";
-        resultPre.textContent = `✅ API 连接成功，生成了 ${result.mimeType} 图片 (${Math.round(result.imageBase64.length / 1024)} KB)`;
+        resultPre.textContent = `✅ API connection successful, generated ${result.mimeType} image (${Math.round(result.imageBase64.length / 1024)} KB)`;
       }
     } catch (error: any) {
-      ztoolkit.log("[AI-Butler] 一图总结 API 测试失败:", error);
+      ztoolkit.log("[AI-Butler] Image summary API test failed:", error);
 
       const fullMsg =
         error instanceof ImageGenerationError
           ? ImageClient.formatError(error)
-          : `错误信息: ${error?.message || "连接失败"}`;
+          : `Error: ${error?.message || "Connection failed"}`;
 
       if (resultBox && resultPre) {
         resultBox.style.display = "block";
@@ -681,11 +685,10 @@ export class ImageSummarySettingsPage {
    */
   private showCostWarningDialog(): boolean {
     const message =
-      "⚠️ 费用警告\n\n" +
-      "开启『自动添加一图总结』功能后，每当论文AI总结完成时，" +
-      "系统将自动调用生图 API 生成学术概念海报。\n\n" +
-      "这将消耗大量 API 调用次数和费用！\n\n" +
-      "确定要开启此功能吗？";
+      "⚠️ Cost Warning\n\n" +
+      "After enabling 'Auto Add Image Summary', the system will automatically call the image generation API to create academic concept posters whenever a paper AI summary is completed.\n\n" +
+      "This will consume significant API calls and costs!\n\n" +
+      "Are you sure you want to enable this feature?";
 
     return ztoolkit.getGlobal("confirm")(message);
   }
@@ -712,7 +715,7 @@ export class ImageSummarySettingsPage {
       closeOnClick: true,
       closeTime: 2000,
     })
-      .createLine({ text: "提示词已重置为默认值", type: "success" })
+      .createLine({ text: "Prompts reset to default", type: "success" })
       .show();
   }
 
@@ -757,7 +760,7 @@ export class ImageSummarySettingsPage {
 
     const toggleBtn = doc.createElement("button");
     toggleBtn.textContent = "👁";
-    toggleBtn.title = "显示/隐藏密钥";
+    toggleBtn.title = "Show/Hide Key";
     toggleBtn.type = "button";
     toggleBtn.style.cssText = `
       border: 1px solid #ddd;

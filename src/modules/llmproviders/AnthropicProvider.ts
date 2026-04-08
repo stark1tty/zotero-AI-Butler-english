@@ -20,7 +20,7 @@ export class AnthropicProvider implements ILlmProvider {
     const apiKey = (options.apiKey || "").trim();
     const model = (options.model || "claude-3-5-sonnet-20241022").trim();
     const temperature = options.temperature ?? 0.7;
-    const maxTokens = options.maxTokens ?? 4096; // Anthropic 必填
+    const maxTokens = options.maxTokens ?? 4096; // Anthropic Required
 
     if (!baseUrl) throw new Error("Anthropic API URL 未配置");
     if (!apiKey) throw new Error("Anthropic API Key 未配置");
@@ -91,13 +91,13 @@ export class AnthropicProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.type || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 const errorMessage = `${code}: ${msg}`;
                 xmlhttp.abort();
                 throw new Error(errorMessage);
               } catch {
                 xmlhttp.abort();
-                throw new Error(`HTTP ${status}: 请求失败`);
+                throw new Error(`HTTP ${status}: 请求Failed`);
               }
             }
 
@@ -149,7 +149,7 @@ export class AnthropicProvider implements ILlmProvider {
         },
       });
     } catch (error: any) {
-      let errorMessage = error?.message || "Anthropic 请求失败";
+      let errorMessage = error?.message || "Anthropic 请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -270,7 +270,7 @@ export class AnthropicProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.type || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 const errorMessage = `${code}: ${msg}`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] Anthropic HTTP error:", {
@@ -281,7 +281,7 @@ export class AnthropicProvider implements ILlmProvider {
                 });
                 xmlhttp.abort();
               } catch (parseErr) {
-                const errorMessage = `HTTP ${status}: 请求失败`;
+                const errorMessage = `HTTP ${status}: 请求Failed`;
                 abortError = new Error(errorMessage);
                 ztoolkit.log("[AI-Butler] Anthropic HTTP error:", {
                   status,
@@ -338,7 +338,7 @@ export class AnthropicProvider implements ILlmProvider {
       });
     } catch (error: any) {
       if (abortError) throw abortError;
-      let errorMessage = error?.message || "Anthropic 请求失败";
+      let errorMessage = error?.message || "Anthropic 请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;
@@ -434,7 +434,7 @@ export class AnthropicProvider implements ILlmProvider {
       const status = error?.xmlhttp?.status;
       const responseBody =
         error?.xmlhttp?.response || error?.xmlhttp?.responseText || "";
-      let errorMessage = error?.message || "Anthropic 请求失败";
+      let errorMessage = error?.message || "Anthropic 请求Failed";
       let errorName = "NetworkError";
       try {
         if (responseBody) {
@@ -478,7 +478,7 @@ export class AnthropicProvider implements ILlmProvider {
     const { APITestError } = await import("./types");
     throw new APITestError(`HTTP ${status}`, {
       errorName: `HTTP_${status}`,
-      errorMessage: `HTTP ${status}: ${response.statusText || "请求失败"}`,
+      errorMessage: `HTTP ${status}: ${response.statusText || "请求Failed"}`,
       statusCode: status,
       requestUrl: url,
       requestBody: payloadStr,
@@ -587,11 +587,11 @@ export class AnthropicProvider implements ILlmProvider {
                 const parsed = errorResponse ? JSON.parse(errorResponse) : null;
                 const err = parsed?.error || parsed || {};
                 const code = err?.type || `HTTP ${status}`;
-                const msg = err?.message || "请求失败";
+                const msg = err?.message || "请求Failed";
                 abortError = new Error(`${code}: ${msg}`);
                 xmlhttp.abort();
               } catch {
-                abortError = new Error(`HTTP ${status}: 请求失败`);
+                abortError = new Error(`HTTP ${status}: 请求Failed`);
                 xmlhttp.abort();
               }
               return;
@@ -662,7 +662,7 @@ export class AnthropicProvider implements ILlmProvider {
         if (gotAnyDelta && chunks.length > 0) return chunks.join("");
         throw abortError;
       }
-      let errorMessage = error?.message || "Anthropic 多文件请求失败";
+      let errorMessage = error?.message || "Anthropic 多文件请求Failed";
       try {
         const responseText =
           error?.xmlhttp?.response || error?.xmlhttp?.responseText;

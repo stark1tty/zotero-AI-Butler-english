@@ -124,13 +124,13 @@ export class SettingsView extends BaseView {
 
     // 设置分类列表
     const categories = [
-      { id: "api" as SettingCategory, label: "🔌 API 配置" },
-      { id: "prompts" as SettingCategory, label: "📝 提示词模板" },
-      { id: "mindmap" as SettingCategory, label: "🧠 思维导图" },
-      { id: "imageSummary" as SettingCategory, label: "🖼️ 一图总结" },
-      { id: "ui" as SettingCategory, label: "🎨 界面设置" },
-      { id: "data" as SettingCategory, label: "💾 数据管理" },
-      { id: "about" as SettingCategory, label: "ℹ️ 关于" },
+      { id: "api" as SettingCategory, label: "🔌 API Configuration" },
+      { id: "prompts" as SettingCategory, label: "📝 Prompt Templates" },
+      { id: "mindmap" as SettingCategory, label: "🧠 Mind Map" },
+      { id: "imageSummary" as SettingCategory, label: "🖼️ Image Summary" },
+      { id: "ui" as SettingCategory, label: "🎨 UI Settings" },
+      { id: "data" as SettingCategory, label: "💾 Data Management" },
+      { id: "about" as SettingCategory, label: "ℹ️ About" },
     ];
 
     // 创建分类按钮
@@ -223,14 +223,14 @@ export class SettingsView extends BaseView {
       return;
     }
 
-    // 更新按钮状态
+    // Update按钮状态
     if (this.activeButton) {
       this.setButtonActive(this.activeButton, false);
     }
     this.setButtonActive(button, true);
     this.activeButton = button;
 
-    // 更新当前分类并渲染
+    // Update当前分类并渲染
     this.currentCategory = category;
     this.renderSettings(category);
   }
@@ -302,10 +302,12 @@ export class SettingsView extends BaseView {
    */
   protected onShow(): void {
     super.onShow();
-    ztoolkit.log(`[SettingsView] 视图显示 - 当前分类: ${this.currentCategory}`);
-    // 重新渲染当前页面，确保显示最新的设置值（例如从仪表盘快捷操作修改后）
+    ztoolkit.log(
+      `[SettingsView] View shown - Current category: ${this.currentCategory}`,
+    );
+    // Re-render current page to ensure latest settings are displayed (e.g. after dashboard quick actions)
     this.renderSettings(this.currentCategory);
-    // 重新应用主题(防止动态内容未应用主题)
+    // Re-apply theme (prevent dynamic content from missing theme)
     this.applyTheme();
   }
 
