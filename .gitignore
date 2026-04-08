@@ -1,5 +1,17 @@
 # dot files
 .DS_Store
+.env
+.env.local
+.env.*.local
+
+# local AI / assistant metadata
+.agent/
+.claude/
+AGENTS.md
+
+# editor / IDE
+.vscode/
+.idea/
 
 # Node.js
 node_modules
@@ -10,13 +22,9 @@ yarn.lock
 tsconfig.tsbuildinfo
 
 # Scaffold
-.env
 .scaffold
 build
 logs
 
 # test
 test/00.env-setup.test.ts
-
-# agents
-AGENTS.md
